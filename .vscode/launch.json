@@ -1,0 +1,14 @@
+{
+	"configurations": [
+		{
+			"type": "java",
+			"name": "Spring Boot-AiHackathonApplication<java_backend>",
+			"request": "launch",
+			"cwd": "${workspaceFolder}",
+			"mainClass": "com.example.ai_hackathon.AiHackathonApplication",
+			"projectName": "java_backend",
+			"args": "",
+			"envFile": "${workspaceFolder}/.env"
+		}
+	]
+}
