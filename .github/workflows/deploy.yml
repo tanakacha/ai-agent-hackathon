@@ -1,17 +1,24 @@
-name: Deploy to Cloud Run
+name: Deploy Java Backend to Cloud Run
 
 on:
   push:
     branches:
-      - main # mainブランチへのプッシュをトリガー
+      - main
+    paths:
+      - 'java_backend/**' # java_backendディレクトリの変更時のみトリガー
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }} # GitHub Secretsから取得
-  SERVICE_NAME: spring-boot-hello-world # Cloud Run サービス名
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  SERVICE_NAME: spring-boot-hello-world
+  WORKING_DIR: java_backend
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }} # すべてのrunステップのデフォルトworking-directoryを設定
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,18 +28,18 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: 'gradle' # Gradleキャッシュを有効にする
+          cache: 'gradle'
 
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew # gradlewに実行権限を付与
+        run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew bootJar --no-daemon # Gradleビルドコマンド
+        run: ./gradlew bootJar --no-daemon
 
       - name: Authenticate Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }} # GitHub Secretsから取得
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
@@ -51,7 +58,7 @@ jobs:
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
             --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
-            --region asia-northeast1 \ # 必要に応じてリージョンを変更
-            --allow-unauthenticated \ # 外部からのアクセスを許可（本番環境では注意）
+            --region asia-northeast1 \
+            --allow-unauthenticated \
             --platform managed \
             --project ${{ env.PROJECT_ID }}

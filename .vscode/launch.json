@@ -1,14 +1,21 @@
 {
-	"configurations": [
-		{
-			"type": "java",
-			"name": "Spring Boot-AiHackathonApplication<java_backend>",
-			"request": "launch",
-			"cwd": "${workspaceFolder}",
-			"mainClass": "com.example.ai_hackathon.AiHackathonApplication",
-			"projectName": "java_backend",
-			"args": "",
-			"envFile": "${workspaceFolder}/.env"
-		}
-	]
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-AiHackathonApplication<java_backend>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.example.ai_hackathon.AiHackathonApplication",
+      "projectName": "java_backend",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Flutter Client Boot-AiHackathonApplicationDebug",
+      "program": "flutter_client/lib/main.dart",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug"
+    }
+  ]
 }
