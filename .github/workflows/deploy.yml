@@ -9,7 +9,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  SERVICE_NAME: spring-boot-hello-world
+  SERVICE_NAME: javabackend
   WORKING_DIR: java_backend
 
 jobs:
