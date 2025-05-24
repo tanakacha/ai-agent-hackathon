@@ -23,6 +23,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check ENV Value
+        run: echo ${{ secrets.GCP_PROJECT_ID }} 
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
