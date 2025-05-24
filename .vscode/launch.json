@@ -12,7 +12,7 @@
     },
     {
       "name": "Flutter Client Boot-AiHackathonApplicationDebug",
-      "program": "flutter_client/lib/main.dart",
+      "program": "${workspaceFolder}/flutter_client/lib/main.dart",
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug"
