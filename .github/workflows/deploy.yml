@@ -5,11 +5,13 @@ on:
     branches:
       - main
     paths:
-      - 'java_backend/**' # java_backendディレクトリの変更時のみトリガー
+      - 'java_backend/**'
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   SERVICE_NAME: javabackend
+  REGION: asia-northeast1
+  REPOSITORY_NAME: javabackend
   WORKING_DIR: java_backend
 
 jobs:
@@ -17,14 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ${{ env.WORKING_DIR }} # すべてのrunステップのデフォルトworking-directoryを設定
+        working-directory: ${{ env.WORKING_DIR }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Check ENV Value
-        run: echo ${{ secrets.GCP_PROJECT_ID }} 
+        run: echo ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -49,19 +51,22 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
-      - name: Configure Docker to use gcloud as a credential helper
-        run: gcloud auth configure-docker
-
-      - name: Build and push Docker image to Container Registry
+      - name: Configure Docker to use Artifact Registry
         run: |
-          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
-          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Build and push Docker image to Artifact Registry
+        run: |
+          IMAGE_URI=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
 
       - name: Deploy to Cloud Run
         run: |
+          IMAGE_URI=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
-            --region asia-northeast1 \
+            --image $IMAGE_URI \
+            --region ${{ env.REGION }} \
             --allow-unauthenticated \
             --platform managed \
             --project ${{ env.PROJECT_ID }}
