@@ -26,6 +26,7 @@ dependencies {
 	
 	// Add JSON processing for Firebase configuration
 	implementation 'org.json:json:20231013'
+	implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 }
 
 tasks.named('test') {
