@@ -4,13 +4,16 @@
 
 ## Java_Backendの立ち上げ方
 
-gradleのバージョン確認
+### gradleのバージョン確認
 
 ```sh
 gradle --version
 ```
 
-開発用サーバーの立ち上げ(ai-agent-hackathon/java_backend)
+### envファイルを配置(ai-agent-hackathon/java_backend)
+
+
+### 開発用サーバーの立ち上げ(ai-agent-hackathon/java_backend)
 
 ```sh
 ./gradlew bootRun
