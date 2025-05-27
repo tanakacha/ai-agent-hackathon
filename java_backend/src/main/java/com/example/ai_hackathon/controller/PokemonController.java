@@ -1,4 +1,4 @@
-package com.example.pokemonapi.controller;
+package com.example.ai_hackathon.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

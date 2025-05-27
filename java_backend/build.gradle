@@ -36,6 +36,3 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-springBoot {
-    mainClass = 'com.example.pokemonapi.PokemonApiApplication'
-}

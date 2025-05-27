@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 
-package com.example.ai_hackathon;
+package com.example.ai_hackathon.controller;
 
 import java.util.List;
 
