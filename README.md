@@ -4,17 +4,36 @@
 
 ## Java_Backendの立ち上げ方
 
-### gradleのバージョン確認
+このドキュメントでは、Spring Boot アプリケーションの開発環境を立ち上げる手順を説明します。
+
+---
+
+## Gradle のバージョン確認
+
+まず、Gradle が正しくインストールされていることを確認してください。
 
 ```sh
 gradle --version
 ```
 
-### envファイルを配置(ai-agent-hackathon/java_backend)
+---
 
+## 環境変数ファイルの配置
 
-### 開発用サーバーの立ち上げ(ai-agent-hackathon/java_backend)
+環境変数ファイル（`.env`）を以下のディレクトリに配置してください：
+
+```
+ai-agent-hackathon/java_backend/.env
+```
+
+---
+
+## 開発用サーバーの起動
+
+以下のコマンドをプロジェクトのルートディレクトリ（`ai-agent-hackathon/java_backend`）で実行します。
 
 ```sh
 ./gradlew bootRun
 ```
+
+Spring Boot アプリケーションが起動し、`http://localhost:8080` でAPIにアクセスできるようになります。
