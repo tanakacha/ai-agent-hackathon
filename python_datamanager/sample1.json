@@ -11,7 +11,7 @@
 	"map": {
 		"id": "map_1",
 		"user_id": "user_1",
-		"name": "Python Learning Path",
+		"title": "Python Learning Path",
 		"objective": "Master Python basics",
 		"deadline": "2025-07-31T23:59:59",
 		"created_at": "2025-05-30T10:00:00",
@@ -21,7 +21,7 @@
 		{
 			"id": "node_1",
 			"map_id": "map_1",
-			"name": "Start Python",
+			"title": "Start Python",
 			"node_type": "normal",
 			"description": "Introduction to Python",
 			"child_id": null,
@@ -33,7 +33,7 @@
 		{
 			"id": "node_2",
 			"map_id": "map_1",
-			"name": "Advanced Python",
+			"title": "Advanced Python",
 			"node_type": "normal",
 			"description": "Deep dive into Python advanced topics",
 			"child_id": "node_1",
