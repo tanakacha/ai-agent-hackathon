@@ -2,11 +2,12 @@ import os
 import json
 import uuid
 from dataclasses import dataclass, asdict
-from datetime import datetime
+import datetime
 from typing import List, Optional
 
 import firebase_admin
 from firebase_admin import credentials, firestore
+
 
 # ----- Firebase初期化 -----
 FIREBASE_CREDENTIALS_PATH = "serviceKey.json"
@@ -33,7 +34,7 @@ class User:
 class Map:
     id: str
     user_id: str
-    name: str
+    title: str
     objective: str
     deadline: datetime
     created_at: datetime
@@ -43,9 +44,9 @@ class Map:
         d = asdict(self)
         d['id'] = str(self.id)
         d['user_id'] = str(self.user_id)
-        d['deadline'] = self.deadline.isoformat()
-        d['created_at'] = self.created_at.isoformat()
-        d['updated_at'] = self.updated_at.isoformat()
+        d['deadline'] = datetime.datetime.now()
+        d['created_at'] = datetime.datetime.now()
+        d['updated_at'] = datetime.datetime.now()
         return d
 
 
@@ -53,7 +54,7 @@ class Map:
 class Node:
     id: str
     map_id: str
-    name: str
+    title: str
     node_type: str
     description: str
     child_id: Optional[str]
@@ -68,14 +69,14 @@ class Node:
         d['map_id'] = str(self.map_id)
         d['child_id'] = str(self.child_id) if self.child_id else None
         d['to_id'] = str(self.to_id) if self.to_id else None
-        d['created_at'] = self.created_at.isoformat()
-        d['updated_at'] = self.updated_at.isoformat()
-        d['finished_at'] = self.finished_at.isoformat() if self.finished_at else None
+        d['created_at'] = datetime.datetime.now()
+        d['updated_at'] = datetime.datetime.now()
+        d['finished_at'] = datetime.datetime.now() if self.finished_at else None
         return d
 
 
 def parse_datetime(dt_str: str) -> datetime:
-    return datetime.fromisoformat(dt_str)
+    return datetime.datetime.fromisoformat(dt_str)
 
 
 def main():
@@ -96,7 +97,7 @@ def main():
     map_obj = Map(
         id=(map_data['id']),
         user_id=(map_data['user_id']),
-        name=map_data['name'],
+        title=map_data['title'],
         objective=map_data['objective'],
         deadline=parse_datetime(map_data['deadline']),
         created_at=parse_datetime(map_data['created_at']),
@@ -109,7 +110,7 @@ def main():
         node = Node(
             id=node_data['id'],
             map_id=node_data['map_id'],
-            name=node_data['name'],
+            title=node_data['title'],
             node_type=node_data['node_type'],
             description=node_data['description'],
             child_id=node_data['child_id'] if node_data['child_id'] else None,
