@@ -11,11 +11,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Node {
+public class RoadMap {
 	private String id;
-	private String map_id;
+	private String user_id;
 	private String title;
-	private String node_type;
+	private String objective;
+	private Date deadline;
 	private Date created_at;
 	private Date updated_at;
 }
