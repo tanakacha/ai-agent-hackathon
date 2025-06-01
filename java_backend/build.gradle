@@ -14,7 +14,7 @@ java {
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
@@ -28,9 +28,11 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok:1.18.38")
 	implementation 'org.json:json:20231013'
 	implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
+	implementation 'com.google.cloud:google-cloud-vertexai:1.8.0'
+	implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
-
