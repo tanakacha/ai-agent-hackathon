@@ -1,5 +1,4 @@
-// src/main/java/com/example/ai_hackathon/TestLLMController.java
-package com.example.ai_hackathon;
+package com.example.ai_hackathon.controller;
 
 import com.example.service.SimpleLLMService;
 import org.springframework.beans.factory.annotation.Autowired;
