@@ -57,8 +57,8 @@ class Node:
     title: str
     node_type: str
     description: str
-    child_id: Optional[str]
-    to_id: Optional[str]
+    children_ids: Optional[List[str]]
+    next_id: Optional[str]
     created_at: datetime
     updated_at: datetime
     finished_at: Optional[datetime]
@@ -67,8 +67,8 @@ class Node:
         d = asdict(self)
         d['id'] = str(self.id)
         d['map_id'] = str(self.map_id)
-        d['child_id'] = str(self.child_id) if self.child_id else None
-        d['to_id'] = str(self.to_id) if self.to_id else None
+        d['children_ids'] = [str(child_id) for child_id in self.children_ids] if self.children_ids else None
+        d['next_id'] = str(self.next_id) if self.next_id else None
         d['created_at'] = datetime.datetime.now()
         d['updated_at'] = datetime.datetime.now()
         d['finished_at'] = datetime.datetime.now() if self.finished_at else None
@@ -113,8 +113,8 @@ def main():
             title=node_data['title'],
             node_type=node_data['node_type'],
             description=node_data['description'],
-            child_id=node_data['child_id'] if node_data['child_id'] else None,
-          	to_id=node_data['to_id'] if node_data['to_id'] else None,
+            children_ids=node_data['children_ids'],
+            next_id=node_data['next_id'],
             created_at=parse_datetime(node_data['created_at']),
             updated_at=parse_datetime(node_data['updated_at']),
             finished_at=parse_datetime(node_data['finished_at']) if node_data['finished_at'] else None
