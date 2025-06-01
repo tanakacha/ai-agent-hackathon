@@ -28,6 +28,16 @@ ai-agent-hackathon/java_backend/.env
 
 ---
 
+## Google Cloud 認証ファイルの配置
+
+Google Cloud Vertex AI を使用するために、サービスアカウントの認証ファイル（`key.json`）を以下のディレクトリに配置してください：
+
+```
+ai-agent-hackathon/java_backend/src/main/resources/key.json
+```
+
+---
+
 ## 開発用サーバーの起動
 
 以下のコマンドをプロジェクトのルートディレクトリ（`ai-agent-hackathon/java_backend`）で実行します。

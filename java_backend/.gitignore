@@ -38,3 +38,4 @@ out/
 
 ### ENV ###
 .env
+key.json
