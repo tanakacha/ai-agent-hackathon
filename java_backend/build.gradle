@@ -15,15 +15,6 @@ java {
 
 repositories {
     mavenCentral()
-    maven { url 'https://repo.spring.io/milestone' } 
-    maven { url 'https://repo.spring.io/snapshot' }
-}
-
-dependencyManagement {
-    imports {
-				mavenBom "org.springframework.cloud:spring-cloud-dependencies:2024.0.0-M2"
-        mavenBom "org.springframework.ai:spring-ai-bom:1.0.0-M1"
-    }
 }
 
 dependencies {
@@ -38,7 +29,8 @@ dependencies {
 	implementation 'org.json:json:20231013'
 	implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 
-	implementation 'org.springframework.ai:spring-ai-vertex-ai-gemini-spring-boot-starter'
+	implementation 'com.google.cloud:google-cloud-vertexai:1.8.0'
+	implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'
 }
 
 tasks.named('test') {
