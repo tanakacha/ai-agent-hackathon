@@ -1,12 +1,11 @@
 package com.example.service;
 
+import com.example.dto.RoadmapRequest;
 import com.example.dto.RoadmapResponse;
 import com.example.dto.RoadmapResponse.*;
 import com.google.cloud.vertexai.api.GenerateContentResponse;
 import com.google.cloud.vertexai.generativeai.ContentMaker;
 import com.google.cloud.vertexai.generativeai.GenerativeModel;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,15 +26,15 @@ public class RoadmapGenerationService {
         this.generativeModel = generativeModel;
     }
 
-    public RoadmapResponse generateRoadmap(String goal, String deadline) {
-        String llmResponse = generateRoadmapFromLLM(goal, deadline);
+    public RoadmapResponse generateRoadmap(RoadmapRequest request) {
+        String llmResponse = generateRoadmapFromLLM(request);
         
         // LLMレスポンスからロードマップデータを生成
-        return createRoadmapFromLLMResponse(goal, deadline, llmResponse);
+        return createRoadmapFromLLMResponse(request, llmResponse);
     }
 
-    private String generateRoadmapFromLLM(String goal, String deadline) {
-        String prompt = createRoadmapPrompt(goal, deadline);
+    private String generateRoadmapFromLLM(RoadmapRequest request) {
+        String prompt = createRoadmapPrompt(request);
         
         try {
             GenerateContentResponse response = generativeModel.generateContent(
@@ -57,53 +56,75 @@ public class RoadmapGenerationService {
         }
     }
 
-    private String createRoadmapPrompt(String goal, String deadline) {
+    private String createRoadmapPrompt(RoadmapRequest request) {
+        String userProfileInfo = buildUserProfileInfo(request.getUserProfile());
+        
         return String.format("""
             あなたはプロジェクトマネージャーです。以下の情報を基にロードマップを作成してください。
             
             目標: %s
             期限: %s
             
+            ユーザープロファイル:
+            %s
+            
             以下の要件に従って実用的なロードマップを作成してください：
             1. 目標達成のために必要な主要なマイルストーンを3-6個特定する
             2. 各マイルストーンは実現可能で具体的な内容にする
             3. マイルストーン間の論理的な順序を考慮する
             4. 期限から逆算して現実的なスケジュールを提案する
+            5. ユーザーの利用可能時間と経験レベルを考慮してスケジュールを調整する
             
-            応答は以下のフォーマットで、マイルストーンのタイトルのみを簡潔に列挙してください：
+            応答は以下のフォーマットで、マイルストーンのタイトルと期日を含めて列挙してください：
             
             マイルストーン:
-            1. [最初のマイルストーン]
-            2. [2番目のマイルストーン]
-            3. [3番目のマイルストーン]
-            4. [4番目のマイルストーン]
-            5. [5番目のマイルストーン]
+            1. [最初のマイルストーン] - [YYYY-MM-DD]
+            2. [2番目のマイルストーン] - [YYYY-MM-DD]
+            3. [3番目のマイルストーン] - [YYYY-MM-DD]
+            4. [4番目のマイルストーン] - [YYYY-MM-DD]
+            5. [5番目のマイルストーン] - [YYYY-MM-DD]
             
-            各マイルストーンは15文字以内で簡潔に表現してください。
-            """, goal, deadline);
+            各マイルストーンは15文字以内で簡潔に表現し、期日は最終期限(%s)以前に設定してください。
+            """, request.getGoal(), request.getDeadline(), userProfileInfo, request.getDeadline());
     }
 
-    private RoadmapResponse createRoadmapFromLLMResponse(String goal, String deadline, String llmResponse) {
-        List<String> milestones = extractMilestones(llmResponse);
+    private String buildUserProfileInfo(RoadmapRequest.UserProfile userProfile) {
+        if (userProfile == null) {
+            return "ユーザープロファイル情報なし";
+        }
+        
+        return String.format("""
+            - ユーザータイプ: %s
+            - 1日の利用可能時間: %d時間
+            - 週の利用可能日数: %d日
+            - 経験レベル: %s
+            - タイムゾーン: %s
+            """,
+            userProfile.getUserType() != null ? userProfile.getUserType().toString() : "不明",
+            userProfile.getAvailableHoursPerDay(),
+            userProfile.getAvailableDaysPerWeek(),
+            userProfile.getExperienceLevel() != null ? userProfile.getExperienceLevel().toString() : "不明",
+            userProfile.getTimezone() != null ? userProfile.getTimezone() : "不明"
+        );
+    }
+
+    private RoadmapResponse createRoadmapFromLLMResponse(RoadmapRequest request, String llmResponse) {
+        List<MilestoneWithDeadline> milestones = extractMilestonesWithDeadlines(llmResponse);
         
         if (milestones.isEmpty()) {
-            milestones = createDefaultMilestones(goal);
+            milestones = createDefaultMilestonesWithDeadlines(request);
         }
         
         List<Element> elements = new ArrayList<>();
-        double canvasWidth = 800.0;
-        double nodeWidth = 150.0;
-        double nodeHeight = 80.0;
-        double spacing = (canvasWidth - nodeWidth) / Math.max(1, milestones.size() - 1);
         
         // 開始ノード
         Element startElement = createElementWithDefaults(
             "start-node",
-            50.0, 150.0,
-            120.0, 60.0,
             "開始",
-            4294901760L,
-            14.0
+            null,
+            1, // start node
+            new ArrayList<>(), // no parents
+            new ArrayList<>()  // children will be added
         );
         elements.add(startElement);
         
@@ -111,54 +132,55 @@ public class RoadmapGenerationService {
         String previousId = "start-node";
         for (int i = 0; i < milestones.size(); i++) {
             String milestoneId = "milestone-" + (i + 1);
-            double x = 100.0 + (i + 1) * spacing;
-            double y = 150.0 + (i % 2 == 0 ? 0 : 50); // ジグザグ配置これはフロントさんに任せる？
+            MilestoneWithDeadline milestone = milestones.get(i);
+            
+            List<String> parentIds = new ArrayList<>();
+            parentIds.add(previousId);
             
             Element milestoneElement = createElementWithDefaults(
                 milestoneId,
-                x, y,
-                nodeWidth, nodeHeight,
-                milestones.get(i),
-                4294944000L,
-                12.0
+                milestone.getTitle(),
+                milestone.getDeadline(),
+                0, // milestone node
+                parentIds,
+                new ArrayList<>() // children will be added
             );
             elements.add(milestoneElement);
             
-            addConnection(elements.get(elements.size() - 2), milestoneId);
+            // 前のノードの子として追加
+            Element previousElement = findElementById(elements, previousId);
+            if (previousElement != null) {
+                previousElement.getChildIds().add(milestoneId);
+            }
+            
             previousId = milestoneId;
         }
 
+        // 完了ノード
+        List<String> endParentIds = new ArrayList<>();
+        endParentIds.add(previousId);
+        
         Element endElement = createElementWithDefaults(
             "end-node",
-            100.0 + (milestones.size() + 1) * spacing, 150.0,
-            120.0, 60.0,
             "完了",
-            4294934528L,
-            14.0
+            parseDeadline(request.getDeadline()),
+            2, // end node
+            endParentIds,
+            new ArrayList<>() // no children
         );
         elements.add(endElement);
         
-        if (elements.size() > 1) {
-            addConnection(elements.get(elements.size() - 2), endElement.getId());
+        // 最後のマイルストーンの子として完了ノードを追加
+        Element lastMilestone = findElementById(elements, previousId);
+        if (lastMilestone != null) {
+            lastMilestone.getChildIds().add("end-node");
         }
         
-        GridBackgroundParams gridParams = new GridBackgroundParams(
-            0.0, 0.0, 1.0, 20.0, 0.7, 5, 4294967295L, 4278190080L
-        );
-        
-        return new RoadmapResponse(
-            elements,
-            canvasWidth,
-            400.0,
-            gridParams,
-            false,
-            0.25,
-            0
-        );
+        return new RoadmapResponse(elements);
     }
 
-    private List<String> extractMilestones(String llmResponse) {
-        List<String> milestones = new ArrayList<>();
+    private List<MilestoneWithDeadline> extractMilestonesWithDeadlines(String llmResponse) {
+        List<MilestoneWithDeadline> milestones = new ArrayList<>();
 
         String[] lines = llmResponse.split("\n");
         boolean inMilestoneSection = false;
@@ -172,22 +194,20 @@ public class RoadmapGenerationService {
             }
             
             if (inMilestoneSection && !line.isEmpty()) {
-                Pattern pattern = Pattern.compile("^\\d+\\.\\s*(.+)$");
+                Pattern pattern = Pattern.compile("^\\d+\\.\\s*(.+?)\\s*-\\s*(\\d{4}-\\d{2}-\\d{2})$");
                 Matcher matcher = pattern.matcher(line);
                 
                 if (matcher.find()) {
-                    String milestone = matcher.group(1).trim();
+                    String title = matcher.group(1).trim();
+                    String dateStr = matcher.group(2).trim();
+                    
                     // 15文字制限を適用
-                    if (milestone.length() > 15) {
-                        milestone = milestone.substring(0, 12) + "...";
+                    if (title.length() > 15) {
+                        title = title.substring(0, 12) + "...";
                     }
-                    milestones.add(milestone);
-                } else if (line.startsWith("-") || line.startsWith("•")) {
-                    String milestone = line.substring(1).trim();
-                    if (milestone.length() > 15) {
-                        milestone = milestone.substring(0, 12) + "...";
-                    }
-                    milestones.add(milestone);
+                    
+                    LocalDate deadline = parseDeadline(dateStr);
+                    milestones.add(new MilestoneWithDeadline(title, deadline));
                 }
                 
                 // 最大6個まで
@@ -200,41 +220,51 @@ public class RoadmapGenerationService {
         return milestones;
     }
 
-    private List<String> createDefaultMilestones(String goal) {
-        // デフォルトのマイルストーン生成
-        List<String> defaults = new ArrayList<>();
-        defaults.add("要件定義");
-        defaults.add("設計フェーズ");
-        defaults.add("開発開始");
-        defaults.add("テスト実行");
-        defaults.add("最終調整");
+    private List<MilestoneWithDeadline> createDefaultMilestonesWithDeadlines(RoadmapRequest request) {
+        List<MilestoneWithDeadline> defaults = new ArrayList<>();
+        LocalDate finalDeadline = parseDeadline(request.getDeadline());
+        LocalDate currentDate = LocalDate.now();
+        
+        long totalDays = ChronoUnit.DAYS.between(currentDate, finalDeadline);
+        int milestoneCount = 5;
+        long daysBetweenMilestones = totalDays / (milestoneCount + 1);
+        
+        String[] defaultTitles = {"要件定義", "設計フェーズ", "開発開始", "テスト実行", "最終調整"};
+        
+        for (int i = 0; i < defaultTitles.length; i++) {
+            LocalDate milestoneDeadline = currentDate.plusDays((i + 1) * daysBetweenMilestones);
+            defaults.add(new MilestoneWithDeadline(defaultTitles[i], milestoneDeadline));
+        }
+        
         return defaults;
     }
 
-    private Element createElementWithDefaults(String id, double x, double y, 
-                                           double width, double height, 
-                                           String text, long backgroundColor,
-                                           double fontSize) {
+    private LocalDate parseDeadline(String deadline) {
+        if (deadline == null) {
+            return LocalDate.now().plusMonths(1); // デフォルト
+        }
+        
+        try {
+            return LocalDate.parse(deadline, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (Exception e) {
+            try {
+                return LocalDate.parse(deadline, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+            } catch (Exception e2) {
+                return LocalDate.now().plusMonths(1); // パースできない場合のデフォルト
+            }
+        }
+    }
+
+    private Element createElementWithDefaults(String id, String text, LocalDate deadline,
+                                           int kind, List<String> parentIds, List<String> childIds) {
         Element element = new Element();
         element.setId(id);
-        element.setPositionDx(x);
-        element.setPositionDy(y);
-        element.setSizeWidth(width);
-        element.setSizeHeight(height);
         element.setText(text);
-        element.setTextColor(4278190080L);
-        element.setFontFamily(null);
-        element.setTextSize(fontSize);
-        element.setTextIsBold(false);
-        element.setKind(0);
-        element.setHandlers(Arrays.asList(1, 0, 3, 2));
-        element.setHandlerSize(25.0);
-        element.setBackgroundColor(backgroundColor);
-        element.setBorderColor(4280391411L);
-        element.setBorderThickness(3.0);
-        element.setElevation(4.0);
+        element.setDeadline(deadline);
+        element.setKind(kind);
         element.setData(null);
-        element.setNext(new ArrayList<>());
+        element.setParentIds(parentIds);
+        element.setChildIds(childIds);
         element.setDraggable(true);
         element.setResizable(false);
         element.setConnectable(true);
@@ -243,18 +273,29 @@ public class RoadmapGenerationService {
         return element;
     }
 
-    private void addConnection(Element fromElement, String toElementId) {
-        ArrowParams arrowParams = new ArrowParams(
-            1.7, 6.0, 25.0, 4278190080L, null, 1.0,
-            1.0, 0.0, -1.0, 0.0
-        );
-        
-        Connection connection = new Connection(
-            toElementId,
-            arrowParams,
-            new ArrayList<>()
-        );
-        
-        fromElement.getNext().add(connection);
+    private Element findElementById(List<Element> elements, String id) {
+        return elements.stream()
+                .filter(element -> element.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    // Inner class for milestone with deadline
+    private static class MilestoneWithDeadline {
+        private final String title;
+        private final LocalDate deadline;
+
+        public MilestoneWithDeadline(String title, LocalDate deadline) {
+            this.title = title;
+            this.deadline = deadline;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public LocalDate getDeadline() {
+            return deadline;
+        }
     }
 }

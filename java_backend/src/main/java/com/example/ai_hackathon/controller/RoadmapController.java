@@ -19,13 +19,6 @@ public class RoadmapController {
 
     @PostMapping("/generate")
     public RoadmapResponse generateRoadmap(@RequestBody RoadmapRequest request) {
-        return roadmapGenerationService.generateRoadmap(request.getGoal(), request.getDeadline());
-    }
-
-    @GetMapping("/generate")
-    public RoadmapResponse generateRoadmapGet(
-            @RequestParam(value = "goal") String goal,
-            @RequestParam(value = "deadline") String deadline) {
-        return roadmapGenerationService.generateRoadmap(goal, deadline);
+        return roadmapGenerationService.generateRoadmap(request);
     }
 }
