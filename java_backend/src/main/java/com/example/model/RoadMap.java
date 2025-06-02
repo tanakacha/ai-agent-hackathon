@@ -17,6 +17,7 @@ public class RoadMap {
 	private String title;
 	private String objective;
 	private Date deadline;
+
 	private Date created_at;
 	private Date updated_at;
 }
