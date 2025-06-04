@@ -1,176 +1,50 @@
 {
 	"user": {
-		"id": "user_1",
-		"name": "Alice",
-		"ability": [
-			"fast learner",
-			"python",
-			"team player"
-		]
+		"id": "user-1234",
+		"name": "Taro Yamada"
 	},
 	"map": {
-		"id": "map_1",
-		"user_id": "user_1",
-		"title": "Python Learning Path",
-		"objective": "Master Python basics",
-		"deadline": "2025-07-31T23:59:59",
-		"created_at": "2025-05-30T10:00:00",
-		"updated_at": "2025-05-30T10:00:00"
+		"id": "map-1",
+		"user_id": "user-1234",
+		"title": "Web開発マスターへの道",
+		"objective": "3ヶ月でWebアプリを作れるようになる",
+		"profile": "HTMLとCSSの基礎知識あり",
+		"deadline": "2025-09-01T00:00:00",
+		"created_at": "2025-06-01T12:00:00",
+		"updated_at": "2025-06-01T12:00:00"
 	},
 	"nodes": [
 		{
-			"id": "node_start",
-			"map_id": "map_1",
-			"title": "Start",
-			"node_type": "start",
-			"description": "学習開始",
-			"children_ids": null,
-			"next_id": "node_A",
-			"created_at": "2025-05-30T10:00:00",
-			"updated_at": "2025-05-30T10:00:00",
-			"finished_at": null
-		},
-		{
-			"id": "node_A",
-			"map_id": "map_1",
-			"title": "A - Basics",
-			"node_type": "normal",
-			"description": "Python基礎の学習",
+			"id": "node-0001",
+			"map_id": "map-5678",
+			"title": "HTML基礎",
+			"node_type": "Root",
+			"duration": 5,
+			"description": "HTMLの基本構造を学ぶ",
+			"progress_rate": 100,
+			"parent_id": null,
 			"children_ids": [
-				"node_A1",
-				"node_A2"
+				"node-0002"
 			],
-			"next_id": "node_B",
-			"created_at": "2025-05-30T10:05:00",
-			"updated_at": "2025-05-30T10:05:00",
-			"finished_at": null
+			"due_at": "2025-06-05T00:00:00",
+			"finished_at": "2025-06-03T00:00:00",
+			"created_at": "2025-06-01T12:00:00",
+			"updated_at": "2025-06-01T12:00:00"
 		},
 		{
-			"id": "node_A1",
-			"map_id": "map_1",
-			"title": "A1 - Syntax",
-			"node_type": "normal",
-			"description": "文法の基本",
+			"id": "node-0002",
+			"map_id": "map-5678",
+			"title": "CSS入門",
+			"node_type": "Normal",
+			"duration": 7,
+			"description": "基本的なスタイルを付ける方法を学ぶ",
+			"progress_rate": 50,
+			"parent_id": "node-0001",
 			"children_ids": [],
-			"next_id": "node_A2",
-			"created_at": "2025-05-30T10:06:00",
-			"updated_at": "2025-05-30T10:06:00",
-			"finished_at": null
-		},
-		{
-			"id": "node_A2",
-			"map_id": "map_1",
-			"title": "A2 - Variables",
-			"node_type": "normal",
-			"description": "変数の使い方",
-			"children_ids": [],
-			"next_id": null,
-			"created_at": "2025-05-30T10:07:00",
-			"updated_at": "2025-05-30T10:07:00",
-			"finished_at": null
-		},
-		{
-			"id": "node_B",
-			"map_id": "map_1",
-			"title": "B - Intermediate",
-			"node_type": "normal",
-			"description": "基本文法の理解",
-			"children_ids": [
-				"node_B1",
-				"node_B2",
-				"node_B3"
-			],
-			"next_id": "node_C",
-			"created_at": "2025-05-30T10:10:00",
-			"updated_at": "2025-05-30T10:10:00",
-			"finished_at": null
-		},
-		{
-			"id": "node_B1",
-			"map_id": "map_1",
-			"title": "B1 - Data Structures",
-			"node_type": "normal",
-			"description": "リストや辞書を学ぶ",
-			"children_ids": [
-				"node_B11",
-				"node_B12"
-			],
-			"next_id": "node_B2",
-			"created_at": "2025-05-30T10:11:00",
-			"updated_at": "2025-05-30T10:11:00",
-			"finished_at": null
-		},
-		{
-			"id": "node_B2",
-			"map_id": "map_1",
-			"title": "B2 - Control Flow",
-			"node_type": "normal",
-			"description": "条件分岐やループを学ぶ",
-			"children_ids": [],
-			"next_id": "node_B3",
-			"created_at": "2025-05-30T10:12:00",
-			"updated_at": "2025-05-30T10:12:00",
-			"finished_at": null
-		},
-		{
-			"id": "node_B3",
-			"map_id": "map_1",
-			"title": "B3 - Functions",
-			"node_type": "normal",
-			"description": "関数定義と利用",
-			"children_ids": [],
-			"next_id": null,
-			"created_at": "2025-05-30T10:13:00",
-			"updated_at": "2025-05-30T10:13:00",
-			"finished_at": null
-		},
-		{
-			"id": "node_B11",
-			"map_id": "map_1",
-			"title": "B11 - List Operations",
-			"node_type": "normal",
-			"description": "リストのメソッドと応用",
-			"children_ids": [],
-			"next_id": "node_B12",
-			"created_at": "2025-05-30T10:14:00",
-			"updated_at": "2025-05-30T10:14:00",
-			"finished_at": null
-		},
-		{
-			"id": "node_B12",
-			"map_id": "map_1",
-			"title": "B12 - Dictionary Operations",
-			"node_type": "normal",
-			"description": "辞書の使い方",
-			"children_ids": [],
-			"next_id": null,
-			"created_at": "2025-05-30T10:15:00",
-			"updated_at": "2025-05-30T10:15:00",
-			"finished_at": null
-		},
-		{
-			"id": "node_C",
-			"map_id": "map_1",
-			"title": "C - Advanced",
-			"node_type": "normal",
-			"description": "Pythonの応用",
-			"children_ids": [],
-			"next_id": "node_goal",
-			"created_at": "2025-05-30T10:16:00",
-			"updated_at": "2025-05-30T10:16:00",
-			"finished_at": null
-		},
-		{
-			"id": "node_goal",
-			"map_id": "map_1",
-			"title": "Goal",
-			"node_type": "end",
-			"description": "学習完了",
-			"children_ids": [],
-			"next_id": null,
-			"created_at": "2025-05-30T10:20:00",
-			"updated_at": "2025-05-30T10:20:00",
-			"finished_at": null
+			"due_at": "2025-06-10T00:00:00",
+			"finished_at": null,
+			"created_at": "2025-06-01T12:00:00",
+			"updated_at": "2025-06-01T12:00:00"
 		}
 	]
 }

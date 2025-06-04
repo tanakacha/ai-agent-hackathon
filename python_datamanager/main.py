@@ -22,7 +22,6 @@ db = firestore.client()
 class User:
     id: str
     name: str
-    ability: List[str]
 
     def to_dict(self):
         d = asdict(self)
@@ -36,6 +35,7 @@ class Map:
     user_id: str
     title: str
     objective: str
+    profile: str
     deadline: datetime
     created_at: datetime
     updated_at: datetime
@@ -44,11 +44,12 @@ class Map:
         d = asdict(self)
         d['id'] = str(self.id)
         d['user_id'] = str(self.user_id)
-        d['deadline'] = datetime.datetime.now()
+        d['profile'] = str(self.profile)
+        d['objective'] = str(self.objective)
+        d['deadline'] = datetime.datetime.now() + datetime.timedelta(days=30)
         d['created_at'] = datetime.datetime.now()
         d['updated_at'] = datetime.datetime.now()
         return d
-
 
 @dataclass
 class Node:
@@ -56,9 +57,12 @@ class Node:
     map_id: str
     title: str
     node_type: str
+    duration: int
     description: str
+    progress_rate: int
+    parent_id: Optional[str]
     children_ids: Optional[List[str]]
-    next_id: Optional[str]
+    due_at: datetime
     created_at: datetime
     updated_at: datetime
     finished_at: Optional[datetime]
@@ -68,12 +72,10 @@ class Node:
         d['id'] = str(self.id)
         d['map_id'] = str(self.map_id)
         d['children_ids'] = [str(child_id) for child_id in self.children_ids] if self.children_ids else None
-        d['next_id'] = str(self.next_id) if self.next_id else None
         d['created_at'] = datetime.datetime.now()
         d['updated_at'] = datetime.datetime.now()
         d['finished_at'] = datetime.datetime.now() if self.finished_at else None
         return d
-
 
 def parse_datetime(dt_str: str) -> datetime:
     return datetime.datetime.fromisoformat(dt_str)
@@ -89,16 +91,16 @@ def main():
     user = User(
         id=user_data['id'],
         name=user_data['name'],
-        ability=user_data['ability']
     )
 
     # Mapオブジェクト作成
     map_data = data['map']
     map_obj = Map(
-        id=(map_data['id']),
-        user_id=(map_data['user_id']),
+        id=map_data['id'],
+        user_id=map_data['user_id'],
         title=map_data['title'],
         objective=map_data['objective'],
+        profile=map_data['profile'],
         deadline=parse_datetime(map_data['deadline']),
         created_at=parse_datetime(map_data['created_at']),
         updated_at=parse_datetime(map_data['updated_at']),
@@ -112,9 +114,12 @@ def main():
             map_id=node_data['map_id'],
             title=node_data['title'],
             node_type=node_data['node_type'],
+            duration=node_data['duration'],
             description=node_data['description'],
+            progress_rate=node_data['progress_rate'],
+            parent_id=node_data['parent_id'],
             children_ids=node_data['children_ids'],
-            next_id=node_data['next_id'],
+            due_at=parse_datetime(node_data['due_at']),
             created_at=parse_datetime(node_data['created_at']),
             updated_at=parse_datetime(node_data['updated_at']),
             finished_at=parse_datetime(node_data['finished_at']) if node_data['finished_at'] else None
