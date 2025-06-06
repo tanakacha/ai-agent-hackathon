@@ -22,34 +22,34 @@ import com.example.service.RoadmapGenerationService;
 @RequestMapping("/api/roadmap")
 public class RoadmapController {
 
-	private final RoadmapGenerationService roadmapGenerationService;
-	private final RoadMapService roadMapService;
+    private final RoadmapGenerationService roadmapGenerationService;
+    private final RoadMapService roadMapService;
 
-	@Autowired
-	public RoadmapController(RoadmapGenerationService roadmapGenerationService, RoadMapService roadMapService) {
-		this.roadmapGenerationService = roadmapGenerationService;
-		this.roadMapService = roadMapService;
-	}
+    @Autowired
+    public RoadmapController(RoadmapGenerationService roadmapGenerationService, RoadMapService roadMapService) {
+        this.roadmapGenerationService = roadmapGenerationService;
+        this.roadMapService = roadMapService;
+    }
 
-	@PostMapping("/generate")
-		public RoadmapResponse generateRoadmap(@RequestBody RoadmapRequest request) {
-			return roadmapGenerationService.generateRoadmap(request.getGoal(), request.getDeadline());
-		}
+    @PostMapping("/generate")
+        public RoadmapResponse generateRoadmap(@RequestBody RoadmapRequest request) {
+            return roadmapGenerationService.generateRoadmap(request.getGoal(), request.getDeadline());
+        }
 
-	@GetMapping("/roadmap/{map_id}")
-	public RoadMap getRoadmap(@PathVariable String map_id) {
-		return roadMapService.getRoadMap(map_id);
-	}
+    @GetMapping("/roadmap/{map_id}")
+    public RoadMap getRoadmap(@PathVariable String map_id) {
+        return roadMapService.getRoadMap(map_id);
+    }
 
-	@GetMapping("/nodes/{map_id}")
-	public List<Node> getNodes(@PathVariable String map_id) {
-		return roadMapService.getNodes(map_id);
-	}
+    @GetMapping("/nodes/{map_id}")
+    public List<Node> getNodes(@PathVariable String map_id) {
+        return roadMapService.getNodes(map_id);
+    }
 
-	@GetMapping("/generate")
-		public RoadmapResponse generateRoadmapGet(
-				@RequestParam(value = "goal") String goal,
-				@RequestParam(value = "deadline") String deadline) {
-			return roadmapGenerationService.generateRoadmap(goal, deadline);
-		}
+    @GetMapping("/generate")
+        public RoadmapResponse generateRoadmapGet(
+                @RequestParam(value = "goal") String goal,
+                @RequestParam(value = "deadline") String deadline) {
+            return roadmapGenerationService.generateRoadmap(goal, deadline);
+        }
 }
