@@ -11,6 +11,8 @@ class RoadmapWidget extends StatelessWidget {
   final Map<int, Node> nodes;
   final int? selectedNodeId;
   final void Function(int nodeId)? onNodeTap;
+  final int offsetY = 60;
+  final int offsetX = 25;
 
   const RoadmapWidget({
     super.key,
@@ -83,8 +85,8 @@ class RoadmapWidget extends StatelessWidget {
       maxX = math.max(maxX, node.x);
       maxY = math.max(maxY, node.y);
     }
-    maxX += 250;
-    maxY += 100;
+    maxX += 100;
+    maxY += 250;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -93,8 +95,8 @@ class RoadmapWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(30.0),
           child: SizedBox(
-            width: maxX,
-            height: maxY,
+            width: maxY,
+            height: maxX,
             child: Stack(
               children: [
                 ...nodes.values.map((node) {
@@ -114,8 +116,9 @@ class RoadmapWidget extends StatelessWidget {
                   // Draw connection to left sibling
                   return CustomPaint(
                     painter: ConnectionPainterSibling(
-                      start: Offset(leftSibling.x + 25, leftSibling.y + 25),
-                      end: Offset(node.x + 25, node.y + 25),
+                      start: Offset(
+                          leftSibling.y + offsetY, leftSibling.x + offsetX),
+                      end: Offset(node.y + offsetY, node.x + offsetX),
                       color: Colors.grey,
                     ),
                   );
@@ -133,11 +136,14 @@ class RoadmapWidget extends StatelessWidget {
                   final leftChild = findLeftMostDescendant(node, nodes);
                   return CustomPaint(
                     painter: ConnectionPainterAncle(
-                      start: Offset(leftAncle.x + 25, leftAncle.y + 25),
-                      end: Offset(node.x + 25, node.y + 25),
+                      start: Offset(
+                        leftAncle.y + offsetY,
+                        leftAncle.x + offsetX,
+                      ),
+                      end: Offset(node.y + offsetY, node.x + offsetX),
                       curveEnd: leftChild != null
-                          ? Offset(leftChild.x + 25, leftChild.y + 25)
-                          : Offset(node.x + 25, node.y + 25),
+                          ? Offset(leftChild.y + offsetY, leftChild.x + offsetX)
+                          : Offset(node.y + offsetY, node.x + offsetX),
                       color: Colors.grey,
                     ),
                   );
@@ -157,11 +163,13 @@ class RoadmapWidget extends StatelessWidget {
                   final rightChild = findRightMostDescendant(node, nodes);
                   return CustomPaint(
                     painter: ConnectionPainterAunt(
-                      start: Offset(rightAunt.x + 25, rightAunt.y + 25),
-                      end: Offset(node.x + 25, node.y + 25),
+                      start:
+                          Offset(rightAunt.y + offsetY, rightAunt.x + offsetX),
+                      end: Offset(node.y + offsetY, node.x + offsetX),
                       curveStart: rightChild != null
-                          ? Offset(rightChild.x + 25, rightChild.y + 25)
-                          : Offset(node.x + 25, node.y + 25),
+                          ? Offset(
+                              rightChild.y + offsetY, rightChild.x + offsetX)
+                          : Offset(node.y + offsetY, node.x + offsetX),
                       color: Colors.grey,
                     ),
                   );

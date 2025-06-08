@@ -16,7 +16,7 @@ class NodeWidget extends StatelessWidget {
     required this.node,
     required this.x,
     required this.y,
-    this.width = 50,
+    this.width = 120,
     this.height = 50,
     this.isSelected = false,
     this.onTap,
@@ -53,8 +53,8 @@ class NodeWidget extends StatelessWidget {
     }
 
     return Positioned(
-      left: x,
-      top: y,
+      left: y,
+      top: x,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -71,7 +71,7 @@ class NodeWidget extends StatelessWidget {
           child: Center(
             child: Text(
               label,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.black),
               textAlign: TextAlign.center,
             ),
           ),
