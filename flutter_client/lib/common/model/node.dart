@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 enum NodeType { start, goal, normal, root }
 
 class Node {
@@ -27,8 +25,8 @@ class Node {
     required this.description,
     required this.duration,
     required this.progressRate,
-    required this.x,
-    required this.y,
+    this.x = 0,
+    this.y = 0,
     required this.dueAt,
     this.finishedAt,
     required this.createdAt,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../model/entities/node.dart';
+import '../model/node.dart';
 
 class NodeWidget extends StatelessWidget {
   final Node node;
