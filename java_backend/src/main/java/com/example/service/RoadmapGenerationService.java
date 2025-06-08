@@ -1,21 +1,22 @@
 package com.example.service;
 
-import com.example.dto.RoadmapResponse;
-import com.example.dto.RoadmapResponse.*;
-import com.google.cloud.vertexai.api.GenerateContentResponse;
-import com.google.cloud.vertexai.generativeai.ContentMaker;
-import com.google.cloud.vertexai.generativeai.GenerativeModel;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.example.dto.RoadmapResponse;
+import com.example.dto.RoadmapResponse.ArrowParams;
+import com.example.dto.RoadmapResponse.Connection;
+import com.example.dto.RoadmapResponse.Element;
+import com.example.dto.RoadmapResponse.GridBackgroundParams;
+import com.google.cloud.vertexai.api.GenerateContentResponse;
+import com.google.cloud.vertexai.generativeai.ContentMaker;
+import com.google.cloud.vertexai.generativeai.GenerativeModel;
 
 @Service
 public class RoadmapGenerationService {
