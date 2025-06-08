@@ -58,10 +58,12 @@ public class RoadmapGenerationService {
 
     private String createRoadmapPrompt(RoadmapRequest request) {
         String userProfileInfo = buildUserProfileInfo(request.getUserProfile());
+        LocalDate currentDate = LocalDate.now();
         
         return String.format("""
             あなたはプロジェクトマネージャーです。以下の情報を基にロードマップを作成してください。
             
+            現在の日付: %s
             目標: %s
             期限: %s
             
@@ -72,8 +74,8 @@ public class RoadmapGenerationService {
             1. 目標達成のために必要な主要なマイルストーンを3-6個特定する
             2. 各マイルストーンは実現可能で具体的な内容にする
             3. マイルストーン間の論理的な順序を考慮する
-            4. 期限から逆算して現実的なスケジュールを提案する
-            5. ユーザーの利用可能時間と経験レベルを考慮してスケジュールを調整する
+            4. 現在の日付(%s)から期限(%s)までの期間を逆算して現実的なスケジュールを提案する
+            5. ユーザーの利用可能時間と経験レベルとタスクの難易度を考慮してスケジュールを調整する
             
             応答は以下のフォーマットで、マイルストーンのタイトルと期日を含めて列挙してください：
             
@@ -85,7 +87,7 @@ public class RoadmapGenerationService {
             5. [5番目のマイルストーン] - [YYYY-MM-DD]
             
             各マイルストーンは15文字以内で簡潔に表現し、期日は最終期限(%s)以前に設定してください。
-            """, request.getGoal(), request.getDeadline(), userProfileInfo, request.getDeadline());
+            """, currentDate, request.getGoal(), request.getDeadline(), userProfileInfo, currentDate, request.getDeadline(), request.getDeadline());
     }
 
     private String buildUserProfileInfo(RoadmapRequest.UserProfile userProfile) {
