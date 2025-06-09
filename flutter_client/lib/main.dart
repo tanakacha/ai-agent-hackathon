@@ -10,11 +10,11 @@ void main() {
   // ノード位置を自動計算
   final layout = DefaultTreeLayoutAlgorithm();
   final rootNodes =
-      sampleNodes.values.where((n) => n.parentId == null).toList();
+      sampleNodes2.values.where((n) => n.parentId == null).toList();
   layout.calculatePositions(
-    nodes: sampleNodes,
+    nodes: sampleNodes2,
     rootNodes: rootNodes,
-    spaceX: 100,
+    spaceX: 120,
     spaceY: 100,
   );
 
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('Sample Roadmap')),
         body: RoadmapWidget(
-          nodes: sampleNodes,
+          nodes: sampleNodes2,
         ),
       ),
     );

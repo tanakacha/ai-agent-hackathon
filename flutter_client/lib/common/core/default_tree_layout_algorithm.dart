@@ -14,17 +14,17 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
   }) {
     if (nodes.isEmpty) return;
 
-    // 1. Calculate depths
     int maxDepth = _calculateMaxDepth(nodes);
 
-    // 2. Initial placement (DFS)
-    double currentGlobalX = 0.0;
+    // 逆方向のため、baseYを十分大きな値に設定
+    double baseY = (maxDepth + 1) * spaceY;
+    double currentGlobalX = 500.0;
     for (final rootNode in rootNodes) {
-      _positionNodeDFS(rootNode.id, 0, currentGlobalX, nodes, spaceX, spaceY);
-      currentGlobalX = _getMaxX(rootNode.id, nodes) + spaceX * 5;
+      _positionNodeDFS(
+          rootNode.id, 0, currentGlobalX, baseY, nodes, spaceX, spaceY);
+      currentGlobalX = _getMaxX(rootNode.id, nodes) - spaceX * 5;
     }
 
-    // 3. Adjust parent positions (bottom-up)
     for (int i = maxDepth; i >= 0; i--) {
       for (final node in nodes.values.where(
         (node) => _getDepth(node.id, nodes) == i,
@@ -48,14 +48,14 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
     return [];
   }
 
-  double _positionNodeDFS(int nodeId, int depth, double currentX,
+  double _positionNodeDFS(int nodeId, int depth, double currentX, double baseY,
       Map<int, Node> nodes, double spaceX, double spaceY) {
     final node = nodes[nodeId]!;
-    node.y = depth * spaceY;
+    node.y = baseY - depth * spaceY;
 
     if (node.childrenIds.isEmpty) {
       node.x = currentX;
-      return currentX + spaceX;
+      return currentX - spaceX;
     } else {
       double nextX = currentX;
       for (final childId in node.childrenIds) {
@@ -63,6 +63,7 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
           childId,
           depth + 1,
           nextX,
+          baseY,
           nodes,
           spaceX,
           spaceY,

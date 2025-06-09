@@ -1,15 +1,15 @@
-// lib/tree_view_page.dart (新規ファイル)
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_client/common/widget/node_widget.dart';
 import 'package:flutter_client/common/widget/painter.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../model/node.dart';
 
-class RoadmapWidget extends StatelessWidget {
+class RoadmapWidget extends HookWidget {
   final Map<int, Node> nodes;
-  final int? selectedNodeId;
+  final int? initialSelectedNodeId;
   final void Function(int nodeId)? onNodeTap;
   final int offsetY = 60;
   final int offsetX = 25;
@@ -17,7 +17,7 @@ class RoadmapWidget extends StatelessWidget {
   const RoadmapWidget({
     super.key,
     required this.nodes,
-    this.selectedNodeId,
+    this.initialSelectedNodeId,
     this.onNodeTap,
   });
 
@@ -76,17 +76,34 @@ class RoadmapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Hooksを使って選択されたノードのIDを管理
+    final selectedNodeId = useState<int?>(initialSelectedNodeId);
+
     if (nodes.isEmpty) {
       return const Center(child: Text('No nodes to display'));
     }
-    double maxX = 0;
+
+    double minY = double.infinity;
     double maxY = 0;
+    double minX = double.infinity;
+    double maxX = 0;
     for (final node in nodes.values) {
+      minX = math.min(minX, node.x);
       maxX = math.max(maxX, node.x);
+      minY = math.min(minY, node.y);
       maxY = math.max(maxY, node.y);
     }
+    // シフト量
+    final yShift = minY < 0 ? -minY + 30 : 30;
+    final xShift = minX < 0 ? -minX + 30 : 30;
     maxX += 100;
     maxY += 250;
+
+    // ノードタップハンドラー
+    void handleNodeTap(int nodeId) {
+      selectedNodeId.value = nodeId;
+      onNodeTap?.call(nodeId);
+    }
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -95,10 +112,11 @@ class RoadmapWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(30.0),
           child: SizedBox(
-            width: maxY,
-            height: maxX,
+            width: maxY + yShift,
+            height: maxX + xShift,
             child: Stack(
               children: [
+                // Sibling connections
                 ...nodes.values.map((node) {
                   if (node.parentId == null) return const SizedBox.shrink();
                   final parent = nodes[node.parentId];
@@ -117,9 +135,11 @@ class RoadmapWidget extends StatelessWidget {
                   return CustomPaint(
                     painter: ConnectionPainterSibling(
                       start: Offset(
-                          leftSibling.y + offsetY, leftSibling.x + offsetX),
-                      end: Offset(node.y + offsetY, node.x + offsetX),
-                      color: Colors.grey,
+                          leftSibling.y + offsetY + yShift,
+                          leftSibling.x + offsetX + xShift),
+                      end: Offset(
+                          node.y + offsetY + yShift, node.x + offsetX + xShift),
+                      color: Colors.red,
                     ),
                   );
                 }),
@@ -135,16 +155,19 @@ class RoadmapWidget extends StatelessWidget {
                   if (nodeIndex > 0) return const SizedBox.shrink();
                   final leftChild = findLeftMostDescendant(node, nodes);
                   return CustomPaint(
-                    painter: ConnectionPainterAncle(
+                    painter: ConnectionPainterToChild(
                       start: Offset(
                         leftAncle.y + offsetY,
-                        leftAncle.x + offsetX,
+                        leftAncle.x + offsetX + xShift,
                       ),
-                      end: Offset(node.y + offsetY, node.x + offsetX),
-                      curveEnd: leftChild != null
-                          ? Offset(leftChild.y + offsetY, leftChild.x + offsetX)
-                          : Offset(node.y + offsetY, node.x + offsetX),
-                      color: Colors.grey,
+                      end: Offset(
+                          node.y + offsetY + yShift, node.x + offsetX + xShift),
+                      curveStart: leftChild != null
+                          ? Offset(leftChild.y + offsetY + yShift,
+                              leftChild.x + offsetX + xShift)
+                          : Offset(node.y + offsetY + yShift,
+                              node.x + offsetX + xShift),
+                      color: Colors.green,
                     ),
                   );
                 }),
@@ -164,24 +187,29 @@ class RoadmapWidget extends StatelessWidget {
                   return CustomPaint(
                     painter: ConnectionPainterAunt(
                       start:
-                          Offset(rightAunt.y + offsetY, rightAunt.x + offsetX),
-                      end: Offset(node.y + offsetY, node.x + offsetX),
+                          Offset(
+                          node.y + offsetY + yShift, node.x + offsetX + xShift),
+                      end: Offset(rightAunt.y + offsetY + yShift,
+                          rightAunt.x + offsetX + xShift),
                       curveStart: rightChild != null
                           ? Offset(
-                              rightChild.y + offsetY, rightChild.x + offsetX)
-                          : Offset(node.y + offsetY, node.x + offsetX),
-                      color: Colors.grey,
+                              rightChild.y + offsetY + yShift,
+                              rightChild.x + offsetX + xShift)
+                          : Offset(node.y + offsetY + yShift,
+                              node.x + offsetX + xShift),
+                      color: Colors.blue,
                     ),
                   );
                 }),
+                // Node widgets with selection border
                 ...nodes.values.map((node) {
-                  final isSelected = selectedNodeId == node.id;
+                  final isSelected = selectedNodeId.value == node.id;
                   return NodeWidget(
                     node: node,
-                    x: node.x,
-                    y: node.y,
+                    x: node.x + xShift,
+                    y: node.y + yShift,
                     isSelected: isSelected,
-                    onTap: onNodeTap != null ? () => onNodeTap!(node.id) : null,
+                    onTap: () => handleNodeTap(node.id),
                   );
                 }),
               ],

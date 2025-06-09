@@ -30,7 +30,7 @@ class NodeWidget extends StatelessWidget {
 
     switch (node.nodeType) {
       case NodeType.start:
-        color = Colors.green;
+        color = const Color.fromARGB(10, 0, 255, 0);
         label = 'Start';
         shape = BoxShape.rectangle;
         break;
@@ -46,7 +46,7 @@ class NodeWidget extends StatelessWidget {
         break;
       case NodeType.normal:
       default:
-        color = Colors.grey;
+        color = const Color.fromARGB(10, 0, 0, 0);
         label = node.title;
         shape = BoxShape.circle;
         break;
@@ -70,7 +70,7 @@ class NodeWidget extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              label,
+              "y${node.y}:x${node.x}",
               style: const TextStyle(color: Colors.black),
               textAlign: TextAlign.center,
             ),
