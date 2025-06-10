@@ -77,13 +77,13 @@ class RoadmapWidget extends StatelessWidget {
     if (nodes.isEmpty) {
       return const Center(child: Text('No nodes to display'));
     }
-    double maxX = 0;
+    double minX = 0;
     double maxY = 0;
     for (final node in nodes.values) {
-      maxX = math.max(maxX, node.x);
+      minX = math.min(minX, node.x);
       maxY = math.max(maxY, node.y);
     }
-    maxX += 250;
+    minX -= 50; // Add some padding
     maxY += 100;
 
     return SingleChildScrollView(
@@ -93,75 +93,19 @@ class RoadmapWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(30.0),
           child: SizedBox(
-            width: maxX,
+            width: -minX + 250, // Adjust width based on leftmost node
             height: maxY,
             child: Stack(
               children: [
+                // Draw parent-child connections
                 ...nodes.values.map((node) {
                   if (node.parentId == null) return const SizedBox.shrink();
                   final parent = nodes[node.parentId];
                   if (parent == null) return const SizedBox.shrink();
-                  // Get the left sibling node
-                  final siblings = parent.childrenIds;
-                  final nodeIndex = siblings.indexOf(node.id);
-                  if (nodeIndex <= 0) {
-                    return const SizedBox.shrink(); // No left sibling
-                  }
-
-                  final leftSiblingId = siblings[nodeIndex - 1];
-                  final leftSibling = nodes[leftSiblingId];
-                  if (leftSibling == null) return const SizedBox.shrink();
-                  // Draw connection to left sibling
                   return CustomPaint(
-                    painter: ConnectionPainterSibling(
-                      start: Offset(leftSibling.x + 25, leftSibling.y + 25),
+                    painter: ConnectionPainterVertical(
+                      start: Offset(parent.x + 25, parent.y + 25),
                       end: Offset(node.x + 25, node.y + 25),
-                      color: Colors.grey,
-                    ),
-                  );
-                }),
-                // Draw Ancle connections
-                ...nodes.values.map((node) {
-                  if (node.parentId == null) return const SizedBox.shrink();
-                  final parent = nodes[node.parentId];
-                  if (parent == null) return const SizedBox.shrink();
-                  final leftAncle = findLeftAncle(node, nodes);
-                  if (leftAncle == null) return const SizedBox.shrink();
-                  final siblings = parent.childrenIds;
-                  final nodeIndex = siblings.indexOf(node.id);
-                  if (nodeIndex > 0) return const SizedBox.shrink();
-                  final leftChild = findLeftMostDescendant(node, nodes);
-                  return CustomPaint(
-                    painter: ConnectionPainterAncle(
-                      start: Offset(leftAncle.x + 25, leftAncle.y + 25),
-                      end: Offset(node.x + 25, node.y + 25),
-                      curveEnd: leftChild != null
-                          ? Offset(leftChild.x + 25, leftChild.y + 25)
-                          : Offset(node.x + 25, node.y + 25),
-                      color: Colors.grey,
-                    ),
-                  );
-                }),
-                // Draw aunt connections
-                ...nodes.values.map((node) {
-                  if (node.parentId == null) return const SizedBox.shrink();
-                  final parent = nodes[node.parentId];
-                  if (parent == null) return const SizedBox.shrink();
-                  final rightAunt = findRightAunt(node, nodes);
-                  if (rightAunt == null) return const SizedBox.shrink();
-                  final siblings = parent.childrenIds;
-                  final nodeIndex = siblings.indexOf(node.id);
-                  if (nodeIndex < siblings.length - 1) {
-                    return const SizedBox.shrink();
-                  }
-                  final rightChild = findRightMostDescendant(node, nodes);
-                  return CustomPaint(
-                    painter: ConnectionPainterAunt(
-                      start: Offset(rightAunt.x + 25, rightAunt.y + 25),
-                      end: Offset(node.x + 25, node.y + 25),
-                      curveStart: rightChild != null
-                          ? Offset(rightChild.x + 25, rightChild.y + 25)
-                          : Offset(node.x + 25, node.y + 25),
                       color: Colors.grey,
                     ),
                   );

@@ -18,10 +18,10 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
     int maxDepth = _calculateMaxDepth(nodes);
 
     // 2. Initial placement (DFS)
-    double currentGlobalX = 0.0;
+    double currentGlobalY = 0.0;
     for (final rootNode in rootNodes) {
-      _positionNodeDFS(rootNode.id, 0, currentGlobalX, nodes, spaceX, spaceY);
-      currentGlobalX = _getMaxX(rootNode.id, nodes) + spaceX * 5;
+      _positionNodeDFS(rootNode.id, 0, currentGlobalY, nodes, spaceX, spaceY);
+      currentGlobalY = _getMaxY(rootNode.id, nodes) + spaceY * 5;
     }
 
     // 3. Adjust parent positions (bottom-up)
@@ -30,9 +30,9 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
         (node) => _getDepth(node.id, nodes) == i,
       )) {
         if (node.childrenIds.isNotEmpty) {
-          double leftMostChildX = nodes[node.childrenIds.first]!.x;
-          double rightMostChildX = nodes[node.childrenIds.last]!.x;
-          node.x = (leftMostChildX + rightMostChildX) / 2;
+          double topMostChildY = nodes[node.childrenIds.first]!.y;
+          double bottomMostChildY = nodes[node.childrenIds.last]!.y;
+          node.y = (topMostChildY + bottomMostChildY) / 2;
         }
       }
     }
@@ -48,38 +48,38 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
     return [];
   }
 
-  double _positionNodeDFS(int nodeId, int depth, double currentX,
+  double _positionNodeDFS(int nodeId, int depth, double currentY,
       Map<int, Node> nodes, double spaceX, double spaceY) {
     final node = nodes[nodeId]!;
-    node.y = depth * spaceY;
+    node.x = -depth * spaceX; // 左側に配置
 
     if (node.childrenIds.isEmpty) {
-      node.x = currentX;
-      return currentX + spaceX;
+      node.y = currentY;
+      return currentY + spaceY;
     } else {
-      double nextX = currentX;
+      double nextY = currentY;
       for (final childId in node.childrenIds) {
-        nextX = _positionNodeDFS(
+        nextY = _positionNodeDFS(
           childId,
           depth + 1,
-          nextX,
+          nextY,
           nodes,
           spaceX,
           spaceY,
         );
       }
-      node.x = currentX; // Temporary, will be adjusted later
-      return nextX;
+      node.y = currentY; // Temporary, will be adjusted later
+      return nextY;
     }
   }
 
-  double _getMaxX(int nodeId, Map<int, Node> nodes) {
+  double _getMaxY(int nodeId, Map<int, Node> nodes) {
     final node = nodes[nodeId]!;
-    double maxX = node.x;
+    double maxY = node.y;
     for (final childId in node.childrenIds) {
-      maxX = math.max(maxX, _getMaxX(childId, nodes));
+      maxY = math.max(maxY, _getMaxY(childId, nodes));
     }
-    return maxX;
+    return maxY;
   }
 
   int _calculateMaxDepth(Map<int, Node> nodes) {

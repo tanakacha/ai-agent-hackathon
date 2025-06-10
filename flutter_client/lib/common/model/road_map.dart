@@ -1,4 +1,4 @@
-import 'package:flutter_client/model/entities/Node.dart';
+import 'package:flutter_client/common/model/node.dart';
 
 class RoadMap {
   int id;

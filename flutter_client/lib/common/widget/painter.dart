@@ -193,3 +193,35 @@ class ConnectionPainterAunt extends CustomPainter {
         color != oldDelegate.color;
   }
 }
+
+class ConnectionPainterVertical extends CustomPainter {
+  final Offset start;
+  final Offset end;
+  final Color color;
+
+  ConnectionPainterVertical({
+    required this.start,
+    required this.end,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    final path = Path();
+    path.moveTo(start.dx, start.dy);
+
+    // Draw a vertical line with a horizontal segment
+    path.lineTo(start.dx, end.dy);
+    path.lineTo(end.dx, end.dy);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
