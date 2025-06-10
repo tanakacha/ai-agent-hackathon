@@ -95,7 +95,7 @@ class RoadmapWidget extends HookWidget {
     }
     // シフト量
     final yShift = minY < 0 ? -minY + 30 : 30;
-    final xShift = minX < 0 ? -minX + 30 : 30;
+    final xShift = minX < 0 ? -minX + 30 : 0;
     maxX += 100;
     maxY += 250;
 
@@ -157,7 +157,7 @@ class RoadmapWidget extends HookWidget {
                   return CustomPaint(
                     painter: ConnectionPainterToChild(
                       start: Offset(
-                        leftAncle.y + offsetY,
+                        leftAncle.y + offsetY + yShift,
                         leftAncle.x + offsetX + xShift,
                       ),
                       end: Offset(
@@ -167,6 +167,10 @@ class RoadmapWidget extends HookWidget {
                               leftChild.x + offsetX + xShift)
                           : Offset(node.y + offsetY + yShift,
                               node.x + offsetX + xShift),
+                      center: Offset(
+                        (leftAncle.y + node.y) / 2 + offsetY + yShift,
+                        (leftAncle.x + node.x) / 2 + offsetX + xShift,
+                      ),
                       color: Colors.green,
                     ),
                   );
