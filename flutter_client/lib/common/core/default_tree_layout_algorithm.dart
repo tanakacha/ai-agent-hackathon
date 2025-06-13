@@ -30,8 +30,9 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
         (node) => _getDepth(node.id, nodes) == i,
       )) {
         if (node.childrenIds.isNotEmpty) {
-          double topMostChildY = nodes[node.childrenIds.first]!.y;
-          double bottomMostChildY = nodes[node.childrenIds.last]!.y;
+          final reversedChildrenIds = node.childrenIds.reversed.toList();
+          double topMostChildY = nodes[reversedChildrenIds.first]!.y;
+          double bottomMostChildY = nodes[reversedChildrenIds.last]!.y;
           node.y = (topMostChildY + bottomMostChildY) / 2;
         }
       }
@@ -58,7 +59,7 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
       return currentY + spaceY;
     } else {
       double nextY = currentY;
-      for (final childId in node.childrenIds) {
+      for (final childId in node.childrenIds.reversed) {
         nextY = _positionNodeDFS(
           childId,
           depth + 1,

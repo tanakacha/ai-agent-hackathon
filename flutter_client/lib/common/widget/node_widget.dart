@@ -70,7 +70,7 @@ class NodeWidget extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              label,
+              '$x:$y',
               style: const TextStyle(color: Colors.white),
               textAlign: TextAlign.center,
             ),

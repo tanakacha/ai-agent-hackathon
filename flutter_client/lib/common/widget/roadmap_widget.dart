@@ -85,42 +85,108 @@ class RoadmapWidget extends StatelessWidget {
     }
     minX -= 50; // Add some padding
     maxY += 100;
-
+    int offesetX = 500;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Padding(
           padding: const EdgeInsets.all(30.0),
-          child: SizedBox(
-            width: -minX + 250, // Adjust width based on leftmost node
-            height: maxY,
-            child: Stack(
-              children: [
-                // Draw parent-child connections
-                ...nodes.values.map((node) {
-                  if (node.parentId == null) return const SizedBox.shrink();
-                  final parent = nodes[node.parentId];
-                  if (parent == null) return const SizedBox.shrink();
-                  return CustomPaint(
-                    painter: ConnectionPainterVertical(
-                      start: Offset(parent.x + 25, parent.y + 25),
-                      end: Offset(node.x + 25, node.y + 25),
-                      color: Colors.grey,
-                    ),
-                  );
-                }),
-                ...nodes.values.map((node) {
-                  final isSelected = selectedNodeId == node.id;
-                  return NodeWidget(
-                    node: node,
-                    x: node.x,
-                    y: node.y,
-                    isSelected: isSelected,
-                    onTap: onNodeTap != null ? () => onNodeTap!(node.id) : null,
-                  );
-                }),
-              ],
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.grey,
+                width: 1,
+              ),
+            ),
+            child: SizedBox(
+              width: -minX + 500,
+              height: maxY,
+              child: Stack(
+                children: [
+                  ...nodes.values.map((node) {
+                    if (node.parentId == null) return const SizedBox.shrink();
+                    final parent = nodes[node.parentId];
+                    if (parent == null) return const SizedBox.shrink();
+                    // Get the left sibling node
+                    final siblings = parent.childrenIds;
+                    final nodeIndex = siblings.indexOf(node.id);
+                    if (nodeIndex <= 0) {
+                      return const SizedBox.shrink(); // No left sibling
+                    }
+
+                    final leftSiblingId = siblings[nodeIndex - 1];
+                    final leftSibling = nodes[leftSiblingId];
+                    if (leftSibling == null) return const SizedBox.shrink();
+                    // Draw connection to left sibling
+                    return CustomPaint(
+                      painter: ConnectionPainterSibling(
+                        start: Offset(
+                            leftSibling.x + offesetX, leftSibling.y + 25),
+                        end: Offset(node.x + offesetX, node.y + 25),
+                        color: Colors.green,
+                      ),
+                    );
+                  }),
+                  // Draw Ancle connections
+                  ...nodes.values.map((node) {
+                    if (node.parentId == null) return const SizedBox.shrink();
+                    final parent = nodes[node.parentId];
+                    if (parent == null) return const SizedBox.shrink();
+                    final leftAncle = findLeftAncle(node, nodes);
+                    if (leftAncle == null) return const SizedBox.shrink();
+                    final siblings = parent.childrenIds;
+                    final nodeIndex = siblings.indexOf(node.id);
+                    if (nodeIndex > 0) return const SizedBox.shrink();
+                    final leftChild = findLeftMostDescendant(node, nodes);
+                    return CustomPaint(
+                      painter: ConnectionPainterAncle(
+                        start: Offset(leftAncle.x + offesetX, leftAncle.y + 25),
+                        end: Offset(node.x + offesetX, node.y + 25),
+                        curveEnd: leftChild != null
+                            ? Offset(leftChild.x + offesetX, leftChild.y + 25)
+                            : Offset(node.x + offesetX, node.y + 25),
+                        color: Colors.blue,
+                      ),
+                    );
+                  }),
+                  // Draw parent-child connections
+                  ...nodes.values.map((node) {
+                    if (node.parentId == null) return const SizedBox.shrink();
+                    final parent = nodes[node.parentId];
+                    if (parent == null) return const SizedBox.shrink();
+                    final rightAunt = findRightAunt(node, nodes);
+                    if (rightAunt == null) return const SizedBox.shrink();
+                    final siblings = parent.childrenIds;
+                    final nodeIndex = siblings.indexOf(node.id);
+                    if (nodeIndex < siblings.length - 1) {
+                      return const SizedBox.shrink();
+                    }
+                    final rightChild = findRightMostDescendant(node, nodes);
+                    return CustomPaint(
+                      painter: ConnectionPainterAunt(
+                        start: Offset(rightAunt.x + offesetX, rightAunt.y + 25),
+                        end: Offset(node.x + offesetX, node.y + 25),
+                        curveStart: rightChild != null
+                            ? Offset(rightChild.x + offesetX, rightChild.y + 25)
+                            : Offset(node.x + offesetX, node.y + 25),
+                        color: Colors.red,
+                      ),
+                    );
+                  }),
+                  ...nodes.values.map((node) {
+                    final isSelected = selectedNodeId == node.id;
+                    return NodeWidget(
+                      node: node,
+                      x: node.x + offesetX,
+                      y: node.y,
+                      isSelected: isSelected,
+                      onTap:
+                          onNodeTap != null ? () => onNodeTap!(node.id) : null,
+                    );
+                  }),
+                ],
+              ),
             ),
           ),
         ),
