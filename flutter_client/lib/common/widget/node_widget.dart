@@ -16,7 +16,7 @@ class NodeWidget extends StatelessWidget {
     required this.node,
     required this.x,
     required this.y,
-    this.width = 50,
+    this.width = 150,
     this.height = 50,
     this.isSelected = false,
     this.onTap,
@@ -48,7 +48,7 @@ class NodeWidget extends StatelessWidget {
       default:
         color = Colors.grey;
         label = node.title;
-        shape = BoxShape.circle;
+        shape = BoxShape.rectangle;
         break;
     }
 

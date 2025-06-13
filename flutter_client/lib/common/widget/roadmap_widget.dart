@@ -7,14 +7,15 @@ import 'package:flutter_client/common/widget/painter.dart';
 
 import '../model/node.dart';
 
-class RoadmapWidget extends StatelessWidget {
-  // Constants for layout
+class RoadmapWidget extends StatefulWidget {
+  static const double _nodeWidth = 100.0;
+  static const double _nodeHeight = 50.0;
   static const double _padding = 30.0;
-  static const double _nodeCenterY = 25.0;
+  static const double _nodeCenterY = _nodeHeight / 2;
   static const double _horizontalOffset = 500.0;
-  static const double _nodeOffsetX = -25.0;
+  static const double _nodeOffsetX = -_nodeWidth / 2;
   static const double _minXPadding = 50.0;
-  static const double _maxYPadding = 100.0;
+  static const double _maxYPadding = 100;
 
   final Map<int, Node> nodes;
   final int? selectedNodeId;
@@ -26,6 +27,36 @@ class RoadmapWidget extends StatelessWidget {
     this.selectedNodeId,
     this.onNodeTap,
   });
+
+  @override
+  State<RoadmapWidget> createState() => RoadmapWidgetState();
+}
+
+class RoadmapWidgetState extends State<RoadmapWidget> {
+  final horizontalController = ScrollController();
+  final verticalController = ScrollController();
+
+  void focusNode(int nodeId) {
+    final node = widget.nodes[nodeId];
+    if (node == null) return;
+
+    // Calculate the target position
+    final targetX = node.x + 350 + RoadmapWidget._nodeOffsetX;
+    final targetY = node.y - 200;
+    print('$targetX, $targetY');
+    // Animate to the target position
+    horizontalController.animateTo(
+      targetX,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+
+    verticalController.animateTo(
+      targetY,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
 
   // Connection helper functions (adapted for Node)
   Node? findLeftAncle(Node node, Map<int, Node> nodes) {
@@ -82,23 +113,25 @@ class RoadmapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (nodes.isEmpty) {
+    if (widget.nodes.isEmpty) {
       return const Center(child: Text('No nodes to display'));
     }
     double minX = 0;
     double maxY = 0;
-    for (final node in nodes.values) {
+    for (final node in widget.nodes.values) {
       minX = math.min(minX, node.x);
       maxY = math.max(maxY, node.y);
     }
-    minX -= _minXPadding; // Add some padding
-    maxY += _maxYPadding;
+    minX -= RoadmapWidget._minXPadding; // Add some padding
+    maxY += RoadmapWidget._maxYPadding;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      controller: horizontalController,
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
+        controller: verticalController,
         child: Padding(
-          padding: const EdgeInsets.all(_padding),
+          padding: const EdgeInsets.all(RoadmapWidget._padding),
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
@@ -107,13 +140,13 @@ class RoadmapWidget extends StatelessWidget {
               ),
             ),
             child: SizedBox(
-              width: -minX + _horizontalOffset,
+              width: -minX + RoadmapWidget._horizontalOffset,
               height: maxY,
               child: Stack(
                 children: [
-                  ...nodes.values.map((node) {
+                  ...widget.nodes.values.map((node) {
                     if (node.parentId == null) return const SizedBox.shrink();
-                    final parent = nodes[node.parentId];
+                    final parent = widget.nodes[node.parentId];
                     if (parent == null) return const SizedBox.shrink();
                     // Get the left sibling node
                     final siblings = parent.childrenIds;
@@ -123,91 +156,106 @@ class RoadmapWidget extends StatelessWidget {
                     }
 
                     final leftSiblingId = siblings[nodeIndex - 1];
-                    final leftSibling = nodes[leftSiblingId];
+                    final leftSibling = widget.nodes[leftSiblingId];
                     if (leftSibling == null) return const SizedBox.shrink();
                     // Draw connection to left sibling
                     return CustomPaint(
                       painter: ConnectionPainterSibling(
                         start: Offset(
-                            leftSibling.x + _horizontalOffset,
-                            leftSibling.y + _nodeCenterY),
-                        end: Offset(
-                            node.x + _horizontalOffset, node.y + _nodeCenterY),
+                            leftSibling.x + RoadmapWidget._horizontalOffset,
+                            leftSibling.y + RoadmapWidget._nodeCenterY),
+                        end: Offset(node.x + RoadmapWidget._horizontalOffset,
+                            node.y + RoadmapWidget._nodeCenterY),
                         color: Colors.green,
                       ),
                     );
                   }),
                   // Draw Ancle connections
-                  ...nodes.values.map((node) {
+                  ...widget.nodes.values.map((node) {
                     if (node.parentId == null) return const SizedBox.shrink();
-                    final parent = nodes[node.parentId];
+                    final parent = widget.nodes[node.parentId];
                     if (parent == null) return const SizedBox.shrink();
-                    final leftAncle = findLeftAncle(node, nodes);
+                    final leftAncle = findLeftAncle(node, widget.nodes);
                     if (leftAncle == null) return const SizedBox.shrink();
                     final siblings = parent.childrenIds;
                     final nodeIndex = siblings.indexOf(node.id);
                     if (nodeIndex > 0) return const SizedBox.shrink();
-                    final leftChild = findLeftMostDescendant(node, nodes);
+                    final leftChild =
+                        findLeftMostDescendant(node, widget.nodes);
                     return CustomPaint(
                       painter: ConnectionPainterAncle(
-                        start: Offset(leftAncle.x + _horizontalOffset,
-                            leftAncle.y + _nodeCenterY),
-                        end: Offset(
-                            node.x + _horizontalOffset, node.y + _nodeCenterY),
+                        start: Offset(
+                            leftAncle.x + RoadmapWidget._horizontalOffset,
+                            leftAncle.y + RoadmapWidget._nodeCenterY),
+                        end: Offset(node.x + RoadmapWidget._horizontalOffset,
+                            node.y + RoadmapWidget._nodeCenterY),
                         curveEnd: leftChild != null
-                            ? Offset(leftChild.x + _horizontalOffset,
-                                leftChild.y + _nodeCenterY)
-                            : Offset(node.x + _horizontalOffset,
-                                node.y + _nodeCenterY),
+                            ? Offset(
+                                leftChild.x + RoadmapWidget._horizontalOffset,
+                                leftChild.y + RoadmapWidget._nodeCenterY)
+                            : Offset(node.x + RoadmapWidget._horizontalOffset,
+                                node.y + RoadmapWidget._nodeCenterY),
                         midpoint: Offset(
-                          (leftAncle.x + node.x) / 2 + _horizontalOffset,
-                          (leftAncle.y + node.y) / 2 + _nodeCenterY,
+                          (leftAncle.x + node.x) / 2 +
+                              RoadmapWidget._horizontalOffset,
+                          (leftAncle.y + node.y) / 2 +
+                              RoadmapWidget._nodeCenterY,
                         ),
                         color: Colors.blue,
                       ),
                     );
                   }),
                   // Draw parent-child connections
-                  ...nodes.values.map((node) {
+                  ...widget.nodes.values.map((node) {
                     if (node.parentId == null) return const SizedBox.shrink();
-                    final parent = nodes[node.parentId];
+                    final parent = widget.nodes[node.parentId];
                     if (parent == null) return const SizedBox.shrink();
-                    final rightAunt = findRightAunt(node, nodes);
+                    final rightAunt = findRightAunt(node, widget.nodes);
                     if (rightAunt == null) return const SizedBox.shrink();
                     final siblings = parent.childrenIds;
                     final nodeIndex = siblings.indexOf(node.id);
                     if (nodeIndex < siblings.length - 1) {
                       return const SizedBox.shrink();
                     }
-                    final rightChild = findRightMostDescendant(node, nodes);
+                    final rightChild =
+                        findRightMostDescendant(node, widget.nodes);
                     return CustomPaint(
                       painter: ConnectionPainterAunt(
-                        start: Offset(
-                            node.x + _horizontalOffset, node.y + _nodeCenterY),
-                        end: Offset(rightAunt.x + _horizontalOffset,
-                            rightAunt.y + _nodeCenterY),
+                        start: Offset(node.x + RoadmapWidget._horizontalOffset,
+                            node.y + RoadmapWidget._nodeCenterY),
+                        end: Offset(
+                            rightAunt.x + RoadmapWidget._horizontalOffset,
+                            rightAunt.y + RoadmapWidget._nodeCenterY),
                         curveStart: rightChild != null
-                            ? Offset(rightChild.x + _horizontalOffset,
-                                rightChild.y + _nodeCenterY)
-                            : Offset(node.x + _horizontalOffset,
-                                node.y + _nodeCenterY),
+                            ? Offset(
+                                rightChild.x + RoadmapWidget._horizontalOffset,
+                                rightChild.y + RoadmapWidget._nodeCenterY)
+                            : Offset(node.x + RoadmapWidget._horizontalOffset,
+                                node.y + RoadmapWidget._nodeCenterY),
                         midpoint: Offset(
-                          (rightAunt.x + node.x) / 2 + _horizontalOffset,
-                          (rightAunt.y + node.y) / 2 + _nodeCenterY,
+                          (rightAunt.x + node.x) / 2 +
+                              RoadmapWidget._horizontalOffset,
+                          (rightAunt.y + node.y) / 2 +
+                              RoadmapWidget._nodeCenterY,
                         ),
                         color: Colors.red,
                       ),
                     );
                   }),
-                  ...nodes.values.map((node) {
-                    final isSelected = selectedNodeId == node.id;
+                  ...widget.nodes.values.map((node) {
+                    final isSelected = widget.selectedNodeId == node.id;
                     return NodeWidget(
                       node: node,
-                      x: node.x + _horizontalOffset + _nodeOffsetX,
+                      x: node.x +
+                          RoadmapWidget._horizontalOffset +
+                          RoadmapWidget._nodeOffsetX,
                       y: node.y,
+                      width: RoadmapWidget._nodeWidth,
+                      height: RoadmapWidget._nodeHeight,
                       isSelected: isSelected,
-                      onTap:
-                          onNodeTap != null ? () => onNodeTap!(node.id) : null,
+                      onTap: widget.onNodeTap != null
+                          ? () => widget.onNodeTap!(node.id)
+                          : null,
                     );
                   }),
                 ],

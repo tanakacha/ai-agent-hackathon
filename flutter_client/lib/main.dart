@@ -32,11 +32,43 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Sample Roadmap')),
-        body: RoadmapWidget(
-          nodes: sampleNodes,
-        ),
+      home: const MyHomePage(),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final _roadmapKey = GlobalKey<RoadmapWidgetState>();
+  int currentFocusIndex = 0;
+
+  void _focusNextNode() {
+    final nodeIds = sampleNodes.keys.toList();
+    if (nodeIds.isEmpty) return;
+
+    setState(() {
+      currentFocusIndex = (currentFocusIndex + 1) % nodeIds.length;
+      _roadmapKey.currentState?.focusNode(nodeIds[currentFocusIndex]);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Sample Roadmap')),
+      body: RoadmapWidget(
+        key: _roadmapKey,
+        nodes: sampleNodes,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _focusNextNode,
+        child: Text(currentFocusIndex.toString()),
       ),
     );
   }
