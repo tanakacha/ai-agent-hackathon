@@ -64,13 +64,14 @@ class ConnectionPainterAncle extends CustomPainter {
   final Offset end;
   final Offset curveEnd;
   final Color color;
+  final Offset midpoint;
 
-  ConnectionPainterAncle({
-    required this.start,
-    required this.end,
-    required this.color,
-    required this.curveEnd,
-  });
+  ConnectionPainterAncle(
+      {required this.start,
+      required this.end,
+      required this.color,
+      required this.curveEnd,
+      required this.midpoint});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -84,17 +85,17 @@ class ConnectionPainterAncle extends CustomPainter {
     // Draw the main line
     final pathStroke = Path()
       ..moveTo(start.dx, start.dy)
-      ..lineTo(center, start.dy)
+      ..lineTo(start.dx, midpoint.dy + radius)
       ..arcToPoint(
-        Offset(center + radius, start.dy + radius),
-        radius: const Radius.circular(radius),
-        clockwise: true,
-      )
-      ..lineTo(center + radius, end.dy - radius)
-      ..arcToPoint(
-        Offset(center + 2 * radius, end.dy),
+        Offset(start.dx - radius, midpoint.dy),
         radius: const Radius.circular(radius),
         clockwise: false,
+      )
+      ..lineTo(end.dx + radius, midpoint.dy)
+      ..arcToPoint(
+        Offset(end.dx, midpoint.dy - radius),
+        radius: const Radius.circular(radius),
+        clockwise: true,
       )
       ..lineTo(end.dx, end.dy);
     canvas.drawPath(pathStroke, paint);
@@ -136,12 +137,14 @@ class ConnectionPainterAunt extends CustomPainter {
   final Offset end;
   final Offset curveStart;
   final Color color;
+  final Offset midpoint;
 
   ConnectionPainterAunt({
     required this.start,
     required this.end,
     required this.color,
     required this.curveStart,
+      required this.midpoint
   });
 
   @override
