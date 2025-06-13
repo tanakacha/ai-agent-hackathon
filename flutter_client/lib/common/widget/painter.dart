@@ -162,34 +162,43 @@ class ConnectionPainterAunt extends CustomPainter {
     // Draw the main line
     final pathStroke = Path()
       ..moveTo(start.dx, start.dy)
-      ..lineTo(center, start.dy)
+      ..lineTo(start.dx, midpoint.dy + radius)
       ..arcToPoint(
-        Offset(center - radius, start.dy + radius),
-        radius: const Radius.circular(radius),
-        clockwise: false,
-      )
-      ..lineTo(center - radius, end.dy - radius)
-      ..arcToPoint(
-        Offset(center - 2 * radius, end.dy),
+        Offset(start.dx + radius, midpoint.dy),
         radius: const Radius.circular(radius),
         clockwise: true,
+      )
+      ..lineTo(end.dx - radius, midpoint.dy)
+      ..arcToPoint(
+        Offset(end.dx, midpoint.dy - radius),
+        radius: const Radius.circular(radius),
+        clockwise: false,
       )
       ..lineTo(end.dx, end.dy);
     canvas.drawPath(pathStroke, paint);
     // Arrowhead size
     const double arrowLength = 10.0;
     const double arrowAngle = pi / 6; // 30 degrees
+    const angle = -pi / 2;
 
-    // Calculate the points for the arrowhead
     final Offset arrowPoint1 = Offset(
-      start.dx - (25 * cos(0)) - arrowLength * cos(-arrowAngle),
-      start.dy - (25 * sin(0)) - arrowLength * sin(-arrowAngle),
+      end.dx - (25 * cos(angle)) - arrowLength * cos(angle - arrowAngle),
+      end.dy - (25 * sin(angle)) - arrowLength * sin(angle - arrowAngle),
     );
 
     final Offset arrowPoint2 = Offset(
-      start.dx - (25 * cos(0)) - arrowLength * cos(arrowAngle),
-      start.dy - (25 * sin(0)) - arrowLength * sin(arrowAngle),
+      end.dx - (25 * cos(angle)) - arrowLength * cos(angle + arrowAngle),
+      end.dy - (25 * sin(angle)) - arrowLength * sin(angle + arrowAngle),
     );
+
+    // Draw the arrowhead
+    final path = Path()
+      ..moveTo(end.dx - (25 * cos(angle)), end.dy - (25 * sin(angle)))
+      ..lineTo(arrowPoint1.dx, arrowPoint1.dy)
+      ..moveTo(end.dx - (25 * cos(angle)), end.dy - (25 * sin(angle)))
+      ..lineTo(arrowPoint2.dx, arrowPoint2.dy);
+
+    canvas.drawPath(path, paint);
   }
 
   @override

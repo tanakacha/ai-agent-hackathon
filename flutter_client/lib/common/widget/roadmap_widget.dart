@@ -8,6 +8,14 @@ import 'package:flutter_client/common/widget/painter.dart';
 import '../model/node.dart';
 
 class RoadmapWidget extends StatelessWidget {
+  // Constants for layout
+  static const double _padding = 30.0;
+  static const double _nodeCenterY = 25.0;
+  static const double _horizontalOffset = 500.0;
+  static const double _nodeOffsetX = -25.0;
+  static const double _minXPadding = 50.0;
+  static const double _maxYPadding = 100.0;
+
   final Map<int, Node> nodes;
   final int? selectedNodeId;
   final void Function(int nodeId)? onNodeTap;
@@ -83,16 +91,14 @@ class RoadmapWidget extends StatelessWidget {
       minX = math.min(minX, node.x);
       maxY = math.max(maxY, node.y);
     }
-    minX -= 50; // Add some padding
-    maxY += 100;
-    int offesetX = 500;
-    int nodeOffsetX = -25;
+    minX -= _minXPadding; // Add some padding
+    maxY += _maxYPadding;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: const EdgeInsets.all(_padding),
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
@@ -101,7 +107,7 @@ class RoadmapWidget extends StatelessWidget {
               ),
             ),
             child: SizedBox(
-              width: -minX + 500,
+              width: -minX + _horizontalOffset,
               height: maxY,
               child: Stack(
                 children: [
@@ -123,8 +129,10 @@ class RoadmapWidget extends StatelessWidget {
                     return CustomPaint(
                       painter: ConnectionPainterSibling(
                         start: Offset(
-                            leftSibling.x + offesetX, leftSibling.y + 25),
-                        end: Offset(node.x + offesetX, node.y + 25),
+                            leftSibling.x + _horizontalOffset,
+                            leftSibling.y + _nodeCenterY),
+                        end: Offset(
+                            node.x + _horizontalOffset, node.y + _nodeCenterY),
                         color: Colors.green,
                       ),
                     );
@@ -142,14 +150,18 @@ class RoadmapWidget extends StatelessWidget {
                     final leftChild = findLeftMostDescendant(node, nodes);
                     return CustomPaint(
                       painter: ConnectionPainterAncle(
-                        start: Offset(leftAncle.x + offesetX, leftAncle.y + 25),
-                        end: Offset(node.x + offesetX, node.y + 25),
+                        start: Offset(leftAncle.x + _horizontalOffset,
+                            leftAncle.y + _nodeCenterY),
+                        end: Offset(
+                            node.x + _horizontalOffset, node.y + _nodeCenterY),
                         curveEnd: leftChild != null
-                            ? Offset(leftChild.x + offesetX, leftChild.y + 25)
-                            : Offset(node.x + offesetX, node.y + 25),
+                            ? Offset(leftChild.x + _horizontalOffset,
+                                leftChild.y + _nodeCenterY)
+                            : Offset(node.x + _horizontalOffset,
+                                node.y + _nodeCenterY),
                         midpoint: Offset(
-                          (leftAncle.x + node.x) / 2 + offesetX,
-                          (leftAncle.y + node.y) / 2 + 25,
+                          (leftAncle.x + node.x) / 2 + _horizontalOffset,
+                          (leftAncle.y + node.y) / 2 + _nodeCenterY,
                         ),
                         color: Colors.blue,
                       ),
@@ -170,14 +182,18 @@ class RoadmapWidget extends StatelessWidget {
                     final rightChild = findRightMostDescendant(node, nodes);
                     return CustomPaint(
                       painter: ConnectionPainterAunt(
-                        start: Offset(rightAunt.x + offesetX, rightAunt.y + 25),
-                        end: Offset(node.x + offesetX, node.y + 25),
+                        start: Offset(
+                            node.x + _horizontalOffset, node.y + _nodeCenterY),
+                        end: Offset(rightAunt.x + _horizontalOffset,
+                            rightAunt.y + _nodeCenterY),
                         curveStart: rightChild != null
-                            ? Offset(rightChild.x + offesetX, rightChild.y + 25)
-                            : Offset(node.x + offesetX, node.y + 25),
+                            ? Offset(rightChild.x + _horizontalOffset,
+                                rightChild.y + _nodeCenterY)
+                            : Offset(node.x + _horizontalOffset,
+                                node.y + _nodeCenterY),
                         midpoint: Offset(
-                          (rightAunt.x + node.x) / 2 + offesetX,
-                          (rightAunt.y + node.y) / 2 + 25,
+                          (rightAunt.x + node.x) / 2 + _horizontalOffset,
+                          (rightAunt.y + node.y) / 2 + _nodeCenterY,
                         ),
                         color: Colors.red,
                       ),
@@ -187,7 +203,7 @@ class RoadmapWidget extends StatelessWidget {
                     final isSelected = selectedNodeId == node.id;
                     return NodeWidget(
                       node: node,
-                      x: node.x + offesetX + nodeOffsetX,
+                      x: node.x + _horizontalOffset + _nodeOffsetX,
                       y: node.y,
                       isSelected: isSelected,
                       onTap:
