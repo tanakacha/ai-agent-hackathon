@@ -20,6 +20,8 @@ class ConnectionPainterSibling extends CustomPainter {
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
+    // const AltStart = Offset(400, 100);
+
     // Draw the main line
     canvas.drawLine(start, end, paint);
 
@@ -75,12 +77,13 @@ class ConnectionPainterAncle extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = curveEnd.dx - 50;
     const radius = 5.0;
     final paint = Paint()
       ..color = color
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
+    const angle = -pi / 2;
+
 
     // Draw the main line
     final pathStroke = Path()
@@ -105,23 +108,23 @@ class ConnectionPainterAncle extends CustomPainter {
 
     // Calculate the points for the arrowhead
     final Offset arrowPoint1 = Offset(
-      end.dx - (25 * cos(0)) - arrowLength * cos(-arrowAngle),
-      end.dy - (25 * sin(0)) - arrowLength * sin(-arrowAngle),
+      end.dx - (25 * cos(angle)) - arrowLength * cos(angle - arrowAngle),
+      end.dy - (25 * sin(angle)) - arrowLength * sin(angle - arrowAngle),
     );
 
     final Offset arrowPoint2 = Offset(
-      end.dx - (25 * cos(0)) - arrowLength * cos(arrowAngle),
-      end.dy - (25 * sin(0)) - arrowLength * sin(arrowAngle),
+      end.dx - (25 * cos(angle)) - arrowLength * cos(angle + arrowAngle),
+      end.dy - (25 * sin(angle)) - arrowLength * sin(angle + arrowAngle),
     );
 
     // Draw the arrowhead
-    final pathAllow = Path()
-      ..moveTo(end.dx - (25 * cos(0)), end.dy - (25 * sin(0)))
+    final path = Path()
+      ..moveTo(end.dx - (25 * cos(angle)), end.dy - (25 * sin(angle)))
       ..lineTo(arrowPoint1.dx, arrowPoint1.dy)
-      ..moveTo(end.dx - (25 * cos(0)), end.dy - (25 * sin(0)))
+      ..moveTo(end.dx - (25 * cos(angle)), end.dy - (25 * sin(angle)))
       ..lineTo(arrowPoint2.dx, arrowPoint2.dy);
 
-    canvas.drawPath(pathAllow, paint);
+    canvas.drawPath(path, paint);
   }
 
   @override

@@ -86,6 +86,7 @@ class RoadmapWidget extends StatelessWidget {
     minX -= 50; // Add some padding
     maxY += 100;
     int offesetX = 500;
+    int nodeOffsetX = -25;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
@@ -146,6 +147,10 @@ class RoadmapWidget extends StatelessWidget {
                         curveEnd: leftChild != null
                             ? Offset(leftChild.x + offesetX, leftChild.y + 25)
                             : Offset(node.x + offesetX, node.y + 25),
+                        midpoint: Offset(
+                          (leftAncle.x + node.x) / 2 + offesetX,
+                          (leftAncle.y + node.y) / 2 + 25,
+                        ),
                         color: Colors.blue,
                       ),
                     );
@@ -170,6 +175,10 @@ class RoadmapWidget extends StatelessWidget {
                         curveStart: rightChild != null
                             ? Offset(rightChild.x + offesetX, rightChild.y + 25)
                             : Offset(node.x + offesetX, node.y + 25),
+                        midpoint: Offset(
+                          (rightAunt.x + node.x) / 2 + offesetX,
+                          (rightAunt.y + node.y) / 2 + 25,
+                        ),
                         color: Colors.red,
                       ),
                     );
@@ -178,7 +187,7 @@ class RoadmapWidget extends StatelessWidget {
                     final isSelected = selectedNodeId == node.id;
                     return NodeWidget(
                       node: node,
-                      x: node.x + offesetX,
+                      x: node.x + offesetX + nodeOffsetX,
                       y: node.y,
                       isSelected: isSelected,
                       onTap:
