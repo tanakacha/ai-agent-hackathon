@@ -11,7 +11,7 @@ class RoadmapWidget extends StatefulWidget {
   static const double _nodeWidth = 100.0;
   static const double _nodeHeight = 50.0;
   static const double _roadmapPadding = 30.0;
-  static const double _nodeSpacingX = 100.0; // Horizontal spacing between nodes
+  static const double _nodeSpacingX = 50.0; // Horizontal spacing between nodes
   static const double _nodeSpacingY = 20.0; // Vertical spacing between nodes
   static const double _nodeCenterY = _nodeHeight / 2;
   static const double _horizontalOffset = 1500.0;
