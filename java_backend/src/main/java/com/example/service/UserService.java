@@ -77,7 +77,7 @@ public class UserService {
 			List<QueryDocumentSnapshot> documents = querySnapshot.getDocuments();
 			logger.debug("完了: Firestoreからのドキュメント取得 (件数: {})", documents.size());
 			return documents;
-		} catch (Exception e) {
+		} catch (InterruptedException | ExecutionException e) {
 			logger.error("Firestoreからのドキュメント取得中にエラーが発生: {}", e.getMessage(), e);
 			throw e;
 		}
