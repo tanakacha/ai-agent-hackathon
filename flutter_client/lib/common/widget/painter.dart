@@ -20,7 +20,6 @@ class ConnectionPainterSibling extends CustomPainter {
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
-    // const AltStart = Offset(400, 100);
 
     // Draw the main line
     canvas.drawLine(start, end, paint);
@@ -150,7 +149,6 @@ class ConnectionPainterAunt extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = curveStart.dx + 50;
     const radius = 5.0;
     final paint = Paint()
       ..color = color
