@@ -1,17 +1,16 @@
 package com.example.service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.dto.Node;
 import com.example.dto.RoadmapResponse;
-import com.example.dto.RoadmapResponse.ArrowParams;
-import com.example.dto.RoadmapResponse.Connection;
-import com.example.dto.RoadmapResponse.Element;
-import com.example.dto.RoadmapResponse.GridBackgroundParams;
 import com.google.cloud.vertexai.api.GenerateContentResponse;
 import com.google.cloud.vertexai.generativeai.ContentMaker;
 import com.google.cloud.vertexai.generativeai.GenerativeModel;
@@ -20,17 +19,33 @@ import com.google.cloud.vertexai.generativeai.GenerativeModel;
 public class RoadmapGenerationService {
 
     private final GenerativeModel generativeModel;
+    private final NodeService nodeService;
+    private final RoadMapService roadMapService;
 
     @Autowired
-    public RoadmapGenerationService(GenerativeModel generativeModel) {
+    public RoadmapGenerationService(GenerativeModel generativeModel, 
+                                   NodeService nodeService, 
+                                   RoadMapService roadMapService) {
         this.generativeModel = generativeModel;
+        this.nodeService = nodeService;
+        this.roadMapService = roadMapService;
     }
 
     public RoadmapResponse generateRoadmap(String goal, String deadline) {
-        String llmResponse = generateRoadmapFromLLM(goal, deadline);
-        
-        // LLMレスポンスからロードマップデータを生成
-        return createRoadmapFromLLMResponse(llmResponse);
+        try {
+            String mapId = generateMapId();
+            String llmResponse = generateRoadmapFromLLM(goal, deadline);
+
+            List<Node> nodes = createNodesFromLLMResponse(llmResponse, mapId);
+
+            roadMapService.createRoadMap(mapId, goal, deadline);
+
+            List<Node> savedNodes = nodeService.createNodes(nodes);
+            
+            return new RoadmapResponse(mapId, savedNodes);
+        } catch (Exception e) {
+            throw new RuntimeException("ロードマップ生成中にエラーが発生しました: " + e.getMessage(), e);
+        }
     }
 
     private String generateRoadmapFromLLM(String goal, String deadline) {
@@ -81,82 +96,59 @@ public class RoadmapGenerationService {
             """, goal, deadline);
     }
 
-    private RoadmapResponse createRoadmapFromLLMResponse(String llmResponse) {
+    private String generateMapId() {
+        return "map-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private List<Node> createNodesFromLLMResponse(String llmResponse, String mapId) {
         List<String> milestones = extractMilestones(llmResponse);
         
         if (milestones.isEmpty()) {
             milestones = createDefaultMilestones();
         }
         
-        List<Element> elements = new ArrayList<>();
-        List<Connection> connections = new ArrayList<>();
+        List<Node> nodes = new ArrayList<>();
+        Date now = new Date();
         
-        // 開始ノード
-        Element startElement = createElementWithDefaults(
-            "start-node",
-            "開始",
-            1, // start node
-            new ArrayList<>(), // no parents
-            new ArrayList<>()  // children will be added
+        // ルートノード
+        Node rootNode = createNode(
+            "node-1",
+            mapId,
+            "プロジェクト開始",
+            "プロジェクトの開始点",
+            "Root",
+            null,
+            new ArrayList<>(),
+            now
         );
-        elements.add(startElement);
-        
-        // マイルストーンノードを生成
-        String previousId = "start-node";
+        nodes.add(rootNode);
+
+        String previousId = "node-1";
         for (int i = 0; i < milestones.size(); i++) {
-            String milestoneId = "milestone-" + (i + 1);
-            String milestoneText = milestones.get(i);
+            String nodeId = "node-" + (i + 2);
+            String title = milestones.get(i);
             
-            List<String> parentIds = new ArrayList<>();
-            parentIds.add(previousId);
-            
-            Element milestoneElement = createElementWithDefaults(
-                milestoneId,
-                milestoneText,
-                0, // milestone node
-                parentIds,
-                new ArrayList<>() // children will be added
+            Node milestoneNode = createNode(
+                nodeId,
+                mapId,
+                title,
+                title + "を達成する",
+                "Task",
+                previousId,
+                new ArrayList<>(),
+                now
             );
-            elements.add(milestoneElement);
-            
-            // 前のノードの子として追加
-            Element previousElement = findElementById(elements, previousId);
-            if (previousElement != null) {
-                previousElement.getChildIds().add(milestoneId);
+            nodes.add(milestoneNode);
+
+            Node previousNode = findNodeById(nodes, previousId);
+            if (previousNode != null) {
+                previousNode.getChildren_ids().add(nodeId);
             }
-
-            // コネクションを追加
-            connections.add(createConnection(previousId, milestoneId));
             
-            previousId = milestoneId;
+            previousId = nodeId;
         }
-
-        // 完了ノード
-        List<String> endParentIds = new ArrayList<>();
-        endParentIds.add(previousId);
         
-        Element endElement = createElementWithDefaults(
-            "end-node",
-            "完了",
-            2, // end node
-            endParentIds,
-            new ArrayList<>() // no children
-        );
-        elements.add(endElement);
-        
-        // 最後のマイルストーンの子として完了ノードを追加
-        Element lastMilestone = findElementById(elements, previousId);
-        if (lastMilestone != null) {
-            lastMilestone.getChildIds().add("end-node");
-        }
-
-        // 最後のコネクションを追加
-        connections.add(createConnection(previousId, "end-node"));
-        
-        // グリッド背景パラメータ
-        GridBackgroundParams gridParams = new GridBackgroundParams("#f0f0f0", 20.0);
-        
-        return new RoadmapResponse(elements, connections, gridParams);
+        return nodes;
     }
 
     private List<String> extractMilestones(String llmResponse) {
@@ -193,40 +185,32 @@ public class RoadmapGenerationService {
     }
 
     private List<String> createDefaultMilestones() {
-        return Arrays.asList("要件定義", "設計フェーズ", "開発開始", "テスト実行", "最終調整");
+        return List.of("要件定義", "設計フェーズ", "開発開始", "テスト実行", "最終調整");
     }
 
-    private Element createElementWithDefaults(String id, String text, int kind, 
-                                           List<String> parentIds, List<String> childIds) {
-        Element element = new Element();
-        element.setId(id);
-        element.setText(text);
-        element.setKind(kind);
-        element.setData(null);
-        element.setParentIds(parentIds);
-        element.setChildIds(childIds);
-        element.setDraggable(true);
-        element.setResizable(false);
-        element.setConnectable(true);
-        element.setDeletable(false);
+    private Node createNode(String id, String mapId, String title, String description, 
+                           String nodeType, String parentId, List<String> childrenIds, Date now) {
+        Node node = new Node();
+        node.setId(id);
+        node.setMap_id(mapId);
+        node.setTitle(title);
+        node.setDescription(description);
+        node.setNode_type(nodeType);
+        node.setParent_id(parentId);
+        node.setChildren_ids(childrenIds);
+        node.setCreated_at(now);
+        node.setUpdated_at(now);
+        node.setDue_at(null);
+        node.setFinished_at(null);
+        node.setDuration(0);
+        node.setProgress_rate(0);
         
-        return element;
+        return node;
     }
 
-    private Connection createConnection(String source, String target) {
-        Connection connection = new Connection();
-        connection.setId(source + "-" + target);
-        connection.setSource(source);
-        connection.setTarget(target);
-        connection.setType("smoothstep");
-        connection.setArrowParams(new ArrowParams("arrowclosed"));
-        
-        return connection;
-    }
-
-    private Element findElementById(List<Element> elements, String id) {
-        return elements.stream()
-                .filter(element -> element.getId().equals(id))
+    private Node findNodeById(List<Node> nodes, String id) {
+        return nodes.stream()
+                .filter(node -> node.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }

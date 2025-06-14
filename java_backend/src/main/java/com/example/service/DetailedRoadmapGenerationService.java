@@ -1,10 +1,13 @@
 package com.example.service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.dto.DetailedRoadmapRequest;
 import com.example.dto.DetailedRoadmapResponse;
-import com.example.dto.DetailedRoadmapResponse.Element;
+import com.example.dto.Node;
 import com.google.cloud.vertexai.api.GenerateContentResponse;
 import com.google.cloud.vertexai.generativeai.ContentMaker;
 import com.google.cloud.vertexai.generativeai.GenerativeModel;
@@ -22,17 +25,33 @@ import com.google.cloud.vertexai.generativeai.GenerativeModel;
 public class DetailedRoadmapGenerationService {
 
     private final GenerativeModel generativeModel;
+    private final NodeService nodeService;
+    private final RoadMapService roadMapService;
 
     @Autowired
-    public DetailedRoadmapGenerationService(GenerativeModel generativeModel) {
+    public DetailedRoadmapGenerationService(GenerativeModel generativeModel,
+                                           NodeService nodeService,
+                                           RoadMapService roadMapService) {
         this.generativeModel = generativeModel;
+        this.nodeService = nodeService;
+        this.roadMapService = roadMapService;
     }
 
     public DetailedRoadmapResponse generateDetailedRoadmap(DetailedRoadmapRequest request) {
-        String llmResponse = generateRoadmapFromLLM(request);
-        
-        // LLMレスポンスからロードマップデータを生成
-        return createRoadmapFromLLMResponse(request, llmResponse);
+        try {
+            String mapId = generateMapId();
+            String llmResponse = generateRoadmapFromLLM(request);
+            
+            List<Node> nodes = createDetailedNodesFromLLMResponse(llmResponse, mapId, request);
+
+            roadMapService.createRoadMap(mapId, request.getGoal(), request.getDeadline());
+
+            List<Node> savedNodes = nodeService.createNodes(nodes);
+            
+            return new DetailedRoadmapResponse(mapId, savedNodes);
+        } catch (Exception e) {
+            throw new RuntimeException("詳細ロードマップ生成中にエラーが発生しました: " + e.getMessage(), e);
+        }
     }
 
     private String generateRoadmapFromLLM(DetailedRoadmapRequest request) {
@@ -112,75 +131,119 @@ public class DetailedRoadmapGenerationService {
         );
     }
 
-    private DetailedRoadmapResponse createRoadmapFromLLMResponse(DetailedRoadmapRequest request, String llmResponse) {
+    private String generateMapId() {
+        return "map-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private List<Node> createDetailedNodesFromLLMResponse(String llmResponse, String mapId, DetailedRoadmapRequest request) {
         List<MilestoneWithDeadline> milestones = extractMilestonesWithDeadlines(llmResponse);
         
         if (milestones.isEmpty()) {
             milestones = createDefaultMilestonesWithDeadlines(request);
         }
         
-        List<Element> elements = new ArrayList<>();
-        
-        // 開始ノード
-        Element startElement = createElementWithDefaults(
-            "start-node",
-            "開始",
+        List<Node> nodes = new ArrayList<>();
+        Date now = new Date();
+
+        Node rootNode = createDetailedNode(
+            "node-1",
+            mapId,
+            "プロジェクト開始",
+            "詳細なプロジェクトの開始点",
+            "Root",
             null,
-            1, // start node
-            new ArrayList<>(), // no parents
-            new ArrayList<>()  // children will be added
+            new ArrayList<>(),
+            now,
+            null,
+            0
         );
-        elements.add(startElement);
-        
-        // マイルストーンノードを生成
-        String previousId = "start-node";
+        nodes.add(rootNode);
+
+        String previousId = "node-1";
         for (int i = 0; i < milestones.size(); i++) {
-            String milestoneId = "milestone-" + (i + 1);
+            String nodeId = "node-" + (i + 2);
             MilestoneWithDeadline milestone = milestones.get(i);
+
+            Date dueDate = null;
+            if (milestone.getDeadline() != null) {
+                dueDate = Date.from(milestone.getDeadline().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            }
+
+            int duration = calculateDuration(i, milestones, request);
             
-            List<String> parentIds = new ArrayList<>();
-            parentIds.add(previousId);
-            
-            Element milestoneElement = createElementWithDefaults(
-                milestoneId,
+            Node milestoneNode = createDetailedNode(
+                nodeId,
+                mapId,
                 milestone.getTitle(),
-                milestone.getDeadline(),
-                0, // milestone node
-                parentIds,
-                new ArrayList<>() // children will be added
+                milestone.getTitle() + "を達成する",
+                "Task",
+                previousId,
+                new ArrayList<>(),
+                now,
+                dueDate,
+                duration
             );
-            elements.add(milestoneElement);
-            
-            // 前のノードの子として追加
-            Element previousElement = findElementById(elements, previousId);
-            if (previousElement != null) {
-                previousElement.getChildIds().add(milestoneId);
+            nodes.add(milestoneNode);
+
+            Node previousNode = findNodeById(nodes, previousId);
+            if (previousNode != null) {
+                previousNode.getChildren_ids().add(nodeId);
             }
             
-            previousId = milestoneId;
+            previousId = nodeId;
         }
+        
+        return nodes;
+    }
 
-        // 完了ノード
-        List<String> endParentIds = new ArrayList<>();
-        endParentIds.add(previousId);
-        
-        Element endElement = createElementWithDefaults(
-            "end-node",
-            "完了",
-            parseDeadline(request.getDeadline()),
-            2, // end node
-            endParentIds,
-            new ArrayList<>() // no children
-        );
-        elements.add(endElement);
-        
-        // 最後のマイルストーンの子として完了ノードを追加
-        Element lastMilestone = findElementById(elements, previousId);
-        if (lastMilestone != null) {
-            lastMilestone.getChildIds().add("end-node");
+    private int calculateDuration(int index, List<MilestoneWithDeadline> milestones, DetailedRoadmapRequest request) {
+
+        if (request.getUserProfile() != null) {
+            int hoursPerDay = request.getUserProfile().getAvailableHoursPerDay();
+            int daysPerWeek = request.getUserProfile().getAvailableDaysPerWeek();
+            
+            int baseHours = switch (request.getUserProfile().getExperienceLevel()) {
+                case BEGINNER -> 40;
+                case INTERMEDIATE -> 20;
+                case ADVANCED -> 15;
+                case EXPERT -> 10;
+                default -> 25;
+            };
+
+            int weeklyHours = hoursPerDay * daysPerWeek;
+
+            return Math.max(1, (baseHours + weeklyHours - 1) / weeklyHours);
         }
         
-        return new DetailedRoadmapResponse(elements);
+        return 7;
+    }
+
+    private Node createDetailedNode(String id, String mapId, String title, String description, 
+                                   String nodeType, String parentId, List<String> childrenIds, 
+                                   Date now, Date dueDate, int duration) {
+        Node node = new Node();
+        node.setId(id);
+        node.setMap_id(mapId);
+        node.setTitle(title);
+        node.setDescription(description);
+        node.setNode_type(nodeType);
+        node.setParent_id(parentId);
+        node.setChildren_ids(childrenIds);
+        node.setCreated_at(now);
+        node.setUpdated_at(now);
+        node.setDue_at(dueDate);
+        node.setFinished_at(null);
+        node.setDuration(duration);
+        node.setProgress_rate(0);
+        
+        return node;
+    }
+
+    private Node findNodeById(List<Node> nodes, String id) {
+        return nodes.stream()
+                .filter(node -> node.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     private List<MilestoneWithDeadline> extractMilestonesWithDeadlines(String llmResponse) {
@@ -244,47 +307,13 @@ public class DetailedRoadmapGenerationService {
     }
 
     private LocalDate parseDeadline(String deadline) {
-        if (deadline == null) {
-            return LocalDate.now().plusMonths(1); // デフォルト
-        }
-        
         try {
             return LocalDate.parse(deadline, DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (Exception e) {
-            try {
-                return LocalDate.parse(deadline, DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-            } catch (Exception e2) {
-                return LocalDate.now().plusMonths(1); // パースできない場合のデフォルト
-            }
+            return LocalDate.now().plusDays(30);
         }
     }
 
-    private Element createElementWithDefaults(String id, String text, LocalDate deadline,
-                                           int kind, List<String> parentIds, List<String> childIds) {
-        Element element = new Element();
-        element.setId(id);
-        element.setText(text);
-        element.setDeadline(deadline);
-        element.setKind(kind);
-        element.setData(null);
-        element.setParentIds(parentIds);
-        element.setChildIds(childIds);
-        element.setDraggable(true);
-        element.setResizable(false);
-        element.setConnectable(true);
-        element.setDeletable(false);
-        
-        return element;
-    }
-
-    private Element findElementById(List<Element> elements, String id) {
-        return elements.stream()
-                .filter(element -> element.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
-    // Inner class for milestone with deadline
     private static class MilestoneWithDeadline {
         private final String title;
         private final LocalDate deadline;
