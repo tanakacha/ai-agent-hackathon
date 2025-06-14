@@ -11,10 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.AddChildNodesRequest;
+import com.example.dto.AddChildNodesResponse;
 import com.example.dto.Node;
 import com.example.dto.RoadMap;
 import com.example.dto.RoadmapRequest;
 import com.example.dto.RoadmapResponse;
+import com.example.service.ChildNodeGenerationService;
+import com.example.service.NodeService;
 import com.example.service.RoadMapService;
 import com.example.service.RoadmapGenerationService;
 
@@ -24,11 +28,18 @@ public class RoadmapController {
 
     private final RoadmapGenerationService roadmapGenerationService;
     private final RoadMapService roadMapService;
+    private final ChildNodeGenerationService childNodeGenerationService;
+    private final NodeService nodeService;
 
     @Autowired
-    public RoadmapController(RoadmapGenerationService roadmapGenerationService, RoadMapService roadMapService) {
+    public RoadmapController(RoadmapGenerationService roadmapGenerationService, 
+                           RoadMapService roadMapService,
+                           ChildNodeGenerationService childNodeGenerationService,
+                           NodeService nodeService) {
         this.roadmapGenerationService = roadmapGenerationService;
         this.roadMapService = roadMapService;
+        this.childNodeGenerationService = childNodeGenerationService;
+        this.nodeService = nodeService;
     }
 
     @PostMapping("/generate")
@@ -52,4 +63,36 @@ public class RoadmapController {
                 @RequestParam(value = "deadline") String deadline) {
             return roadmapGenerationService.generateRoadmap(goal, deadline);
         }
+
+    @PostMapping("/add-child-nodes")
+    public AddChildNodesResponse addChildNodes(@RequestBody AddChildNodesRequest request) {
+        try {
+            Node parentNode = nodeService.getNodeById(request.getNodeId());
+            if (parentNode == null) {
+                AddChildNodesResponse errorResponse = new AddChildNodesResponse();
+                errorResponse.setMessage("指定されたノードが見つかりませんでした: " + request.getNodeId());
+                return errorResponse;
+            }
+
+            if (!request.getMapId().equals(parentNode.getMap_id())) {
+                AddChildNodesResponse errorResponse = new AddChildNodesResponse();
+                errorResponse.setMessage("ノードのマップIDが一致しません");
+                return errorResponse;
+            }
+
+            List<Node> childNodes = childNodeGenerationService.generateChildNodes(request.getMapId(), parentNode);
+
+            AddChildNodesResponse response = new AddChildNodesResponse();
+            response.setParentNodeId(parentNode.getId());
+            response.setChildNodes(childNodes);
+            response.setMessage("子ノードを正常に生成しました");
+
+            return response;
+
+        } catch (Exception e) {
+            AddChildNodesResponse errorResponse = new AddChildNodesResponse();
+            errorResponse.setMessage("子ノード生成中にエラーが発生しました: " + e.getMessage());
+            return errorResponse;
+        }
+    }
 }
