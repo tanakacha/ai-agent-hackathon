@@ -32,9 +32,9 @@ public class RoadmapController {
     }
 
     @PostMapping("/generate")
-        public RoadmapResponse generateRoadmap(@RequestBody RoadmapRequest request) {
-            return roadmapGenerationService.generateRoadmap(request.getGoal(), request.getDeadline());
-        }
+    public RoadmapResponse generateRoadmap(@RequestBody RoadmapRequest request) {
+        return roadmapGenerationService.generateRoadmap(request.getGoal(), request.getDeadline());
+    }
 
     @GetMapping("/roadmap/{map_id}")
     public RoadMap getRoadmap(@PathVariable String map_id) {
