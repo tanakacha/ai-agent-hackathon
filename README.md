@@ -32,7 +32,12 @@ ai-agent-hackathon/java_backend/.env
 
 google cloud cliのGoogle Account認証を行います。
 ```sh
-gcloud config
+gcloud auth login
+```
+
+認証が終わったら、プロジェクトの切り替えをします。
+```sh
+gcloud config set project ai-hackathon-460510
 ```
 
 Google Cloud Secret Service Managerがロードされていることを確認します。
