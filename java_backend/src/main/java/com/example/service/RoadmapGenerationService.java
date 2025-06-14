@@ -38,7 +38,12 @@ public class RoadmapGenerationService {
 
             List<Node> nodes = createNodesFromLLMResponse(llmResponse, mapId);
 
-            roadMapService.createRoadMap(mapId, goal, deadline);
+            String roadmapTitle = extractRoadmapTitle(llmResponse);
+            if (roadmapTitle == null || roadmapTitle.isEmpty()) {
+                roadmapTitle = goal + "達成への道";
+            }
+
+            roadMapService.createRoadMapWithDetails(mapId, roadmapTitle, goal, "{}", deadline);
 
             List<Node> savedNodes = nodeService.createNodes(nodes);
             
@@ -83,7 +88,9 @@ public class RoadmapGenerationService {
             2. 各マイルストーンは実現可能で具体的な内容にする
             3. マイルストーン間の論理的な順序を考慮する
             
-            応答は以下のフォーマットで列挙してください：
+            応答は以下のフォーマットで出力してください：
+            
+            ロードマップタイトル: [目標を端的に表現した「〜の道」形式のタイトル]
             
             マイルストーン:
             1. [最初のマイルストーン]
@@ -101,6 +108,7 @@ public class RoadmapGenerationService {
     }
 
     private List<Node> createNodesFromLLMResponse(String llmResponse, String mapId) {
+        String roadmapTitle = extractRoadmapTitle(llmResponse);
         List<String> milestones = extractMilestones(llmResponse);
         
         if (milestones.isEmpty()) {
@@ -109,8 +117,7 @@ public class RoadmapGenerationService {
         
         List<Node> nodes = new ArrayList<>();
         Date now = new Date();
-        
-        // ルートノード
+
         Node rootNode = createNode(
             "node-1",
             mapId,
@@ -149,6 +156,19 @@ public class RoadmapGenerationService {
         }
         
         return nodes;
+    }
+
+    private String extractRoadmapTitle(String llmResponse) {
+        String[] lines = llmResponse.split("\n");
+        
+        for (String line : lines) {
+            line = line.trim();
+            if (line.startsWith("ロードマップタイトル:") || line.startsWith("タイトル:")) {
+                return line.substring(line.indexOf(":") + 1).trim();
+            }
+        }
+        
+        return null;
     }
 
     private List<String> extractMilestones(String llmResponse) {

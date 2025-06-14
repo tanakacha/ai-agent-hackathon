@@ -14,7 +14,6 @@ public class DetailedRoadmapRequest {
         private int availableHoursPerDay;
         private int availableDaysPerWeek;
         private ExperienceLevel experienceLevel;
-        private String timezone;
         
         public enum UserType {
             STUDENT, PROFESSIONAL, FREELANCER, HOBBYIST

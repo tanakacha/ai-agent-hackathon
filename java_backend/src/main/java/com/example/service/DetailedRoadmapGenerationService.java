@@ -41,10 +41,17 @@ public class DetailedRoadmapGenerationService {
         try {
             String mapId = generateMapId();
             String llmResponse = generateRoadmapFromLLM(request);
-            
+
+            RoadmapInfo roadmapInfo = extractRoadmapInfoFromLLMResponse(llmResponse);
+            if (roadmapInfo.getMilestones().isEmpty()) {
+                roadmapInfo = createDefaultRoadmapInfo(request);
+            }
+
             List<Node> nodes = createDetailedNodesFromLLMResponse(llmResponse, mapId, request);
 
-            roadMapService.createRoadMap(mapId, request.getGoal(), request.getDeadline());
+            String profileInfo = buildUserProfileForStorage(request.getUserProfile());
+
+            roadMapService.createRoadMapWithDetails(mapId, roadmapInfo.getTitle(), request.getGoal(), profileInfo, request.getDeadline());
 
             List<Node> savedNodes = nodeService.createNodes(nodes);
             
@@ -80,35 +87,54 @@ public class DetailedRoadmapGenerationService {
     private String createRoadmapPrompt(DetailedRoadmapRequest request) {
         String userProfileInfo = buildUserProfileInfo(request.getUserProfile());
         LocalDate currentDate = LocalDate.now();
+        LocalDate deadline = parseDeadline(request.getDeadline());
+        long totalDays = ChronoUnit.DAYS.between(currentDate, deadline);
         
         return String.format("""
-            あなたはプロジェクトマネージャーです。以下の情報を基にロードマップを作成してください。
+            あなたはプロジェクトマネージャーです。以下の情報を基に詳細なロードマップを作成してください。
             
             現在の日付: %s
             目標: %s
             期限: %s
+            利用可能期間: %d日
             
             ユーザープロファイル:
             %s
             
             以下の要件に従って実用的なロードマップを作成してください：
-            1. 目標達成のために必要な主要なマイルストーンを3-6個特定する
-            2. 各マイルストーンは実現可能で具体的な内容にする
-            3. マイルストーン間の論理的な順序を考慮する
-            4. 現在の日付(%s)から期限(%s)までの期間を逆算して現実的なスケジュールを提案する
-            5. ユーザーの利用可能時間と経験レベルとタスクの難易度を考慮してスケジュールを調整する
+            1. 利用可能期間（%d日）とユーザーの経験レベル・利用可能時間を考慮して、コンテンツ量を適切に調整する
+            2. 経験レベルが低い場合は基礎的な内容を多めに、高い場合は高度な内容に集中する
+            3. 利用可能時間が少ない場合は、重要なマイルストーンに絞り込む
+            4. 目標達成のために必要な主要なマイルストーンを3-6個特定する
+            5. 各マイルストーンは実現可能で具体的な内容にする
+            6. マイルストーン間の論理的な順序を考慮する
+            7. 現在の日付から期限までの期間を逆算して現実的なスケジュールを提案する
+            8. ユーザーの利用可能時間と経験レベルを考慮してスケジュールと所要時間を調整する
             
-            応答は以下のフォーマットで、マイルストーンのタイトルと期日を含めて列挙してください：
+            応答は以下のフォーマットで出力してください：
+            
+            ロードマップタイトル: [目標を端的に表現した「〜の道」形式のタイトル]
             
             マイルストーン:
-            1. [最初のマイルストーン] - [YYYY-MM-DD]
-            2. [2番目のマイルストーン] - [YYYY-MM-DD]
-            3. [3番目のマイルストーン] - [YYYY-MM-DD]
-            4. [4番目のマイルストーン] - [YYYY-MM-DD]
-            5. [5番目のマイルストーン] - [YYYY-MM-DD]
+            1. タイトル: [マイルストーンタイトル] | 説明: [具体的な説明] | 期日: [YYYY-MM-DD] | 所要週数: [数値]
+            2. タイトル: [マイルストーンタイトル] | 説明: [具体的な説明] | 期日: [YYYY-MM-DD] | 所要週数: [数値]
+            3. タイトル: [マイルストーンタイトル] | 説明: [具体的な説明] | 期日: [YYYY-MM-DD] | 所要週数: [数値]
             
-            各マイルストーンは15文字以内で簡潔に表現し、期日は最終期限(%s)以前に設定してください。
-            """, currentDate, request.getGoal(), request.getDeadline(), userProfileInfo, currentDate, request.getDeadline(), request.getDeadline());
+            各マイルストーンのタイトルは15文字以内で簡潔に表現し、期日は最終期限（%s）以前に設定してください。
+            所要週数は、ユーザーの利用可能時間（1日%d時間、週%d日）と経験レベル（%s）を考慮して現実的に設定してください。
+            """, 
+            currentDate, 
+            request.getGoal(), 
+            request.getDeadline(), 
+            totalDays,
+            userProfileInfo, 
+            totalDays,
+            request.getDeadline(),
+            request.getUserProfile() != null ? request.getUserProfile().getAvailableHoursPerDay() : 2,
+            request.getUserProfile() != null ? request.getUserProfile().getAvailableDaysPerWeek() : 3,
+            request.getUserProfile() != null && request.getUserProfile().getExperienceLevel() != null ? 
+                request.getUserProfile().getExperienceLevel().toString() : "不明"
+        );
     }
 
     private String buildUserProfileInfo(DetailedRoadmapRequest.UserProfile userProfile) {
@@ -121,14 +147,32 @@ public class DetailedRoadmapGenerationService {
             - 1日の利用可能時間: %d時間
             - 週の利用可能日数: %d日
             - 経験レベル: %s
-            - タイムゾーン: %s
             """,
             userProfile.getUserType() != null ? userProfile.getUserType().toString() : "不明",
             userProfile.getAvailableHoursPerDay(),
             userProfile.getAvailableDaysPerWeek(),
-            userProfile.getExperienceLevel() != null ? userProfile.getExperienceLevel().toString() : "不明",
-            userProfile.getTimezone() != null ? userProfile.getTimezone() : "不明"
+            userProfile.getExperienceLevel() != null ? userProfile.getExperienceLevel().toString() : "不明"
         );
+    }
+
+    private String buildUserProfileForStorage(DetailedRoadmapRequest.UserProfile userProfile) {
+        if (userProfile == null) {
+            return "{}";
+        }
+        
+        return String.format("""
+            {
+                "userType": "%s",
+                "availableHoursPerDay": %d,
+                "availableDaysPerWeek": %d,
+                "experienceLevel": "%s"
+            }
+            """,
+            userProfile.getUserType() != null ? userProfile.getUserType().toString() : "UNKNOWN",
+            userProfile.getAvailableHoursPerDay(),
+            userProfile.getAvailableDaysPerWeek(),
+            userProfile.getExperienceLevel() != null ? userProfile.getExperienceLevel().toString() : "UNKNOWN"
+        ).replaceAll("\\s+", " ").trim();
     }
 
     private String generateMapId() {
@@ -136,10 +180,10 @@ public class DetailedRoadmapGenerationService {
     }
 
     private List<Node> createDetailedNodesFromLLMResponse(String llmResponse, String mapId, DetailedRoadmapRequest request) {
-        List<MilestoneWithDeadline> milestones = extractMilestonesWithDeadlines(llmResponse);
+        RoadmapInfo roadmapInfo = extractRoadmapInfoFromLLMResponse(llmResponse);
         
-        if (milestones.isEmpty()) {
-            milestones = createDefaultMilestonesWithDeadlines(request);
+        if (roadmapInfo.getMilestones().isEmpty()) {
+            roadmapInfo = createDefaultRoadmapInfo(request);
         }
         
         List<Node> nodes = new ArrayList<>();
@@ -160,6 +204,8 @@ public class DetailedRoadmapGenerationService {
         nodes.add(rootNode);
 
         String previousId = "node-1";
+        List<MilestoneWithDeadline> milestones = roadmapInfo.getMilestones();
+        
         for (int i = 0; i < milestones.size(); i++) {
             String nodeId = "node-" + (i + 2);
             MilestoneWithDeadline milestone = milestones.get(i);
@@ -169,19 +215,17 @@ public class DetailedRoadmapGenerationService {
                 dueDate = Date.from(milestone.getDeadline().atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
 
-            int duration = calculateDuration(i, milestones, request);
-            
             Node milestoneNode = createDetailedNode(
                 nodeId,
                 mapId,
                 milestone.getTitle(),
-                milestone.getTitle() + "を達成する",
+                milestone.getDescription(),
                 "Task",
                 previousId,
                 new ArrayList<>(),
                 now,
                 dueDate,
-                duration
+                milestone.getDurationWeeks()
             );
             nodes.add(milestoneNode);
 
@@ -194,28 +238,6 @@ public class DetailedRoadmapGenerationService {
         }
         
         return nodes;
-    }
-
-    private int calculateDuration(int index, List<MilestoneWithDeadline> milestones, DetailedRoadmapRequest request) {
-
-        if (request.getUserProfile() != null) {
-            int hoursPerDay = request.getUserProfile().getAvailableHoursPerDay();
-            int daysPerWeek = request.getUserProfile().getAvailableDaysPerWeek();
-            
-            int baseHours = switch (request.getUserProfile().getExperienceLevel()) {
-                case BEGINNER -> 40;
-                case INTERMEDIATE -> 20;
-                case ADVANCED -> 15;
-                case EXPERT -> 10;
-                default -> 25;
-            };
-
-            int weeklyHours = hoursPerDay * daysPerWeek;
-
-            return Math.max(1, (baseHours + weeklyHours - 1) / weeklyHours);
-        }
-        
-        return 7;
     }
 
     private Node createDetailedNode(String id, String mapId, String title, String description, 
@@ -246,27 +268,34 @@ public class DetailedRoadmapGenerationService {
                 .orElse(null);
     }
 
-    private List<MilestoneWithDeadline> extractMilestonesWithDeadlines(String llmResponse) {
-        List<MilestoneWithDeadline> milestones = new ArrayList<>();
-
+    private RoadmapInfo extractRoadmapInfoFromLLMResponse(String llmResponse) {
         String[] lines = llmResponse.split("\n");
+        String roadmapTitle = null;
+        List<MilestoneWithDeadline> milestones = new ArrayList<>();
         boolean inMilestoneSection = false;
         
         for (String line : lines) {
             line = line.trim();
             
+            if (line.startsWith("ロードマップタイトル:") || line.startsWith("タイトル:")) {
+                roadmapTitle = line.substring(line.indexOf(":") + 1).trim();
+                continue;
+            }
+
             if (line.contains("マイルストーン:") || line.contains("Milestone")) {
                 inMilestoneSection = true;
                 continue;
             }
-            
+
             if (inMilestoneSection && !line.isEmpty()) {
-                Pattern pattern = Pattern.compile("^\\d+\\.\\s*(.+?)\\s*-\\s*(\\d{4}-\\d{2}-\\d{2})$");
+                Pattern pattern = Pattern.compile("^\\d+\\.\\s*タイトル:\\s*(.+?)\\s*\\|\\s*説明:\\s*(.+?)\\s*\\|\\s*期日:\\s*(\\d{4}-\\d{2}-\\d{2})\\s*\\|\\s*所要週数:\\s*(\\d+)$");
                 Matcher matcher = pattern.matcher(line);
                 
                 if (matcher.find()) {
                     String title = matcher.group(1).trim();
-                    String dateStr = matcher.group(2).trim();
+                    String description = matcher.group(2).trim();
+                    String dateStr = matcher.group(3).trim();
+                    int weeks = Integer.parseInt(matcher.group(4).trim());
                     
                     // 15文字制限を適用
                     if (title.length() > 15) {
@@ -274,7 +303,7 @@ public class DetailedRoadmapGenerationService {
                     }
                     
                     LocalDate deadline = parseDeadline(dateStr);
-                    milestones.add(new MilestoneWithDeadline(title, deadline));
+                    milestones.add(new MilestoneWithDeadline(title, description, deadline, weeks));
                 }
                 
                 // 最大6個まで
@@ -284,10 +313,14 @@ public class DetailedRoadmapGenerationService {
             }
         }
         
-        return milestones;
+        if (roadmapTitle == null || roadmapTitle.isEmpty()) {
+            roadmapTitle = "目標達成への道";
+        }
+        
+        return new RoadmapInfo(roadmapTitle, milestones);
     }
 
-    private List<MilestoneWithDeadline> createDefaultMilestonesWithDeadlines(DetailedRoadmapRequest request) {
+    private RoadmapInfo createDefaultRoadmapInfo(DetailedRoadmapRequest request) {
         List<MilestoneWithDeadline> defaults = new ArrayList<>();
         LocalDate finalDeadline = parseDeadline(request.getDeadline());
         LocalDate currentDate = LocalDate.now();
@@ -297,13 +330,27 @@ public class DetailedRoadmapGenerationService {
         long daysBetweenMilestones = totalDays / (milestoneCount + 1);
         
         String[] defaultTitles = {"要件定義", "設計フェーズ", "開発開始", "テスト実行", "最終調整"};
+        String[] defaultDescriptions = {
+            "プロジェクトの要件を明確に定義し、目標を設定する",
+            "システムやプロセスの設計を行い、実装計画を立てる", 
+            "実際の開発作業を開始し、基本機能を実装する",
+            "実装した機能のテストを行い、問題を修正する",
+            "最終的な調整とドキュメント作成を行う"
+        };
         
         for (int i = 0; i < defaultTitles.length; i++) {
             LocalDate milestoneDeadline = currentDate.plusDays((i + 1) * daysBetweenMilestones);
-            defaults.add(new MilestoneWithDeadline(defaultTitles[i], milestoneDeadline));
+            int defaultWeeks = Math.max(1, (int)(daysBetweenMilestones / 7));
+            defaults.add(new MilestoneWithDeadline(
+                defaultTitles[i], 
+                defaultDescriptions[i], 
+                milestoneDeadline, 
+                defaultWeeks
+            ));
         }
         
-        return defaults;
+        String defaultTitle = request.getGoal() + "達成への道";
+        return new RoadmapInfo(defaultTitle, defaults);
     }
 
     private LocalDate parseDeadline(String deadline) {
@@ -316,19 +363,49 @@ public class DetailedRoadmapGenerationService {
 
     private static class MilestoneWithDeadline {
         private final String title;
+        private final String description;
         private final LocalDate deadline;
+        private final int durationWeeks;
 
-        public MilestoneWithDeadline(String title, LocalDate deadline) {
+        public MilestoneWithDeadline(String title, String description, LocalDate deadline, int durationWeeks) {
             this.title = title;
+            this.description = description;
             this.deadline = deadline;
+            this.durationWeeks = durationWeeks;
         }
 
         public String getTitle() {
             return title;
         }
 
+        public String getDescription() {
+            return description;
+        }
+
         public LocalDate getDeadline() {
             return deadline;
+        }
+
+        public int getDurationWeeks() {
+            return durationWeeks;
+        }
+    }
+
+    private static class RoadmapInfo {
+        private final String title;
+        private final List<MilestoneWithDeadline> milestones;
+
+        public RoadmapInfo(String title, List<MilestoneWithDeadline> milestones) {
+            this.title = title;
+            this.milestones = milestones;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public List<MilestoneWithDeadline> getMilestones() {
+            return milestones;
         }
     }
 }

@@ -106,4 +106,33 @@ public class RoadMapService {
 		
 		return roadMap;
 	}
+
+	public RoadMap createRoadMapWithDetails(String mapId, String title, String objective, String profile, String deadline) throws InterruptedException, ExecutionException {
+		logger.info("開始: 詳細RoadMap作成 (ID: {})", mapId);
+		
+		Date now = new Date();
+		RoadMap roadMap = new RoadMap();
+		roadMap.setId(mapId);
+		roadMap.setUser_id("default-user");
+		roadMap.setTitle(title);
+		roadMap.setObjective(objective);
+		roadMap.setProfile(profile);	
+		try {
+			java.time.LocalDate localDate = java.time.LocalDate.parse(deadline);
+			roadMap.setDeadline(java.sql.Date.valueOf(localDate));
+		} catch (Exception e) {
+			roadMap.setDeadline(new Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000));
+		}
+		
+		roadMap.setCreated_at(now);
+		roadMap.setUpdated_at(now);
+		
+		DocumentReference docRef = firestore.collection(ROADMAPS_COLLECTION).document(mapId);
+		ApiFuture<WriteResult> future = docRef.set(roadMap);
+		WriteResult result = future.get();
+		
+		logger.info("詳細RoadMap作成完了: ID={}, Title={}, 作成時刻={}", mapId, title, result.getUpdateTime());
+		
+		return roadMap;
+	}
 }
