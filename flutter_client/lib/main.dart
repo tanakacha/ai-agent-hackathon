@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'common/core/default_tree_layout_algorithm.dart';
 import 'common/sample_data/node_list.dart';
@@ -37,38 +38,38 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends HookWidget {
   const MyHomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  final _roadmapKey = GlobalKey<RoadmapWidgetState>();
-  int currentFocusIndex = 0;
-
-  void _focusNextNode() {
-    final nodeIds = sampleNodes.keys.toList();
-    if (nodeIds.isEmpty) return;
-
-    setState(() {
-      currentFocusIndex = (currentFocusIndex + 1) % nodeIds.length;
-      _roadmapKey.currentState?.focusNode(nodeIds[currentFocusIndex]);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final roadmapKey = useMemoized(() => GlobalKey<RoadmapWidgetState>());
+    final currentFocusIndex = useState(0);
+    final selectedNodeId = useState<int?>(null);
+
+    void focusNextNode() {
+      final nodeIds = sampleNodes.keys.toList();
+      if (nodeIds.isEmpty) return;
+
+      currentFocusIndex.value = (currentFocusIndex.value + 1) % nodeIds.length;
+      roadmapKey.currentState?.focusNode(nodeIds[currentFocusIndex.value]);
+    }
+
+    void handleNodeTap(int nodeId) {
+      selectedNodeId.value = nodeId;
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Sample Roadmap')),
       body: RoadmapWidget(
-        key: _roadmapKey,
+        key: roadmapKey,
         nodes: sampleNodes,
+        selectedNodeId: selectedNodeId.value,
+        onNodeTap: handleNodeTap,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _focusNextNode,
-        child: Text(currentFocusIndex.toString()),
+        onPressed: focusNextNode,
+        child: Text(currentFocusIndex.value.toString()),
       ),
     );
   }
