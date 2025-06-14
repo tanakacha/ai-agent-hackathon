@@ -84,7 +84,6 @@ class ConnectionPainterAncle extends CustomPainter {
       ..style = PaintingStyle.stroke;
     const angle = -pi / 2;
 
-
     // Draw the main line
     final pathStroke = Path()
       ..moveTo(start.dx, start.dy)
@@ -142,13 +141,12 @@ class ConnectionPainterAunt extends CustomPainter {
   final Color color;
   final Offset midpoint;
 
-  ConnectionPainterAunt({
-    required this.start,
-    required this.end,
-    required this.color,
-    required this.curveStart,
-      required this.midpoint
-  });
+  ConnectionPainterAunt(
+      {required this.start,
+      required this.end,
+      required this.color,
+      required this.curveStart,
+      required this.midpoint});
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -14,7 +14,7 @@ void main() {
   layout.calculatePositions(
     nodes: sampleNodes,
     rootNodes: rootNodes,
-    spaceX: 100,
+    spaceX: 120,
     spaceY: 100,
   );
 

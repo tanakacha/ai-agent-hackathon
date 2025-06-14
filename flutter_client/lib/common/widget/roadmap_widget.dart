@@ -11,8 +11,8 @@ class RoadmapWidget extends StatefulWidget {
   static const double _nodeWidth = 100.0;
   static const double _nodeHeight = 50.0;
   static const double _roadmapPadding = 30.0;
-  static const double _nodeSpacingX = 100.0;
-  static const double _nodeSpacingY = 20.0;
+  static const double _nodeSpacingX = 100.0; // Horizontal spacing between nodes
+  static const double _nodeSpacingY = 20.0; // Vertical spacing between nodes
   static const double _nodeCenterY = _nodeHeight / 2;
   static const double _horizontalOffset = 1500.0;
   static const double _nodeOffsetX = -_nodeWidth / 2;
@@ -163,7 +163,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
             ),
             child: SizedBox(
               width: -minX + RoadmapWidget._horizontalOffset,
-              height: maxY,
+              height: 2000,
               child: Stack(
                 children: [
                   // Draw sibling connections

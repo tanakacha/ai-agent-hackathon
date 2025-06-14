@@ -21,4 +21,3 @@ class RoadMap {
     required this.nodes,
   });
 }
-
