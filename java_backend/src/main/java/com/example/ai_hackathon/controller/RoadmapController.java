@@ -41,7 +41,7 @@ public class RoadmapController {
         return roadMapService.getRoadMap(map_id);
     }
 
-    @GetMapping("/nodes/{map_id}")
+    @GetMapping("/roadmap/{map_id}/nodes")
     public List<Node> getNodes(@PathVariable String map_id) {
         return roadMapService.getNodes(map_id);
     }
