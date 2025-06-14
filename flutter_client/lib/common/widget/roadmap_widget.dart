@@ -18,6 +18,7 @@ class RoadmapWidget extends StatefulWidget {
   static const double _nodeOffsetX = -_nodeWidth / 2;
   static const double _minXPadding = 50.0;
   static const double _maxYPadding = 100;
+  static const double _curveSpacing = 50.0; // Spacing for curved connections
 
   final Map<int, Node> nodes;
   final int? selectedNodeId;
@@ -217,9 +218,10 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
                         start: leftAnclePos,
                         end: nodePos,
                         curveEnd: leftChildPos,
-                        midpoint: Offset(
-                          (leftAnclePos.dx + nodePos.dx) / 2,
-                          (leftAnclePos.dy + nodePos.dy) / 2,
+                        midpoint:
+                        Offset(
+                          leftAnclePos.dx - RoadmapWidget._curveSpacing,
+                          leftAnclePos.dy - RoadmapWidget._curveSpacing,
                         ),
                         color: Colors.blue,
                       ),
@@ -252,9 +254,10 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
                         start: nodePos,
                         end: rightAuntPos,
                         curveStart: rightChildPos,
-                        midpoint: Offset(
-                          (rightAuntPos.dx + nodePos.dx) / 2,
-                          (rightAuntPos.dy + nodePos.dy) / 2,
+                        midpoint:
+                        Offset(
+                          rightAuntPos.dx + RoadmapWidget._curveSpacing,
+                          rightAuntPos.dy + RoadmapWidget._curveSpacing,
                         ),
                         color: Colors.red,
                       ),
