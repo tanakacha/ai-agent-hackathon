@@ -13,11 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.AddChildNodesRequest;
 import com.example.dto.AddChildNodesResponse;
+import com.example.dto.DetailedRoadmapRequest;
+import com.example.dto.DetailedRoadmapResponse;
 import com.example.dto.Node;
 import com.example.dto.RoadMap;
 import com.example.dto.RoadmapRequest;
 import com.example.dto.RoadmapResponse;
 import com.example.service.ChildNodeGenerationService;
+import com.example.service.DetailedRoadmapGenerationService;
 import com.example.service.NodeService;
 import com.example.service.RoadMapService;
 import com.example.service.RoadmapGenerationService;
@@ -27,16 +30,19 @@ import com.example.service.RoadmapGenerationService;
 public class RoadmapController {
 
     private final RoadmapGenerationService roadmapGenerationService;
+    private final DetailedRoadmapGenerationService detailedRoadmapGenerationService;
     private final RoadMapService roadMapService;
     private final ChildNodeGenerationService childNodeGenerationService;
     private final NodeService nodeService;
 
     @Autowired
     public RoadmapController(RoadmapGenerationService roadmapGenerationService, 
+                           DetailedRoadmapGenerationService detailedRoadmapGenerationService,
                            RoadMapService roadMapService,
                            ChildNodeGenerationService childNodeGenerationService,
                            NodeService nodeService) {
         this.roadmapGenerationService = roadmapGenerationService;
+        this.detailedRoadmapGenerationService = detailedRoadmapGenerationService;
         this.roadMapService = roadMapService;
         this.childNodeGenerationService = childNodeGenerationService;
         this.nodeService = nodeService;
@@ -45,6 +51,11 @@ public class RoadmapController {
     @PostMapping("/generate")
     public RoadmapResponse generateRoadmap(@RequestBody RoadmapRequest request) {
         return roadmapGenerationService.generateRoadmap(request.getGoal(), request.getDeadline());
+    }
+
+    @PostMapping("/generate-detailed")
+    public DetailedRoadmapResponse generateDetailedRoadmap(@RequestBody DetailedRoadmapRequest request) {
+        return detailedRoadmapGenerationService.generateDetailedRoadmap(request);
     }
 
     @GetMapping("/roadmap/{map_id}")
@@ -58,11 +69,11 @@ public class RoadmapController {
     }
 
     @GetMapping("/generate")
-        public RoadmapResponse generateRoadmapGet(
-                @RequestParam(value = "goal") String goal,
-                @RequestParam(value = "deadline") String deadline) {
-            return roadmapGenerationService.generateRoadmap(goal, deadline);
-        }
+    public RoadmapResponse generateRoadmapGet(
+            @RequestParam(value = "goal") String goal,
+            @RequestParam(value = "deadline") String deadline) {
+        return roadmapGenerationService.generateRoadmap(goal, deadline);
+    }
 
     @PostMapping("/add-child-nodes")
     public AddChildNodesResponse addChildNodes(@RequestBody AddChildNodesRequest request) {

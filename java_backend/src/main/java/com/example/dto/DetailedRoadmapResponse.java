@@ -9,14 +9,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoadmapResponse {
+public class DetailedRoadmapResponse {
     private String mapId;
     private List<Node> nodes;
     private String message;
     
-    public RoadmapResponse(String mapId, List<Node> nodes) {
+    public DetailedRoadmapResponse(String mapId, List<Node> nodes) {
         this.mapId = mapId;
         this.nodes = nodes;
-        this.message = "ロードマップを正常に生成しました";
+        this.message = "詳細ロードマップを正常に生成しました";
     }
 }

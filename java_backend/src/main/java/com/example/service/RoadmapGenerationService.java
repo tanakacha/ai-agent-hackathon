@@ -1,19 +1,16 @@
 package com.example.service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.dto.Node;
 import com.example.dto.RoadmapResponse;
-import com.example.dto.RoadmapResponse.ArrowParams;
-import com.example.dto.RoadmapResponse.Connection;
-import com.example.dto.RoadmapResponse.Element;
-import com.example.dto.RoadmapResponse.GridBackgroundParams;
 import com.google.cloud.vertexai.api.GenerateContentResponse;
 import com.google.cloud.vertexai.generativeai.ContentMaker;
 import com.google.cloud.vertexai.generativeai.GenerativeModel;
@@ -22,17 +19,38 @@ import com.google.cloud.vertexai.generativeai.GenerativeModel;
 public class RoadmapGenerationService {
 
     private final GenerativeModel generativeModel;
+    private final NodeService nodeService;
+    private final RoadMapService roadMapService;
 
     @Autowired
-    public RoadmapGenerationService(GenerativeModel generativeModel) {
+    public RoadmapGenerationService(GenerativeModel generativeModel, 
+                                   NodeService nodeService, 
+                                   RoadMapService roadMapService) {
         this.generativeModel = generativeModel;
+        this.nodeService = nodeService;
+        this.roadMapService = roadMapService;
     }
 
     public RoadmapResponse generateRoadmap(String goal, String deadline) {
-        String llmResponse = generateRoadmapFromLLM(goal, deadline);
-        
-        // LLMレスポンスからロードマップデータを生成
-        return createRoadmapFromLLMResponse(goal, deadline, llmResponse);
+        try {
+            String mapId = generateMapId();
+            String llmResponse = generateRoadmapFromLLM(goal, deadline);
+
+            List<Node> nodes = createNodesFromLLMResponse(llmResponse, mapId);
+
+            String roadmapTitle = extractRoadmapTitle(llmResponse);
+            if (roadmapTitle == null || roadmapTitle.isEmpty()) {
+                roadmapTitle = goal + "達成への道";
+            }
+
+            roadMapService.createRoadMapWithDetails(mapId, roadmapTitle, goal, "{}", deadline);
+
+            List<Node> savedNodes = nodeService.createNodes(nodes);
+            
+            return new RoadmapResponse(mapId, savedNodes);
+        } catch (Exception e) {
+            throw new RuntimeException("ロードマップ生成中にエラーが発生しました: " + e.getMessage(), e);
+        }
     }
 
     private String generateRoadmapFromLLM(String goal, String deadline) {
@@ -66,12 +84,13 @@ public class RoadmapGenerationService {
             期限: %s
             
             以下の要件に従って実用的なロードマップを作成してください：
-            1. 目標達成のために必要な主要なマイルストーンを3-6個特定する
+            1. 目標達成のために必要な主要なマイルストーンを3-5個特定する
             2. 各マイルストーンは実現可能で具体的な内容にする
             3. マイルストーン間の論理的な順序を考慮する
-            4. 期限から逆算して現実的なスケジュールを提案する
             
-            応答は以下のフォーマットで、マイルストーンのタイトルのみを簡潔に列挙してください：
+            応答は以下のフォーマットで出力してください：
+            
+            ロードマップタイトル: [目標を端的に表現した「〜の道」形式のタイトル]
             
             マイルストーン:
             1. [最初のマイルストーン]
@@ -84,83 +103,76 @@ public class RoadmapGenerationService {
             """, goal, deadline);
     }
 
-    private RoadmapResponse createRoadmapFromLLMResponse(String goal, String deadline, String llmResponse) {
+    private String generateMapId() {
+        return "map-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private List<Node> createNodesFromLLMResponse(String llmResponse, String mapId) {
+        String roadmapTitle = extractRoadmapTitle(llmResponse);
         List<String> milestones = extractMilestones(llmResponse);
         
         if (milestones.isEmpty()) {
-            milestones = createDefaultMilestones(goal);
+            milestones = createDefaultMilestones();
         }
         
-        List<Element> elements = new ArrayList<>();
-        double canvasWidth = 800.0;
-        double nodeWidth = 150.0;
-        double nodeHeight = 80.0;
-        double spacing = (canvasWidth - nodeWidth) / Math.max(1, milestones.size() - 1);
-        
-        // 開始ノード
-        Element startElement = createElementWithDefaults(
-            "start-node",
-            50.0, 150.0,
-            120.0, 60.0,
-            "開始",
-            4294901760L,
-            14.0
-        );
-        elements.add(startElement);
-        
-        // マイルストーンノードを生成
-        String previousId = "start-node";
-        for (int i = 0; i < milestones.size(); i++) {
-            String milestoneId = "milestone-" + (i + 1);
-            double x = 100.0 + (i + 1) * spacing;
-            double y = 150.0 + (i % 2 == 0 ? 0 : 50); // ジグザグ配置これはフロントさんに任せる？
-            
-            Element milestoneElement = createElementWithDefaults(
-                milestoneId,
-                x, y,
-                nodeWidth, nodeHeight,
-                milestones.get(i),
-                4294944000L,
-                12.0
-            );
-            elements.add(milestoneElement);
-            
-            addConnection(elements.get(elements.size() - 2), milestoneId);
-            previousId = milestoneId;
-        }
+        List<Node> nodes = new ArrayList<>();
+        Date now = new Date();
 
-        Element endElement = createElementWithDefaults(
-            "end-node",
-            100.0 + (milestones.size() + 1) * spacing, 150.0,
-            120.0, 60.0,
-            "完了",
-            4294934528L,
-            14.0
+        Node rootNode = createNode(
+            "node-1",
+            mapId,
+            "プロジェクト開始",
+            "プロジェクトの開始点",
+            "Root",
+            null,
+            new ArrayList<>(),
+            now
         );
-        elements.add(endElement);
-        
-        if (elements.size() > 1) {
-            addConnection(elements.get(elements.size() - 2), endElement.getId());
+        nodes.add(rootNode);
+
+        String previousId = "node-1";
+        for (int i = 0; i < milestones.size(); i++) {
+            String nodeId = "node-" + (i + 2);
+            String title = milestones.get(i);
+            
+            Node milestoneNode = createNode(
+                nodeId,
+                mapId,
+                title,
+                title + "を達成する",
+                "Task",
+                previousId,
+                new ArrayList<>(),
+                now
+            );
+            nodes.add(milestoneNode);
+
+            Node previousNode = findNodeById(nodes, previousId);
+            if (previousNode != null) {
+                previousNode.getChildren_ids().add(nodeId);
+            }
+            
+            previousId = nodeId;
         }
         
-        GridBackgroundParams gridParams = new GridBackgroundParams(
-            0.0, 0.0, 1.0, 20.0, 0.7, 5, 4294967295L, 4278190080L
-        );
+        return nodes;
+    }
+
+    private String extractRoadmapTitle(String llmResponse) {
+        String[] lines = llmResponse.split("\n");
         
-        return new RoadmapResponse(
-            elements,
-            canvasWidth,
-            400.0,
-            gridParams,
-            false,
-            0.25,
-            0
-        );
+        for (String line : lines) {
+            line = line.trim();
+            if (line.startsWith("ロードマップタイトル:") || line.startsWith("タイトル:")) {
+                return line.substring(line.indexOf(":") + 1).trim();
+            }
+        }
+        
+        return null;
     }
 
     private List<String> extractMilestones(String llmResponse) {
         List<String> milestones = new ArrayList<>();
-
         String[] lines = llmResponse.split("\n");
         boolean inMilestoneSection = false;
         
@@ -173,26 +185,17 @@ public class RoadmapGenerationService {
             }
             
             if (inMilestoneSection && !line.isEmpty()) {
-                Pattern pattern = Pattern.compile("^\\d+\\.\\s*(.+)$");
-                Matcher matcher = pattern.matcher(line);
-                
-                if (matcher.find()) {
-                    String milestone = matcher.group(1).trim();
+                if (line.matches("^\\d+\\.\\s*(.+)$")) {
+                    String milestone = line.replaceFirst("^\\d+\\.\\s*", "").trim();
                     // 15文字制限を適用
-                    if (milestone.length() > 15) {
-                        milestone = milestone.substring(0, 12) + "...";
-                    }
-                    milestones.add(milestone);
-                } else if (line.startsWith("-") || line.startsWith("•")) {
-                    String milestone = line.substring(1).trim();
                     if (milestone.length() > 15) {
                         milestone = milestone.substring(0, 12) + "...";
                     }
                     milestones.add(milestone);
                 }
                 
-                // 最大6個まで
-                if (milestones.size() >= 6) {
+                // 最大5個まで
+                if (milestones.size() >= 5) {
                     break;
                 }
             }
@@ -201,61 +204,34 @@ public class RoadmapGenerationService {
         return milestones;
     }
 
-    private List<String> createDefaultMilestones(String goal) {
-        // デフォルトのマイルストーン生成
-        List<String> defaults = new ArrayList<>();
-        defaults.add("要件定義");
-        defaults.add("設計フェーズ");
-        defaults.add("開発開始");
-        defaults.add("テスト実行");
-        defaults.add("最終調整");
-        return defaults;
+    private List<String> createDefaultMilestones() {
+        return List.of("要件定義", "設計フェーズ", "開発開始", "テスト実行", "最終調整");
     }
 
-    private Element createElementWithDefaults(String id, double x, double y, 
-                                           double width, double height, 
-                                           String text, long backgroundColor,
-                                           double fontSize) {
-        Element element = new Element();
-        element.setId(id);
-        element.setPositionDx(x);
-        element.setPositionDy(y);
-        element.setSizeWidth(width);
-        element.setSizeHeight(height);
-        element.setText(text);
-        element.setTextColor(4278190080L);
-        element.setFontFamily(null);
-        element.setTextSize(fontSize);
-        element.setTextIsBold(false);
-        element.setKind(0);
-        element.setHandlers(Arrays.asList(1, 0, 3, 2));
-        element.setHandlerSize(25.0);
-        element.setBackgroundColor(backgroundColor);
-        element.setBorderColor(4280391411L);
-        element.setBorderThickness(3.0);
-        element.setElevation(4.0);
-        element.setData(null);
-        element.setNext(new ArrayList<>());
-        element.setDraggable(true);
-        element.setResizable(false);
-        element.setConnectable(true);
-        element.setDeletable(false);
+    private Node createNode(String id, String mapId, String title, String description, 
+                           String nodeType, String parentId, List<String> childrenIds, Date now) {
+        Node node = new Node();
+        node.setId(id);
+        node.setMap_id(mapId);
+        node.setTitle(title);
+        node.setDescription(description);
+        node.setNode_type(nodeType);
+        node.setParent_id(parentId);
+        node.setChildren_ids(childrenIds);
+        node.setCreated_at(now);
+        node.setUpdated_at(now);
+        node.setDue_at(null);
+        node.setFinished_at(null);
+        node.setDuration(0);
+        node.setProgress_rate(0);
         
-        return element;
+        return node;
     }
 
-    private void addConnection(Element fromElement, String toElementId) {
-        ArrowParams arrowParams = new ArrowParams(
-            1.7, 6.0, 25.0, 4278190080L, null, 1.0,
-            1.0, 0.0, -1.0, 0.0
-        );
-        
-        Connection connection = new Connection(
-            toElementId,
-            arrowParams,
-            new ArrayList<>()
-        );
-        
-        fromElement.getNext().add(connection);
+    private Node findNodeById(List<Node> nodes, String id) {
+        return nodes.stream()
+                .filter(node -> node.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 }
