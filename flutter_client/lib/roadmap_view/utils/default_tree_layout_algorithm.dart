@@ -7,7 +7,7 @@ import 'package:flutter_client/common/model/node.dart';
 class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
   @override
   void calculatePositions({
-    required Map<int, Node> nodes,
+    required Map<String, Node> nodes,
     required List<Node> rootNodes,
     required double spaceX,
     required double spaceY,
@@ -33,7 +33,7 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
           final reversedChildrenIds = node.childrenIds.reversed.toList();
           double topMostChildY = nodes[reversedChildrenIds.first]!.y;
           double bottomMostChildY = nodes[reversedChildrenIds.last]!.y;
-          node.y = (topMostChildY + bottomMostChildY) / 2;
+          nodes[node.id] = nodes[node.id]!.copyWith(y: (topMostChildY + bottomMostChildY) / 2);
         }
       }
     }
@@ -42,20 +42,21 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
   // calculateConnectionsの実装は、UIで直接処理している接続線をここに移動することも可能です。
   // 今回はUIに残していますが、もし接続線のロジックも完全に分離したい場合はここに実装します。
   @override
-  List<Connection> calculateConnections(Map<int, Node> nodes) {
+  List<Connection> calculateConnections(Map<String, Node> nodes) {
     // 現在のコードでは、接続線はUI側で描画ロジックと密接に結びついています。
     // そのため、ここでは空のリストを返します。
     // もし接続線の計算もロジックに含めたい場合は、ここに実装を追加します。
     return [];
   }
 
-  double _positionNodeDFS(int nodeId, int depth, double currentY,
-      Map<int, Node> nodes, double spaceX, double spaceY) {
+  double _positionNodeDFS(String nodeId, int depth, double currentY,
+      Map<String, Node> nodes, double spaceX, double spaceY) {
     final node = nodes[nodeId]!;
-    node.x = -depth * spaceX; // 左側に配置
+    // Use copyWith to create a new immutable Node with updated position
+    nodes[nodeId] = node.copyWith(x: -depth * spaceX); // 左側に配置
 
     if (node.childrenIds.isEmpty) {
-      node.y = currentY;
+      nodes[nodeId] = nodes[nodeId]!.copyWith(y: currentY);
       return currentY + spaceY;
     } else {
       double nextY = currentY;
@@ -69,12 +70,12 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
           spaceY,
         );
       }
-      node.y = currentY; // Temporary, will be adjusted later
+      nodes[nodeId] = nodes[nodeId]!.copyWith(y: currentY); // Temporary, will be adjusted later
       return nextY;
     }
   }
 
-  double _getMaxY(int nodeId, Map<int, Node> nodes) {
+  double _getMaxY(String nodeId, Map<String, Node> nodes) {
     final node = nodes[nodeId]!;
     double maxY = node.y;
     for (final childId in node.childrenIds) {
@@ -83,7 +84,7 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
     return maxY;
   }
 
-  int _calculateMaxDepth(Map<int, Node> nodes) {
+  int _calculateMaxDepth(Map<String, Node> nodes) {
     int maxDepth = 0;
     for (final node in nodes.values) {
       maxDepth = math.max(maxDepth, _getDepth(node.id, nodes));
@@ -91,9 +92,9 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
     return maxDepth;
   }
 
-  int _getDepth(int? nodeId, Map<int, Node> nodes) {
+  int _getDepth(String? nodeId, Map<String, Node> nodes) {
     int depth = 0;
-    int? currentId = nodeId;
+    String? currentId = nodeId;
     while (currentId != null) {
       final node = nodes[currentId];
       if (node == null) break;
