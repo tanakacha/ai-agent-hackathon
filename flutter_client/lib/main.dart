@@ -1,11 +1,11 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:flutter/material.dart';
+import 'package:flutter_client/roadmap_view/utils/default_tree_layout_algorithm.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import 'common/core/default_tree_layout_algorithm.dart';
 import 'common/sample_data/node_list.dart';
-import 'common/widget/roadmap_widget.dart';
+import 'roadmap_view/widget/roadmap_widget.dart';
 
 void main() {
   // ノード位置を自動計算

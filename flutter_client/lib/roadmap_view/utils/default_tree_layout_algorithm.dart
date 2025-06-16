@@ -1,7 +1,7 @@
 // lib/default_tree_layout_algorithm.dart (新規ファイル)
 import 'dart:math' as math;
 
-import 'package:flutter_client/common/interface/tree_layout_gorithm.dart';
+import 'package:flutter_client/roadmap_view/utils/interface/tree_layout_gorithm.dart';
 import 'package:flutter_client/common/model/node.dart';
 
 class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {

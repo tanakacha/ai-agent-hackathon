@@ -1,4 +1,4 @@
-import 'package:flutter_client/common/interface/roadmap_repository_repository.dart';
+import 'package:flutter_client/roadmap_view/utils/interface/roadmap_repository_repository.dart';
 import 'package:flutter_client/common/model/node.dart';
 import 'package:flutter_client/common/model/road_map.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

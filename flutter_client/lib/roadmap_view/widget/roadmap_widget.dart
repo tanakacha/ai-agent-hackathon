@@ -2,10 +2,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_client/common/widget/node_widget.dart';
-import 'package:flutter_client/common/widget/painter.dart';
+import 'package:flutter_client/roadmap_view/widget/node_widget.dart';
+import 'package:flutter_client/roadmap_view/widget/painter.dart';
 
-import '../model/node.dart';
+import '../../common/model/node.dart';
 
 class RoadmapWidget extends StatefulWidget {
   static const double _nodeWidth = 100.0;
