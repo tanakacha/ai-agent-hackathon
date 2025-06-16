@@ -6,13 +6,25 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'roadmap_manager.g.dart';
 
+abstract class RoadmapManagerInterface {
+  RoadmapManagerInterface();
+  Future<Map<int, Node>> getAllNodes(String userId, String mapId);
+  Future<Map<int, Node>> exploreNodes({
+    required List<Node> selectedNodeList,
+    required String mapId,
+    required String objective,
+    required String profile,
+  });
+  Future<Map<int, Node>> adjustNodes(RoadMap roadMap);
+}
+
 @riverpod
-RoadmapRepositoryInterface roadmapManager(RoadmapManagerRef ref) =>
+RoadmapManagerInterface roadmapManager(RoadmapManagerRef ref) =>
     _RoadmapManager(
       roadmapRepository: ref.watch(roadmapRepositoryProvider),
     );
 
-class _RoadmapManager extends RoadmapRepositoryInterface {
+class _RoadmapManager extends RoadmapManagerInterface {
   _RoadmapManager({
     required this.roadmapRepository,
   });
