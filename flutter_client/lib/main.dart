@@ -1,13 +1,15 @@
 // ignore_for_file: public_member_api_docs
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_client/roadmap_view/utils/default_tree_layout_algorithm.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'common/sample_data/node_list.dart';
+import 'firebase_options.dart';
 import 'roadmap_view/widget/roadmap_widget.dart';
 
-void main() {
+Future<void> main() async {
   // ノード位置を自動計算
   final layout = DefaultTreeLayoutAlgorithm();
   final rootNodes =
@@ -17,6 +19,10 @@ void main() {
     rootNodes: rootNodes,
     spaceX: 120,
     spaceY: 100,
+  );
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
 
   runApp(const MyApp());

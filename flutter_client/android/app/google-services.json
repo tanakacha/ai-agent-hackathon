@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "229610582553",
+    "project_id": "ai-hackathon-460510",
+    "storage_bucket": "ai-hackathon-460510.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:229610582553:android:ac296c4e2e4574e3b2b088",
+        "android_client_info": {
+          "package_name": "com.example.flutter_client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyxkxbrynk3-Urs31buD-z30CaBe1veNg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
