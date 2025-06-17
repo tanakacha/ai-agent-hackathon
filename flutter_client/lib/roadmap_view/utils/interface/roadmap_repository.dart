@@ -1,6 +1,6 @@
-import 'package:flutter_client/roadmap_view/utils/interface/roadmap_repository_repository.dart';
 import 'package:flutter_client/common/model/node.dart';
 import 'package:flutter_client/common/model/road_map.dart';
+import 'package:flutter_client/roadmap_view/utils/interface/roadmap_repository_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'roadmap_repository.g.dart';
@@ -13,13 +13,13 @@ class _RoadmapRepositoryRepository extends RoadmapRepositoryInterface {
   _RoadmapRepositoryRepository();
 
   @override
-  Future<Map<int, Node>> getAllNodes(String userId, String mapId) async {
+  Future<Map<String, Node>> getAllNodes(String userId, String mapId) async {
     final now = DateTime.now();
     return {
-      1: Node(
-        id: 1,
+      '1': Node(
+        id: '1',
         parentId: null,
-        childrenIds: [2, 3],
+        childrenIds: ['2', '3'],
         nodeType: NodeType.root,
         title: 'Mock Node 1',
         description: 'This is a mock node',
@@ -35,7 +35,7 @@ class _RoadmapRepositoryRepository extends RoadmapRepositoryInterface {
   }
 
   @override
-  Future<Map<int, Node>> exploreNodes({
+  Future<Map<String, Node>> exploreNodes({
     required List<Node> selectedNodeList,
     required String mapId,
     required String objective,
@@ -43,9 +43,9 @@ class _RoadmapRepositoryRepository extends RoadmapRepositoryInterface {
   }) async {
     final now = DateTime.now();
     return {
-      3: Node(
-        id: 3,
-        parentId: 1,
+      '3': Node(
+        id: '3',
+        parentId: '1',
         childrenIds: [],
         nodeType: NodeType.normal,
         title: 'Explored Node',
@@ -62,9 +62,9 @@ class _RoadmapRepositoryRepository extends RoadmapRepositoryInterface {
   }
 
   @override
-  Future<Map<int, Node>> adjustNodes(RoadMap roadMap) async {
+  Future<Map<String, Node>> adjustNodes(RoadMap roadMap) async {
     final nodes = roadMap.nodes;
-    final adjustedNodes = <int, Node>{};
+    final adjustedNodes = <String, Node>{};
     final now = DateTime.now();
 
     for (final node in nodes) {
