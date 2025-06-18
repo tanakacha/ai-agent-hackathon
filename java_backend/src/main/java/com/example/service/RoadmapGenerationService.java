@@ -187,10 +187,6 @@ public class RoadmapGenerationService {
             if (inMilestoneSection && !line.isEmpty()) {
                 if (line.matches("^\\d+\\.\\s*(.+)$")) {
                     String milestone = line.replaceFirst("^\\d+\\.\\s*", "").trim();
-                    // 10文字制限を適用
-                    if (milestone.length() > 10) {
-                        milestone = milestone.substring(0, 10);
-                    }
                     milestones.add(milestone);
                 }
                 

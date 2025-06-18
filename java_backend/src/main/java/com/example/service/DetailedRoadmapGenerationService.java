@@ -297,11 +297,6 @@ public class DetailedRoadmapGenerationService {
                     String dateStr = matcher.group(3).trim();
                     int weeks = Integer.parseInt(matcher.group(4).trim());
                     
-                    // 10文字制限を適用
-                    if (title.length() > 10) {
-                        title = title.substring(0, 10);
-                    }
-                    
                     LocalDate deadline = parseDeadline(dateStr);
                     milestones.add(new MilestoneWithDeadline(title, description, deadline, weeks));
                 }

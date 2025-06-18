@@ -127,11 +127,6 @@ public class ChildNodeGenerationService {
                     description = content;
                 }
                 
-                // タイトルを10文字以内に制限
-                if (title.length() > 10) {
-                    title = title.substring(0, 10);
-                }
-                
                 tasks.add(new ChildTask(title, description));
             }
         }
