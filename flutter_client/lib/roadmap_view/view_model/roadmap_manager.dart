@@ -8,14 +8,14 @@ part 'roadmap_manager.g.dart';
 
 abstract class RoadmapManagerInterface {
   RoadmapManagerInterface();
-  Future<Map<int, Node>> getAllNodes(String userId, String mapId);
-  Future<Map<int, Node>> exploreNodes({
+  Future<Map<String, Node>> getAllNodes(String userId, String mapId);
+  Future<Map<String, Node>> exploreNodes({
     required List<Node> selectedNodeList,
     required String mapId,
     required String objective,
     required String profile,
   });
-  Future<Map<int, Node>> adjustNodes(RoadMap roadMap);
+  Future<Map<String, Node>> adjustNodes(RoadMap roadMap);
 }
 
 @riverpod
@@ -32,11 +32,11 @@ class _RoadmapManager extends RoadmapManagerInterface {
   final RoadmapRepositoryInterface roadmapRepository;
 
   @override
-  Future<Map<int, Node>> getAllNodes(String userId, String mapId) async =>
+  Future<Map<String, Node>> getAllNodes(String userId, String mapId) async =>
       roadmapRepository.getAllNodes(userId, mapId);
 
   @override
-  Future<Map<int, Node>> exploreNodes({
+  Future<Map<String, Node>> exploreNodes({
     required List<Node> selectedNodeList,
     required String mapId,
     required String objective,
@@ -50,6 +50,6 @@ class _RoadmapManager extends RoadmapManagerInterface {
       );
 
   @override
-  Future<Map<int, Node>> adjustNodes(RoadMap roadMap) async =>
+  Future<Map<String, Node>> adjustNodes(RoadMap roadMap) async =>
       roadmapRepository.adjustNodes(roadMap);
 }

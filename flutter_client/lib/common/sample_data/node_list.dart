@@ -1,10 +1,10 @@
 import 'package:flutter_client/common/model/node.dart';
 
-final Map<int, Node> sampleNodes = {
-  1: Node(
-    id: 1,
+final Map<String, Node> sampleNodes = {
+  '1': Node(
+    id: '1',
     parentId: null,
-    childrenIds: [2, 4, 5, 10, 3],
+    childrenIds: ['2', '4', '5', '10', '3'],
     nodeType: NodeType.root,
     title: 'Root',
     description: 'Root node',
@@ -15,9 +15,9 @@ final Map<int, Node> sampleNodes = {
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
-  2: Node(
-    id: 2,
-    parentId: 1,
+  '2': Node(
+    id: '2',
+    parentId: '1',
     childrenIds: [],
     nodeType: NodeType.start,
     title: 'Start',
@@ -29,9 +29,9 @@ final Map<int, Node> sampleNodes = {
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
-  3: Node(
-    id: 3,
-    parentId: 1,
+  '3': Node(
+    id: '3',
+    parentId: '1',
     childrenIds: [],
     nodeType: NodeType.goal,
     title: 'Goal',
@@ -43,10 +43,10 @@ final Map<int, Node> sampleNodes = {
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
-  4: Node(
-    id: 4,
-    parentId: 1,
-    childrenIds: [6, 7],
+  '4': Node(
+    id: '4',
+    parentId: '1',
+    childrenIds: ['6', '7'],
     nodeType: NodeType.normal,
     title: 'Child A',
     description: 'A child node A',
@@ -57,9 +57,9 @@ final Map<int, Node> sampleNodes = {
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
-  5: Node(
-    id: 5,
-    parentId: 1,
+  '5': Node(
+    id: '5',
+    parentId: '1',
     childrenIds: [],
     nodeType: NodeType.normal,
     title: 'Child B',
@@ -71,9 +71,9 @@ final Map<int, Node> sampleNodes = {
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
-  6: Node(
-    id: 6,
-    parentId: 4,
+  '6': Node(
+    id: '6',
+    parentId: '4',
     childrenIds: [],
     nodeType: NodeType.normal,
     title: 'Leaf A1',
@@ -85,10 +85,10 @@ final Map<int, Node> sampleNodes = {
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
-  7: Node(
-    id: 7,
-    parentId: 4,
-    childrenIds: [8, 9],
+  '7': Node(
+    id: '7',
+    parentId: '4',
+    childrenIds: ['8', '9'],
     nodeType: NodeType.normal,
     title: 'Leaf A2',
     description: 'Another leaf under Child A',
@@ -99,9 +99,9 @@ final Map<int, Node> sampleNodes = {
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
-  8: Node(
-    id: 8,
-    parentId: 7,
+  '8': Node(
+    id: '8',
+    parentId: '7',
     childrenIds: [],
     nodeType: NodeType.normal,
     title: 'Intermediate A2-1',
@@ -113,9 +113,9 @@ final Map<int, Node> sampleNodes = {
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
-  9: Node(
-    id: 9,
-    parentId: 7,
+  '9': Node(
+    id: '9',
+    parentId: '7',
     childrenIds: [],
     nodeType: NodeType.normal,
     title: 'Bridge to Goal',
@@ -127,9 +127,9 @@ final Map<int, Node> sampleNodes = {
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
-  10: Node(
-    id: 10,
-    parentId: 1,
+  '10': Node(
+    id: '10',
+    parentId: '1',
     childrenIds: [],
     nodeType: NodeType.normal,
     title: 'Final Goal',

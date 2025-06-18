@@ -9,7 +9,7 @@ abstract class TreeLayoutAlgorithm {
   /// [spaceX] はノード間の水平方向のスペースです。
   /// [spaceY] はノード間の垂直方向のスペースです。
   void calculatePositions({
-    required Map<int, Node> nodes,
+    required Map<String, Node> nodes,
     required List<Node> rootNodes,
     required double spaceX,
     required double spaceY,
@@ -18,7 +18,7 @@ abstract class TreeLayoutAlgorithm {
   /// 接続線を計算するためのオプションのメソッド (必要に応じて)
   /// このメソッドは、ノード間の接続線の座標リストを返すことができます。
   /// UIが接続線を描画する際にこの情報を使用できます。
-  List<Connection> calculateConnections(Map<int, Node> nodes);
+  List<Connection> calculateConnections(Map<String, Node> nodes);
 }
 
 /// 接続線の情報を保持するクラス

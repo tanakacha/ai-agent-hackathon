@@ -20,9 +20,9 @@ class RoadmapWidget extends StatefulWidget {
   static const double _maxYPadding = 100;
   static const double _curveSpacing = 50.0; // Spacing for curved connections
 
-  final Map<int, Node> nodes;
-  final int? selectedNodeId;
-  final void Function(int nodeId)? onNodeTap;
+  final Map<String, Node> nodes;
+  final String? selectedNodeId;
+  final void Function(String nodeId)? onNodeTap;
 
   const RoadmapWidget({
     super.key,
@@ -39,7 +39,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
   final horizontalController = ScrollController();
   final verticalController = ScrollController();
 
-  void focusNode(int nodeId) {
+  void focusNode(String nodeId) {
     final node = widget.nodes[nodeId];
     if (node == null) return;
 
@@ -77,7 +77,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
     );
   }
 
-  Node? findLeftAncle(Node node, Map<int, Node> nodes) {
+  Node? findLeftAncle(Node node, Map<String, Node> nodes) {
     Node? currentParent = node.parentId != null ? nodes[node.parentId] : null;
     while (currentParent != null) {
       final grandParent =
@@ -94,7 +94,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
     return null;
   }
 
-  Node? findRightAunt(Node node, Map<int, Node> nodes) {
+  Node? findRightAunt(Node node, Map<String, Node> nodes) {
     Node? currentParent = node.parentId != null ? nodes[node.parentId] : null;
     while (currentParent != null) {
       final grandParent =
@@ -111,7 +111,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
     return null;
   }
 
-  Node? findRightMostDescendant(Node node, Map<int, Node> nodes) {
+  Node? findRightMostDescendant(Node node, Map<String, Node> nodes) {
     Node? currentNode = node;
     while (currentNode != null && currentNode.childrenIds.isNotEmpty) {
       final rightMostChildId = currentNode.childrenIds.last;
@@ -120,7 +120,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
     return currentNode;
   }
 
-  Node? findLeftMostDescendant(Node node, Map<int, Node> nodes) {
+  Node? findLeftMostDescendant(Node node, Map<String, Node> nodes) {
     Node? currentNode = node;
     while (currentNode != null && currentNode.childrenIds.isNotEmpty) {
       final leftMostChildId = currentNode.childrenIds.first;
