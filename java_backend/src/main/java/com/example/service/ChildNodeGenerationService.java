@@ -63,9 +63,11 @@ public class ChildNodeGenerationService {
             3. [サブタスク3のタイトル] - [サブタスク3の説明]
             4. [サブタスク4のタイトル] - [サブタスク4の説明]（必要に応じて）
             
+            各サブタスクのタイトルは10文字以内で簡潔に表現してください。
+            
             例:
-            1. HTMLファイルの作成 - 基本的なHTML構造を持つindex.htmlファイルを作成する
-            2. スタイルシートの準備 - CSSファイルを作成し、HTMLにリンクする
+            1. HTML作成 - 基本的なHTML構造を持つindex.htmlファイルを作成する
+            2. CSS準備 - CSSファイルを作成し、HTMLにリンクする
             """, description);
     }
     
@@ -123,6 +125,11 @@ public class ChildNodeGenerationService {
                 } else {
                     title = content;
                     description = content;
+                }
+                
+                // タイトルを10文字以内に制限
+                if (title.length() > 10) {
+                    title = title.substring(0, 10);
                 }
                 
                 tasks.add(new ChildTask(title, description));
