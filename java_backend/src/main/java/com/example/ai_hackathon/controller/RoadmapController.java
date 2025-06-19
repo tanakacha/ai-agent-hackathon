@@ -114,7 +114,7 @@ public class RoadmapController {
     }
     @PostMapping("/nodes/generate-alternative")
     public Node generateSingleAlternativeNode(@RequestBody AlternativeNodeRequest request) { 
-        Node savedNode = alternativeNodeGenerationService.generateAndSaveSingleAlternative(request.getNodeId());
+        Node savedNode = alternativeNodeGenerationService.generateAndUpdateNode(request.getNodeId());
         return savedNode;
     }
 }

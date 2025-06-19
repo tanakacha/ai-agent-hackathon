@@ -27,8 +27,8 @@ public class AlternativeNodeGenerationService {
     }
 
     
-    public Node generateAndSaveSingleAlternative(String originalNodeId) {
-      try{
+    public Node generateAndUpdateNode(String originalNodeId) {
+      try {
         Node originalNode = nodeService.getNodeById(originalNodeId);
         if (originalNode == null) {
             logger.error("元ノードが見つかりません: ID={}", originalNodeId);
@@ -36,24 +36,22 @@ public class AlternativeNodeGenerationService {
         }
         RoadMap roadMap = roadMapService.getRoadMap(originalNode.getMap_id());
 
-        logger.info("開始: 単一代替ノード生成 (元ノード: {})", originalNode.getTitle());
+        logger.info("開始: 代替案によるノード更新 (元ノード: {})", originalNode.getTitle());
 
         String llmResponse = requestSingleAlternativeTaskFromLLM(roadMap, originalNode);
 
         AlternativeTask task = parseSingleAlternativeTaskFromResponse(llmResponse);
+        updateNodeWithAlternativeTask(originalNode, task);
 
-        Node alternativeNode = createAlternativeNodeFromTask(originalNode, task);
-
-        Node savedNode = nodeService.createNode(alternativeNode);
-        logger.info("新規代替ノードを保存しました: ID={}, Title={}", savedNode.getId(), savedNode.getTitle());
+        Node updatedNode = nodeService.updateNode(originalNode);
+        logger.info("ノードを更新しました: ID={}, Title={}", updatedNode.getId(), updatedNode.getTitle());
         
-        updateParentOfOriginalNode(originalNode, savedNode);
+        
+        return updatedNode;
 
-        logger.info("単一代替ノード生成完了。");
-        return savedNode;
       } catch (Exception e) {
-          logger.error("単一代替ノード生成中にエラーが発生しました: {}", e.getMessage(), e);
-          throw new RuntimeException("代替ノード生成中にエラーが発生しました: " + e.getMessage(), e);
+          logger.error("代替案によるノード更新中にエラーが発生しました: {}", e.getMessage(), e);
+          throw new RuntimeException("代替案によるノード更新中にエラーが発生しました: " + e.getMessage(), e);
       }
     }
 
@@ -90,18 +88,9 @@ public class AlternativeNodeGenerationService {
         );
     }
     
-    private Node createAlternativeNodeFromTask(Node originalNode, AlternativeTask task) {
-        Node altNode = new Node();
-        altNode.setMap_id(originalNode.getMap_id());
-        altNode.setParent_id(originalNode.getParent_id());
-        altNode.setTitle(task.getTitle());
-        altNode.setDescription(task.getDescription());
-        altNode.setNode_type("Task");
-        altNode.setDuration(originalNode.getDuration());
-        altNode.setDue_at(originalNode.getDue_at());
-        altNode.setProgress_rate(0);
-        altNode.setChildren_ids(new ArrayList<>());
-        return altNode;
+    private void updateNodeWithAlternativeTask(Node nodeToUpdate, AlternativeTask task) {
+        nodeToUpdate.setTitle(task.getTitle());
+        nodeToUpdate.setDescription(task.getDescription());
     }
 
     private AlternativeTask parseSingleAlternativeTaskFromResponse(String response) {
@@ -117,29 +106,6 @@ public class AlternativeNodeGenerationService {
             }
         }
         return null;
-    }
-
-    private void updateParentOfOriginalNode(Node originalNode, Node newAlternativeNode) throws ExecutionException, InterruptedException {
-        String parentId = originalNode.getParent_id();
-        if (parentId == null || parentId.isEmpty()) {
-            return;
-        }
-
-        Node parentNode = nodeService.getNodeById(parentId);
-        if (parentNode == null) {
-            logger.warn("親ノードが見つかりませんでした: {}", parentId);
-            return;
-        }
-
-        List<String> currentChildrenIds = parentNode.getChildren_ids();
-        if (currentChildrenIds == null) {
-            currentChildrenIds = new ArrayList<>();
-        }
-        currentChildrenIds.add(newAlternativeNode.getId());
-        parentNode.setChildren_ids(currentChildrenIds);
-
-        nodeService.updateNode(parentNode);
-        logger.info("親ノード({})の子IDリストを更新しました。", parentId);
     }
 
     private static class AlternativeTask {
