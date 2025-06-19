@@ -120,7 +120,7 @@ public class DetailedRoadmapGenerationService {
             2. タイトル: [マイルストーンタイトル] | 説明: [具体的な説明] | 期日: [YYYY-MM-DD] | 所要週数: [数値]
             3. タイトル: [マイルストーンタイトル] | 説明: [具体的な説明] | 期日: [YYYY-MM-DD] | 所要週数: [数値]
             
-            各マイルストーンのタイトルは15文字以内で簡潔に表現し、期日は最終期限（%s）以前に設定してください。
+            各マイルストーンのタイトルは10文字以内で簡潔に表現し、期日は最終期限（%s）以前に設定してください。
             所要週数は、ユーザーの利用可能時間（1日%d時間、週%d日）と経験レベル（%s）を考慮して現実的に設定してください。
             """, 
             currentDate, 
@@ -296,11 +296,6 @@ public class DetailedRoadmapGenerationService {
                     String description = matcher.group(2).trim();
                     String dateStr = matcher.group(3).trim();
                     int weeks = Integer.parseInt(matcher.group(4).trim());
-                    
-                    // 15文字制限を適用
-                    if (title.length() > 15) {
-                        title = title.substring(0, 12) + "...";
-                    }
                     
                     LocalDate deadline = parseDeadline(dateStr);
                     milestones.add(new MilestoneWithDeadline(title, description, deadline, weeks));

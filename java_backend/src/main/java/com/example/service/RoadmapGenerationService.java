@@ -99,7 +99,7 @@ public class RoadmapGenerationService {
             4. [4番目のマイルストーン]
             5. [5番目のマイルストーン]
             
-            各マイルストーンは15文字以内で簡潔に表現してください。
+            各マイルストーンは10文字以内で簡潔に表現してください。
             """, goal, deadline);
     }
 
@@ -187,10 +187,6 @@ public class RoadmapGenerationService {
             if (inMilestoneSection && !line.isEmpty()) {
                 if (line.matches("^\\d+\\.\\s*(.+)$")) {
                     String milestone = line.replaceFirst("^\\d+\\.\\s*", "").trim();
-                    // 15文字制限を適用
-                    if (milestone.length() > 15) {
-                        milestone = milestone.substring(0, 12) + "...";
-                    }
                     milestones.add(milestone);
                 }
                 

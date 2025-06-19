@@ -30,6 +30,7 @@ class _RoadmapRepositoryRepository extends RoadmapRepositoryInterface {
         dueAt: now.add(const Duration(days: 7)),
         createdAt: now,
         updatedAt: now,
+        mapId: mapId,
       ),
     };
   }
@@ -57,6 +58,7 @@ class _RoadmapRepositoryRepository extends RoadmapRepositoryInterface {
         dueAt: now.add(const Duration(days: 10)),
         createdAt: now,
         updatedAt: now,
+        mapId: mapId,
       ),
     };
   }
@@ -83,6 +85,7 @@ class _RoadmapRepositoryRepository extends RoadmapRepositoryInterface {
         finishedAt: node.finishedAt,
         createdAt: node.createdAt,
         updatedAt: now,
+        mapId: node.mapId,
       );
     }
 

@@ -14,8 +14,6 @@ abstract class TreeLayoutAlgorithm {
     required double spaceX,
     required double spaceY,
   });
-
-
 }
 
 /// 接続線の情報を保持するクラス

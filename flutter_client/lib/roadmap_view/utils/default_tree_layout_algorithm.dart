@@ -10,9 +10,7 @@ Map<String, Node> convertListToNodeMap(List<Node> nodes) {
   };
 }
 
-
 class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
-  
   @override
   void calculatePositions({
     required Map<String, Node> nodes,
@@ -41,20 +39,21 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
           final reversedChildrenIds = node.childrenIds.reversed.toList();
           double topMostChildY = nodes[reversedChildrenIds.first]!.y;
           double bottomMostChildY = nodes[reversedChildrenIds.last]!.y;
-          node.y = (topMostChildY + bottomMostChildY) / 2;
+          nodes[node.id] = nodes[node.id]!
+              .copyWith(y: (topMostChildY + bottomMostChildY) / 2);
         }
       }
     }
   }
 
-
   double _positionNodeDFS(String nodeId, int depth, double currentY,
       Map<String, Node> nodes, double spaceX, double spaceY) {
     final node = nodes[nodeId]!;
-    node.x = -depth * spaceX; // 左側に配置
+    // Use copyWith to create a new immutable Node with updated position
+    nodes[nodeId] = node.copyWith(x: -depth * spaceX); // 左側に配置
 
     if (node.childrenIds.isEmpty) {
-      node.y = currentY;
+      nodes[nodeId] = nodes[nodeId]!.copyWith(y: currentY);
       return currentY + spaceY;
     } else {
       double nextY = currentY;
@@ -68,7 +67,8 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
           spaceY,
         );
       }
-      node.y = currentY; // Temporary, will be adjusted later
+      nodes[nodeId] = nodes[nodeId]!
+          .copyWith(y: currentY); // Temporary, will be adjusted later
       return nextY;
     }
   }

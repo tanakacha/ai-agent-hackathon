@@ -1,69 +1,108 @@
-enum NodeType { start, goal, normal, root }
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-extension NodeTypeExtension on NodeType {
-  static NodeType fromString(String value) {
-    return NodeType.values.firstWhere(
-      (e) => e.toString().split('.').last == value,
-      orElse: () => NodeType.normal, // デフォルト値
-    );
-  }
+part '_generated/node.freezed.dart';
+
+enum NodeType {
+  @JsonValue('Start')
+  start,
+  @JsonValue('Goal')
+  goal,
+  @JsonValue('Task')
+  normal,
+  @JsonValue('Root')
+  root
 }
 
-class Node {
-  String id;
-  String? parentId;
-  List<String> childrenIds;
-  NodeType nodeType;
-  String title;
-  String description;
-  int duration;
-  int progressRate;
-  double x;
-  double y;
-  DateTime dueAt;
-  DateTime? finishedAt;
-  DateTime createdAt;
-  DateTime updatedAt;
+@freezed
+class Node with _$Node {
+  const Node._();
 
-  Node({
-    required this.id,
-    required this.parentId,
-    required this.childrenIds,
-    required this.nodeType,
-    required this.title,
-    required this.description,
-    required this.duration,
-    required this.progressRate,
-    this.x = 0,
-    this.y = 0,
-    required this.dueAt,
-    this.finishedAt,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+  const factory Node({
+    required String id,
+    String? parentId,
+    @Default([]) List<String> childrenIds,
+    required NodeType nodeType,
+    required String title,
+    required String description,
+    required int duration,
+    required int progressRate,
+    @Default(0.0) double x,
+    @Default(0.0) double y,
+    required DateTime dueAt,
+    DateTime? finishedAt,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    String? mapId,
+  }) = _Node;
 
   factory Node.fromJson(Map<String, dynamic> json) {
     return Node(
-      id: json['id'],
-      parentId: json['parent_id'],
-      childrenIds: List<String>.from(json['children_ids']),
-      nodeType: NodeTypeExtension.fromString(json['node_type']),
-      title: json['title'],
-      description: json['description'],
-      duration: json['duration'],
-      progressRate: json['progress_rate'],
-      dueAt: DateTime.parse(json['due_at']),
+      id: json['id'] as String,
+      parentId: json['parent_id'] as String?,
+      childrenIds:
+          (json['children_ids'] as List<dynamic>?)?.cast<String>() ?? [],
+      nodeType: _parseNodeType(json['node_type'] as String?),
+      title: json['title'] as String,
+      description: json['description'] as String,
+      duration: json['duration'] as int,
+      progressRate: json['progress_rate'] as int,
+      x: (json['x'] as num?)?.toDouble() ?? 0.0,
+      y: (json['y'] as num?)?.toDouble() ?? 0.0,
+      dueAt: DateTime.parse(json['due_at'] as String),
       finishedAt: json['finished_at'] != null
-          ? DateTime.parse(json['finished_at'])
+          ? DateTime.parse(json['finished_at'] as String)
           : null,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+      mapId: json['map_id'] as String?,
     );
   }
 
-  @override
-  String toString() {
-    return 'Node(id: $id, parentId: $parentId, childrenIds: $childrenIds, '
-        'type: $nodeType, title: $title, x: $x, y: $y)';
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'parent_id': parentId,
+      'children_ids': childrenIds,
+      'node_type': _nodeTypeToString(nodeType),
+      'title': title,
+      'description': description,
+      'duration': duration,
+      'progress_rate': progressRate,
+      'x': x,
+      'y': y,
+      'due_at': dueAt.toIso8601String(),
+      'finished_at': finishedAt?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+      'map_id': mapId,
+    };
+  }
+
+  static NodeType _parseNodeType(String? type) {
+    switch (type) {
+      case 'Start':
+        return NodeType.start;
+      case 'Goal':
+        return NodeType.goal;
+      case 'Task':
+        return NodeType.normal;
+      case 'Root':
+        return NodeType.root;
+      default:
+        return NodeType.normal;
+    }
+  }
+
+  static String _nodeTypeToString(NodeType type) {
+    switch (type) {
+      case NodeType.start:
+        return 'Start';
+      case NodeType.goal:
+        return 'Goal';
+      case NodeType.normal:
+        return 'Task';
+      case NodeType.root:
+        return 'Root';
+    }
   }
 }
