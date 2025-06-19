@@ -7,10 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ExecutionException;
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 public class AlternativeNodeGenerationService {
     private static final Logger logger = LoggerFactory.getLogger(AlternativeNodeGenerationService.class);
@@ -72,6 +68,7 @@ public class AlternativeNodeGenerationService {
             ## 元のタスク（Node）
             - タスク名: %s
             - タスク詳細: %s
+            - 期間: %s 日
 
             ## 指示
             - 提案は、元のタスクとは異なる視点や手段を用いるものにしてください。
@@ -84,7 +81,8 @@ public class AlternativeNodeGenerationService {
             roadMap.getTitle(),
             roadMap.getObjective(),
             originalNode.getTitle(),
-            originalNode.getDescription()
+            originalNode.getDescription(),
+            originalNode.getDuration()
         );
     }
     
