@@ -47,7 +47,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDpBJMbcMPiihQ4qki7bz0Sc1oZyUGOovI',
+    apiKey: 'Google Cloud Consoleの「新しい Browser key (auto created by Firebase)」で書き換えてください',
     appId: '1:229610582553:web:1f24342f87eee688b2b088',
     messagingSenderId: '229610582553',
     projectId: 'ai-hackathon-460510',
@@ -56,7 +56,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDyxkxbrynk3-Urs31buD-z30CaBe1veNg',
+    apiKey: 'Google Cloud Consoleの「新しい Android key (auto created by Firebase)」で書き換えてください',
     appId: '1:229610582553:android:ac296c4e2e4574e3b2b088',
     messagingSenderId: '229610582553',
     projectId: 'ai-hackathon-460510',
@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBbBD5EYLyWT-tHqUlQRWYtxTgEGG7Ejts',
+    apiKey: 'Google Cloud Consoleの「新しい iOS key (auto created by Firebase)」で書き換えてください',
     appId: '1:229610582553:ios:bd5ffef72e7c4485b2b088',
     messagingSenderId: '229610582553',
     projectId: 'ai-hackathon-460510',
