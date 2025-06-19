@@ -13,12 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.AddChildNodesRequest;
 import com.example.dto.AddChildNodesResponse;
+import com.example.dto.AlternativeNodeRequest;
 import com.example.dto.DetailedRoadmapRequest;
 import com.example.dto.DetailedRoadmapResponse;
 import com.example.dto.Node;
 import com.example.dto.RoadMap;
 import com.example.dto.RoadmapRequest;
 import com.example.dto.RoadmapResponse;
+import com.example.service.AlternativeNodeGenerationService;
 import com.example.service.ChildNodeGenerationService;
 import com.example.service.DetailedRoadmapGenerationService;
 import com.example.service.NodeService;
@@ -34,18 +36,22 @@ public class RoadmapController {
     private final RoadMapService roadMapService;
     private final ChildNodeGenerationService childNodeGenerationService;
     private final NodeService nodeService;
+    private final AlternativeNodeGenerationService alternativeNodeGenerationService;
 
     @Autowired
     public RoadmapController(RoadmapGenerationService roadmapGenerationService, 
                            DetailedRoadmapGenerationService detailedRoadmapGenerationService,
                            RoadMapService roadMapService,
                            ChildNodeGenerationService childNodeGenerationService,
-                           NodeService nodeService) {
+                           NodeService nodeService,
+                           AlternativeNodeGenerationService alternativeNodeGenerationService
+                           ) {
         this.roadmapGenerationService = roadmapGenerationService;
         this.detailedRoadmapGenerationService = detailedRoadmapGenerationService;
         this.roadMapService = roadMapService;
         this.childNodeGenerationService = childNodeGenerationService;
         this.nodeService = nodeService;
+        this.alternativeNodeGenerationService = alternativeNodeGenerationService;
     }
 
     @PostMapping("/generate")
@@ -105,5 +111,10 @@ public class RoadmapController {
             errorResponse.setMessage("子ノード生成中にエラーが発生しました: " + e.getMessage());
             return errorResponse;
         }
+    }
+    @PostMapping("/nodes/generate-alternative")
+    public Node generateSingleAlternativeNode(@RequestBody AlternativeNodeRequest request) { 
+        Node savedNode = alternativeNodeGenerationService.generateAndSaveSingleAlternative(request.getNodeId());
+        return savedNode;
     }
 }
