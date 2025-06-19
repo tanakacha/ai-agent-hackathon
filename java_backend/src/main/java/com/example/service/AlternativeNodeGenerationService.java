@@ -105,7 +105,7 @@ public class AlternativeNodeGenerationService {
                 }
             }
         }
-        return null;
+        throw new IllegalArgumentException("Response does not match the expected format for an AlternativeTask.");
     }
 
     private static class AlternativeTask {
