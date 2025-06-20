@@ -66,6 +66,26 @@ class NodesNotifier extends _$NodesNotifier {
       rethrow;
     }
   }
+
+  Future<void> completeNode({
+    required String mapId,
+    required String nodeId,
+  }) async {
+    try {
+      final roadmapService = ref.read(roadmapServiceProvider);
+      final response = await roadmapService.completeNode(
+        mapId: mapId,
+        nodeId: nodeId,
+      );
+      
+      if (response.node != null) {
+        final completedNode = response.node!;
+        state = {...state, nodeId: completedNode};
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 @riverpod
