@@ -15,8 +15,6 @@ enum NodeType {
 
 @freezed
 class Node with _$Node {
-  const Node._();
-
   const factory Node({
     required String id,
     String? parentId,

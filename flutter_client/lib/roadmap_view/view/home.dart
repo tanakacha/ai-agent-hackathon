@@ -1,37 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_client/common/provider/api_provider.dart';
+import 'package:flutter_client/providers/roadmap_provider.dart';
 import 'package:flutter_client/roadmap_view/utils/default_tree_layout_algorithm.dart';
 import 'package:flutter_client/roadmap_view/widget/roadmap_widget.dart';
+import 'package:flutter_client/widgets/node_detail_modal.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class RoadMapDetailScreen extends HookConsumerWidget {
   final String roadMapId = "map-5678";
 
-  const RoadMapDetailScreen({
-    super.key,
-    // required this.roadMapId,
-  });
+  const RoadMapDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final roadMapAsync = ref.watch(roadMapProvider(roadMapId));
+    final roadMapAsync = ref.watch(roadmapNotifierProvider);
+
+    // 初回読み込み用: すでにデータがある or 読み込み中なら呼ばない
+    useEffect(() {
+      if (!roadMapAsync.isLoading &&
+          roadMapAsync.hasError == false &&
+          roadMapAsync.value == null) {
+        ref.read(roadmapNotifierProvider.notifier).loadRoadmapById(roadMapId);
+      }
+      return null;
+    }, []);
+
     return roadMapAsync.when(
       data: (roadMap) {
+        // 以下はあなたの既存の表示ロジックそのままでOK
         final layout = DefaultTreeLayoutAlgorithm();
         final rootNodes =
-            roadMap.nodes.where((n) => n.parentId == null).toList();
+            ref.read(roadmapNotifierProvider.notifier).getRootNodes();
 
         final roadmapKey =
             useMemoized(() => GlobalKey<RoadmapWidgetState>(), [roadMapId]);
 
         final currentFocusIndex = useState(0);
         final selectedNodeId = useState<String?>(null);
-        final nodeMap = convertListToNodeMap(roadMap.nodes);
 
         try {
           layout.calculatePositions(
-            nodes: nodeMap,
+            nodes: roadMap.nodes,
             rootNodes: rootNodes,
             spaceX: 120,
             spaceY: 100,
@@ -42,7 +51,7 @@ class RoadMapDetailScreen extends HookConsumerWidget {
         }
 
         void focusNextNode() {
-          final nodeIds = nodeMap.keys.toList();
+          final nodeIds = roadMap.nodes.keys.toList();
           if (nodeIds.isEmpty) return;
 
           currentFocusIndex.value =
@@ -57,11 +66,10 @@ class RoadMapDetailScreen extends HookConsumerWidget {
 
         void handleNodeTap(String nodeId) {
           selectedNodeId.value = nodeId;
-          final nodeIds = nodeMap.keys.toList();
-          final index = nodeIds.indexOf(nodeId);
-          if (index != -1) {
-            currentFocusIndex.value = index;
-          }
+          showDialog(
+            context: context,
+            builder: (context) => NodeDetailModal(nodeId: nodeId),
+          );
         }
 
         return Scaffold(
@@ -74,7 +82,7 @@ class RoadMapDetailScreen extends HookConsumerWidget {
             children: [
               RoadmapWidget(
                 key: roadmapKey,
-                nodes: nodeMap,
+                nodes: roadMap.nodes,
                 selectedNodeId: selectedNodeId.value,
                 onNodeTap: handleNodeTap,
               ),
@@ -110,7 +118,9 @@ class RoadMapDetailScreen extends HookConsumerWidget {
           Text('エラーが発生しました: $error'),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () => ref.refresh(roadMapProvider(roadMapId)),
+            onPressed: () => ref
+                .read(roadmapNotifierProvider.notifier)
+                .loadRoadmapById("map-5678"),
             child: const Text('再試行'),
           ),
         ],
