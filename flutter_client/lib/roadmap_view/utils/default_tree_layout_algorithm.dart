@@ -12,39 +12,41 @@ Map<String, Node> convertListToNodeMap(List<Node> nodes) {
 
 class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
   @override
-  void calculatePositions({
+  Map<String, Node> calculatePositions({
     required Map<String, Node> nodes,
     required List<Node> rootNodes,
     required double spaceX,
     required double spaceY,
   }) {
-    if (nodes.isEmpty) return;
+    if (nodes.isEmpty) return nodes;
+    final localNodes = Map<String, Node>.of(nodes);
 
-    // 1. Calculate depths
-    int maxDepth = _calculateMaxDepth(nodes);
-
-    // 2. Initial placement (DFS)
+    int maxDepth = _calculateMaxDepth(localNodes);
     double currentGlobalY = 0.0;
     for (final rootNode in rootNodes) {
-      _positionNodeDFS(rootNode.id, 0, currentGlobalY, nodes, spaceX, spaceY);
-      currentGlobalY = _getMaxY(rootNode.id, nodes) + spaceY * 5;
+      _positionNodeDFS(
+          rootNode.id, 0, currentGlobalY, localNodes, spaceX, spaceY);
+      currentGlobalY = _getMaxY(rootNode.id, localNodes) + spaceY * 5;
     }
 
-    // 3. Adjust parent positions (bottom-up)
+    // 親の位置を子の中心に合わせて再調整
     for (int i = maxDepth; i >= 0; i--) {
-      for (final node in nodes.values.where(
-        (node) => _getDepth(node.id, nodes) == i,
+      for (final node in localNodes.values.where(
+        (node) => _getDepth(node.id, localNodes) == i,
       )) {
         if (node.childrenIds.isNotEmpty) {
           final reversedChildrenIds = node.childrenIds.reversed.toList();
-          double topMostChildY = nodes[reversedChildrenIds.first]!.y;
-          double bottomMostChildY = nodes[reversedChildrenIds.last]!.y;
-          nodes[node.id] = nodes[node.id]!
+          double topMostChildY = localNodes[reversedChildrenIds.first]!.y;
+          double bottomMostChildY = localNodes[reversedChildrenIds.last]!.y;
+          localNodes[node.id] = localNodes[node.id]!
               .copyWith(y: (topMostChildY + bottomMostChildY) / 2);
         }
       }
     }
+
+    return localNodes; // 修正: 更新後のMapを返す
   }
+  
 
   double _positionNodeDFS(String nodeId, int depth, double currentY,
       Map<String, Node> nodes, double spaceX, double spaceY) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_client/providers/roadmap_provider.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -17,7 +18,6 @@ class NodeDetailModal extends HookConsumerWidget {
     final isLoading = useState(false);
     final nodes = ref.watch(nodesNotifierProvider);
     final node = nodes[nodeId];
-    print(nodes);
 
     if (node == null) {
       return Dialog(
@@ -39,9 +39,8 @@ class NodeDetailModal extends HookConsumerWidget {
 
       isLoading.value = true;
       try {
-        await ref.read(nodesNotifierProvider.notifier).addChildNodesToParent(
-              mapId: 'map-5678', // 固定値
-              nodeId: nodeId, // ここもnodeIdに変更
+        ref.read(roadmapNotifierProvider.notifier).addChildNodesToParent(
+            roadmapId: 'map-5678', parentId: nodeId // ここもnodeIdに変更
             );
 
         if (context.mounted) {

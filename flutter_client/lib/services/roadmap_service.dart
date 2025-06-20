@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_client/common/model/node.dart';
 import 'package:flutter_client/common/model/road_map.dart';
-import 'package:flutter_client/roadmap_view/utils/default_tree_layout_algorithm.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../api/api_client.dart';
@@ -41,21 +40,23 @@ class RoadmapService {
 
   Future<RoadMap> fetchRoadMapById(String id) async {
     final roadmap = await _apiClient.handleResponse(
-      _apiClient.dio.get(
-        '/roadmap/roadmap/$id',
-      ),
+      _apiClient.dio.get('/api/roadmap/roadmap/$id'),
       (json) => RoadMap.fromJson(json),
     );
-    debugPrint('roadmap: $roadmap');
-    final nodes = await _apiClient.handleResponse<List<Node>>(
-      _apiClient.dio.get(
-        '/roadmap/roadmap/$id/nodes',
-      ),
-      (json) => (json as List<dynamic>)
-          .map((e) => Node.fromJson(e as Map<String, dynamic>))
-          .toList(),
+    final nodeJsonList = await _apiClient.handleResponse(
+      _apiClient.dio.get('/api/roadmap/roadmap/$id/nodes'),
+      (json) => json as List<dynamic>? ?? [],
     );
-    roadmap.setNodes(convertListToNodeMap(nodes));
-    return roadmap;
+    final nodes = nodeJsonList
+        .whereType<Map<String, dynamic>>()
+        .map((e) => Node.fromJson(e))
+        .toList();
+    final nodeMap = listToNodeMap(nodes);
+
+    final updatedRoadmap = roadmap.setNodes(nodeMap);
+
+    debugPrint('updatedRoadmap.nodes: ${updatedRoadmap.nodes}');
+    return updatedRoadmap;
   }
+
 }

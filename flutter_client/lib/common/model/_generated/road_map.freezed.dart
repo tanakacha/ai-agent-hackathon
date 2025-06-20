@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of '../RoadMap.dart';
+part of '../road_map.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -25,7 +25,9 @@ mixin _$RoadMap {
   String get objective => throw _privateConstructorUsedError;
   String get profile => throw _privateConstructorUsedError;
   DateTime get deadline => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
   DateTime get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'updated_at')
   DateTime get updatedAt => throw _privateConstructorUsedError;
   Map<String, Node> get nodes => throw _privateConstructorUsedError;
 
@@ -49,8 +51,8 @@ abstract class $RoadMapCopyWith<$Res> {
       String objective,
       String profile,
       DateTime deadline,
-      DateTime createdAt,
-      DateTime updatedAt,
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'updated_at') DateTime updatedAt,
       Map<String, Node> nodes});
 }
 
@@ -128,8 +130,8 @@ abstract class _$$RoadMapImplCopyWith<$Res> implements $RoadMapCopyWith<$Res> {
       String objective,
       String profile,
       DateTime deadline,
-      DateTime createdAt,
-      DateTime updatedAt,
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'updated_at') DateTime updatedAt,
       Map<String, Node> nodes});
 }
 
@@ -194,17 +196,18 @@ class __$$RoadMapImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$RoadMapImpl implements _RoadMap {
+class _$RoadMapImpl extends _RoadMap {
   const _$RoadMapImpl(
       {required this.id,
       required this.title,
       required this.objective,
       required this.profile,
       required this.deadline,
-      required this.createdAt,
-      required this.updatedAt,
-      required final Map<String, Node> nodes})
-      : _nodes = nodes;
+      @JsonKey(name: 'created_at') required this.createdAt,
+      @JsonKey(name: 'updated_at') required this.updatedAt,
+      final Map<String, Node> nodes = const {}})
+      : _nodes = nodes,
+        super._();
 
   factory _$RoadMapImpl.fromJson(Map<String, dynamic> json) =>
       _$$RoadMapImplFromJson(json);
@@ -220,11 +223,14 @@ class _$RoadMapImpl implements _RoadMap {
   @override
   final DateTime deadline;
   @override
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
   @override
+  @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
   final Map<String, Node> _nodes;
   @override
+  @JsonKey()
   Map<String, Node> get nodes {
     if (_nodes is EqualUnmodifiableMapView) return _nodes;
     // ignore: implicit_dynamic_type
@@ -284,16 +290,17 @@ class _$RoadMapImpl implements _RoadMap {
   }
 }
 
-abstract class _RoadMap implements RoadMap {
+abstract class _RoadMap extends RoadMap {
   const factory _RoadMap(
       {required final String id,
       required final String title,
       required final String objective,
       required final String profile,
       required final DateTime deadline,
-      required final DateTime createdAt,
-      required final DateTime updatedAt,
-      required final Map<String, Node> nodes}) = _$RoadMapImpl;
+      @JsonKey(name: 'created_at') required final DateTime createdAt,
+      @JsonKey(name: 'updated_at') required final DateTime updatedAt,
+      final Map<String, Node> nodes}) = _$RoadMapImpl;
+  const _RoadMap._() : super._();
 
   factory _RoadMap.fromJson(Map<String, dynamic> json) = _$RoadMapImpl.fromJson;
 
@@ -308,8 +315,10 @@ abstract class _RoadMap implements RoadMap {
   @override
   DateTime get deadline;
   @override
+  @JsonKey(name: 'created_at')
   DateTime get createdAt;
   @override
+  @JsonKey(name: 'updated_at')
   DateTime get updatedAt;
   @override
   Map<String, Node> get nodes;

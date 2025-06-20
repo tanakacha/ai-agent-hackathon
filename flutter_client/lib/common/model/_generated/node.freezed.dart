@@ -277,7 +277,7 @@ class __$$NodeImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$NodeImpl implements _Node {
+class _$NodeImpl extends _Node {
   const _$NodeImpl(
       {required this.id,
       this.parentId,
@@ -294,7 +294,8 @@ class _$NodeImpl implements _Node {
       required this.createdAt,
       required this.updatedAt,
       this.mapId})
-      : _childrenIds = childrenIds;
+      : _childrenIds = childrenIds,
+        super._();
 
   @override
   final String id;
@@ -400,7 +401,7 @@ class _$NodeImpl implements _Node {
       __$$NodeImplCopyWithImpl<_$NodeImpl>(this, _$identity);
 }
 
-abstract class _Node implements Node {
+abstract class _Node extends Node {
   const factory _Node(
       {required final String id,
       final String? parentId,
@@ -417,6 +418,7 @@ abstract class _Node implements Node {
       required final DateTime createdAt,
       required final DateTime updatedAt,
       final String? mapId}) = _$NodeImpl;
+  const _Node._() : super._();
 
   @override
   String get id;

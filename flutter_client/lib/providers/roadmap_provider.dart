@@ -12,33 +12,26 @@ class RoadmapNotifier extends _$RoadmapNotifier {
   @override
   Future<RoadMap> build() async {
     // 初期状態では空のロードマップを返すか、もしくは何も返さず null を許容する設計でもOK
-    throw UnimplementedError('Call loadRoadmapById to load actual roadmap');
+    return await _loadRoadmap("map-5678");
   }
 
-  Future<void> loadRoadmapById(String roadmapId) async {
-    state = const AsyncLoading();
+  Future<RoadMap> _loadRoadmap(String roadmapId) async {
+    final roadmapService = ref.read(roadmapServiceProvider);
+    final roadmapData = await roadmapService.fetchRoadMapById(roadmapId);
 
-    try {
-      final roadmapService = ref.read(roadmapServiceProvider);
-      final roadmapData = await roadmapService.fetchRoadMapById(roadmapId);
+    ref.read(nodesNotifierProvider.notifier).setNodes(roadmapData.nodes);
+    final nodes = ref.read(nodesNotifierProvider);
 
-      // ノードの初期化
-      ref.read(nodesNotifierProvider.notifier).setNodes(roadmapData.nodes);
-      final nodes = ref.read(nodesNotifierProvider);
-
-      state = AsyncData(RoadMap(
-        id: roadmapId,
-        title: roadmapData.title,
-        profile: roadmapData.profile,
-        objective: roadmapData.objective,
-        deadline: roadmapData.deadline,
-        createdAt: roadmapData.createdAt,
-        updatedAt: roadmapData.updatedAt,
-        nodes: nodes,
-      ));
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
+    return RoadMap(
+      id: roadmapId,
+      title: roadmapData.title,
+      profile: roadmapData.profile,
+      objective: roadmapData.objective,
+      deadline: roadmapData.deadline,
+      createdAt: roadmapData.createdAt,
+      updatedAt: roadmapData.updatedAt,
+      nodes: nodes,
+    );
   }
 
   List<Node> getRootNodes() {
@@ -59,24 +52,39 @@ class RoadmapNotifier extends _$RoadmapNotifier {
     return currentState.value!.nodes.values.toList();
   }
 
-  void addChildNodesToParent(
-      String roadmapId, String parentId, List<Node> newNodes) {
-    final currentState = state;
-    if (!currentState.hasValue) return;
+  Future<void> addChildNodesToParent(
+      {required String roadmapId, required String parentId}) async {
+    state = const AsyncLoading();
 
-    final nodesNotifier = ref.read(nodesNotifierProvider.notifier);
+    try {
+      final roadmapService = ref.read(roadmapServiceProvider);
+      final roadmapData = await roadmapService.addChildNodes(
+        mapId: roadmapId,
+        nodeId: parentId,
+      );
 
-    // 追加する各ノードの親IDをセット
-    final updatedNodes = newNodes.map((node) {
-      return node.copyWith(parentId: parentId);
-    }).toList();
+      // 既存ノードに新しいノードを追加
+      ref.read(nodesNotifierProvider.notifier).addNodes(roadmapData.childNodes);
+      final updatedNodes = ref.read(nodesNotifierProvider);
 
-    // ノード追加＋レイアウト再計算
-    nodesNotifier.addMultipleNodesAndRecalculate(newNodes: updatedNodes);
-
-    // 現在のロードマップを更新（nodesを再取得）
-    final updatedNodesMap = ref.read(nodesNotifierProvider);
-    final currentRoadmap = currentState.value!;
-    state = AsyncData(currentRoadmap.copyWith(nodes: updatedNodesMap));
+      final currentState = state;
+      if (currentState.hasValue) {
+        final roadmap = currentState.value!;
+        state = AsyncData(RoadMap(
+          id: roadmap.id,
+          title: roadmap.title,
+          profile: roadmap.profile,
+          objective: roadmap.objective,
+          deadline: roadmap.deadline,
+          createdAt: roadmap.createdAt,
+          updatedAt: DateTime.now(),
+          nodes: updatedNodes,
+        ));
+      } else {
+        throw Exception("Failed to update roadmap: current state is invalid.");
+      }
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
   }
 }

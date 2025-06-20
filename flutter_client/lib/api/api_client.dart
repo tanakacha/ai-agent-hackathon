@@ -35,13 +35,19 @@ class ApiClient {
   ApiClient(this._dio);
   
   // Make methods public
-  Future<T> handleResponse<T>(Future<Response> future, T Function(Map<String, dynamic>) fromJson) async {
+  Future<T> handleResponse<T>(
+      Future<Response> future, T Function(dynamic) fromJson) async {
     try {
       final response = await future;
       if (response.statusCode == 200) {
-        return fromJson(response.data);
+        final data = response.data;
+        if (data == null) {
+          throw ApiException('Response body is null');
+        }
+        return fromJson(data);
       } else {
-        throw ApiException('HTTP ${response.statusCode}: ${response.statusMessage}');
+        throw ApiException(
+            'HTTP ${response.statusCode}: ${response.statusMessage}');
       }
     } on DioException catch (e) {
       throw ApiException(_handleDioError(e));
@@ -49,6 +55,7 @@ class ApiClient {
       throw ApiException('Unexpected error: $e');
     }
   }
+
   
   // Make dio getter public
   Dio get dio => _dio;
@@ -76,9 +83,10 @@ class ApiClient {
 
 class ApiException implements Exception {
   final String message;
-  
-  ApiException(this.message);
+  final StackTrace? stackTrace;
+
+  ApiException(this.message, [this.stackTrace]);
   
   @override
-  String toString() => 'ApiException: $message';
+  String toString() => 'ApiException: $message\n$stackTrace';
 }
