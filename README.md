@@ -61,3 +61,4 @@ vertex-ai-key  2025-06-04T13:07:33  automatic           -
 ```
 
 Spring Boot アプリケーションが起動し、`http://localhost:8080` でAPIにアクセスできるようになります。
+`http://localhost:8080/swagger-ui/index.html`を開いてSwaggerでAPIを叩けます。
