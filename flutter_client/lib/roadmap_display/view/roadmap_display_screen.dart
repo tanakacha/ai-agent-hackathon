@@ -68,6 +68,90 @@ class RoadmapDisplayScreen extends HookConsumerWidget {
           rethrow;
         }
 
+        Node? findDeepestNode(Map<String, Node> nodes) {
+          int calculateDepth(String nodeId, Map<String, Node> nodeMap) {
+            final node = nodeMap[nodeId];
+            if (node == null) return -1;
+            if (node.parentId == null || !nodeMap.containsKey(node.parentId)) {
+              return 0;
+            }
+            return 1 + calculateDepth(node.parentId!, nodeMap);
+          }
+
+          Node? targetNode;
+          int maxDepth = -1;
+          for (final node in nodes.values) {
+            if (node.nodeType != NodeType.root) {
+              final depth = calculateDepth(node.id, nodes);
+              if (depth > maxDepth) {
+                maxDepth = depth;
+                targetNode = node;
+              }
+            }
+          }
+          return targetNode;
+        }
+
+        Node? findShallowIncompleteNode(Map<String, Node> nodes) {
+          Node? rootNode;
+          try {
+            rootNode = nodes.values.firstWhere(
+              (node) => node.nodeType == NodeType.root,
+            );
+          } catch (e) {
+            return findDeepestNode(nodes);
+          }
+
+          Node? dfsSearch(String nodeId, Set<String> visited) {
+            if (visited.contains(nodeId)) return null;
+            visited.add(nodeId);
+            
+            final currentNode = nodes[nodeId];
+            if (currentNode == null) return null;
+
+            if (currentNode.nodeType == NodeType.normal && currentNode.progressRate < 100) {
+              
+              if (currentNode.childrenIds.isNotEmpty) {
+                final firstChildId = currentNode.childrenIds.first;
+                final firstChild = nodes[firstChildId];
+                if (firstChild != null) {
+                  return firstChild;
+                }
+              }
+              
+              return currentNode;
+            }
+
+            for (final childId in currentNode.childrenIds) {
+              final result = dfsSearch(childId, visited);
+              if (result != null) {
+                return result;
+              }
+            }
+
+            return null;
+          }
+
+          final visited = <String>{};
+          final result = dfsSearch(rootNode.id, visited);
+
+          if (result != null) {
+            return result;
+          }
+          return findDeepestNode(nodes);
+        }
+
+        useMemoized(() {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final targetNode = findShallowIncompleteNode(updatedNodes);
+            if (targetNode != null) {
+              final state = roadmapKey.currentState;
+              state?.focusNode(targetNode.id);
+            }
+          });
+          return null;
+        }, [mapId]);
+
         void focusNextNode() {
           final nodeIds = roadMap.nodes.keys.toList();
           if (nodeIds.isEmpty) {
