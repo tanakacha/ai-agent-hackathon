@@ -68,6 +68,111 @@ class RoadmapDisplayScreen extends HookConsumerWidget {
           rethrow;
         }
 
+        Node? findDeepestNode(Map<String, Node> nodes) {
+          int calculateDepth(String nodeId, Map<String, Node> nodeMap) {
+            final node = nodeMap[nodeId];
+            if (node == null) return -1;
+            if (node.parentId == null || !nodeMap.containsKey(node.parentId)) {
+              return 0;
+            }
+            return 1 + calculateDepth(node.parentId!, nodeMap);
+          }
+
+          Node? targetNode;
+          int maxDepth = -1;
+          for (final node in nodes.values) {
+            if (node.nodeType != NodeType.root) {
+              final depth = calculateDepth(node.id, nodes);
+              if (depth > maxDepth) {
+                maxDepth = depth;
+                targetNode = node;
+              }
+            }
+          }
+          return targetNode;
+        }
+
+        Node? findShallowIncompleteNode(Map<String, Node> nodes) {
+          Node? rootNode;
+          try {
+            rootNode = nodes.values.firstWhere(
+              (node) => node.nodeType == NodeType.root,
+            );
+          } catch (e) {
+            return findDeepestNode(nodes);
+          }
+
+          Node? findIncompleteLeafNode(String nodeId) {
+            var currentNodeId = nodeId;
+            
+            while (true) {
+              final currentNode = nodes[currentNodeId];
+              if (currentNode == null) return null;
+              
+              if (currentNode.childrenIds.isEmpty) {
+                return currentNode;
+              }
+              
+              String? nextIncompleteChildId;
+              for (final childId in currentNode.childrenIds) {
+                final childNode = nodes[childId];
+                if (childNode != null && 
+                    childNode.nodeType == NodeType.normal && 
+                    childNode.progressRate < 100) {
+                  nextIncompleteChildId = childId;
+                  break;
+                }
+              }
+              
+              if (nextIncompleteChildId == null) {
+                return currentNode;
+              }
+              
+              currentNodeId = nextIncompleteChildId;
+            }
+          }
+
+          Node? dfsSearch(String nodeId, Set<String> visited) {
+            if (visited.contains(nodeId)) return null;
+            visited.add(nodeId);
+            
+            final currentNode = nodes[nodeId];
+            if (currentNode == null) return null;
+
+            if (currentNode.nodeType == NodeType.normal && currentNode.progressRate < 100) {
+              return findIncompleteLeafNode(nodeId);
+            }
+            
+            for (final childId in currentNode.childrenIds) {
+              final result = dfsSearch(childId, visited);
+              if (result != null) {
+                return result;
+              }
+            }
+
+            return null;
+          }
+
+          final visited = <String>{};
+          final result = dfsSearch(rootNode.id, visited);
+
+          if (result != null) {
+            return result;
+          }
+          return findDeepestNode(nodes);
+        }
+
+        useMemoized(() {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final targetNode = findShallowIncompleteNode(updatedNodes);
+            if (targetNode != null) {
+              final state = roadmapKey.currentState;
+              state?.focusNode(targetNode.id);
+            }
+          });
+          return null;
+        }, [mapId]);
+
         void focusNextNode() {
           final nodeIds = roadMap.nodes.keys.toList();
           if (nodeIds.isEmpty) {
