@@ -6,7 +6,7 @@ import '../common/sample_data/node_list.dart';
 
 part '_generated/nodes_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class NodesNotifier extends _$NodesNotifier {
   final layout = DefaultTreeLayoutAlgorithm();
   @override

@@ -6,12 +6,12 @@ part of '../nodes_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$nodesNotifierHash() => r'710d75d8134bfeb729cb446d222f547007e15edb';
+String _$nodesNotifierHash() => r'c68f83b38fc8632d380401853fe97a7801bdfb30';
 
 /// See also [NodesNotifier].
 @ProviderFor(NodesNotifier)
 final nodesNotifierProvider =
-    AutoDisposeNotifierProvider<NodesNotifier, Map<String, Node>>.internal(
+    NotifierProvider<NodesNotifier, Map<String, Node>>.internal(
   NodesNotifier.new,
   name: r'nodesNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -21,7 +21,7 @@ final nodesNotifierProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$NodesNotifier = AutoDisposeNotifier<Map<String, Node>>;
+typedef _$NodesNotifier = Notifier<Map<String, Node>>;
 String _$selectedNodeNotifierHash() =>
     r'3385fe9e6e3c347f642419be9833707fbbaa83c3';
 

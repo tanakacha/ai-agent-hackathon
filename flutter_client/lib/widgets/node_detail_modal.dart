@@ -11,13 +11,16 @@ class NodeDetailModal extends HookConsumerWidget {
   const NodeDetailModal({
     super.key,
     required this.nodeId,
-  });
+  }); 
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = useState(false);
-    final nodes = ref.watch(nodesNotifierProvider);
+    final nodes = ref.read(nodesNotifierProvider);
     final node = nodes[nodeId];
+    print('ノード件数: ${nodes.length}');
+    print('含まれるノードID: ${nodes.keys}');
+    print('探してるID: $nodeId');
 
     if (node == null) {
       return Dialog(
@@ -77,7 +80,6 @@ class NodeDetailModal extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // タイトル
             Text(
               node.title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
