@@ -14,11 +14,6 @@ abstract class TreeLayoutAlgorithm {
     required double spaceX,
     required double spaceY,
   });
-
-  /// 接続線を計算するためのオプションのメソッド (必要に応じて)
-  /// このメソッドは、ノード間の接続線の座標リストを返すことができます。
-  /// UIが接続線を描画する際にこの情報を使用できます。
-  List<Connection> calculateConnections(Map<String, Node> nodes);
 }
 
 /// 接続線の情報を保持するクラス

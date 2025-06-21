@@ -1,29 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'roadmap_repository.dart';
+part of '../roadmap_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$roadmapRepositoryHash() => r'3dc1458ca009095ae995ac53b0973e27e915ba01';
+String _$roadmapNotifierHash() => r'b0fc4b4e61ebb9607c2a75bdbe2e6039a8dd62c2';
 
-/// See also [roadmapRepository].
-@ProviderFor(roadmapRepository)
-final roadmapRepositoryProvider =
-    AutoDisposeProvider<RoadmapRepositoryInterface>.internal(
-  roadmapRepository,
-  name: r'roadmapRepositoryProvider',
+/// See also [RoadmapNotifier].
+@ProviderFor(RoadmapNotifier)
+final roadmapNotifierProvider =
+    AutoDisposeAsyncNotifierProvider<RoadmapNotifier, RoadMap>.internal(
+  RoadmapNotifier.new,
+  name: r'roadmapNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$roadmapRepositoryHash,
+      : _$roadmapNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef RoadmapRepositoryRef
-    = AutoDisposeProviderRef<RoadmapRepositoryInterface>;
+typedef _$RoadmapNotifier = AutoDisposeAsyncNotifier<RoadMap>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
