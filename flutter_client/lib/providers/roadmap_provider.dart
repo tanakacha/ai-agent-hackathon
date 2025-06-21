@@ -63,8 +63,11 @@ class RoadmapNotifier extends _$RoadmapNotifier {
         nodeId: parentId,
       );
 
-      // 既存ノードに新しいノードを追加
-      ref.read(nodesNotifierProvider.notifier).addNodes(roadmapData.childNodes);
+      ref.read(nodesNotifierProvider.notifier).addMultipleNodesAndRecalculate(
+        newNodes: roadmapData.childNodes,
+        spaceX: 120.0,
+        spaceY: 100.0,
+      );
       final updatedNodes = ref.read(nodesNotifierProvider);
 
       final currentState = state;
