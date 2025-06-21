@@ -102,6 +102,36 @@ class RoadmapDisplayScreen extends HookConsumerWidget {
             return findDeepestNode(nodes);
           }
 
+          Node? findIncompleteLeafNode(String nodeId) {
+            var currentNodeId = nodeId;
+            
+            while (true) {
+              final currentNode = nodes[currentNodeId];
+              if (currentNode == null) return null;
+              
+              if (currentNode.childrenIds.isEmpty) {
+                return currentNode;
+              }
+              
+              String? nextIncompleteChildId;
+              for (final childId in currentNode.childrenIds) {
+                final childNode = nodes[childId];
+                if (childNode != null && 
+                    childNode.nodeType == NodeType.normal && 
+                    childNode.progressRate < 100) {
+                  nextIncompleteChildId = childId;
+                  break;
+                }
+              }
+              
+              if (nextIncompleteChildId == null) {
+                return currentNode;
+              }
+              
+              currentNodeId = nextIncompleteChildId;
+            }
+          }
+
           Node? dfsSearch(String nodeId, Set<String> visited) {
             if (visited.contains(nodeId)) return null;
             visited.add(nodeId);
@@ -110,18 +140,9 @@ class RoadmapDisplayScreen extends HookConsumerWidget {
             if (currentNode == null) return null;
 
             if (currentNode.nodeType == NodeType.normal && currentNode.progressRate < 100) {
-              
-              if (currentNode.childrenIds.isNotEmpty) {
-                final firstChildId = currentNode.childrenIds.first;
-                final firstChild = nodes[firstChildId];
-                if (firstChild != null) {
-                  return firstChild;
-                }
-              }
-              
-              return currentNode;
+              return findIncompleteLeafNode(nodeId);
             }
-
+            
             for (final childId in currentNode.childrenIds) {
               final result = dfsSearch(childId, visited);
               if (result != null) {
