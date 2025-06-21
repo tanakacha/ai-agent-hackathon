@@ -148,22 +148,36 @@ class RoadMapDetailScreen extends HookConsumerWidget {
   }
 
   Widget _buildErrorWidget(Object error, WidgetRef ref, StackTrace stackTrace) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text('エラーが発生しました: $error'),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              debugPrint('[_buildErrorWidget] Retry pressed');
-              ref.invalidate(roadmapNotifierProvider);
-            },
-            child: const Text('再試行'),
-          ),
-        ],
+    // ログには詳細出力
+    debugPrint('[ErrorWidget] error: $error');
+    debugPrint('[ErrorWidget] stackTrace:\n$stackTrace');
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('エラー'),
+        backgroundColor: Colors.redAccent,
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            const Text(
+              'エラーが発生しました。',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                debugPrint('[_buildErrorWidget] Retry pressed');
+                ref.invalidate(roadmapNotifierProvider);
+              },
+              child: const Text('再試行'),
+            ),
+          ],
+        ),
       ),
     );
   }

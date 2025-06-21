@@ -54,7 +54,7 @@ class RoadmapNotifier extends _$RoadmapNotifier {
 
   Future<void> addChildNodesToParent(
       {required String roadmapId, required String parentId}) async {
-    state = const AsyncLoading();
+    state = const AsyncLoading<RoadMap>().copyWithPrevious(state);
 
     try {
       final roadmapService = ref.read(roadmapServiceProvider);

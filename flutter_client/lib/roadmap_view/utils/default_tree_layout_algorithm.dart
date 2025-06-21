@@ -1,6 +1,7 @@
 // lib/default_tree_layout_algorithm.dart (新規ファイル)
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter_client/common/model/node.dart';
 import 'package:flutter_client/roadmap_view/utils/interface/tree_layout_gorithm.dart';
 
@@ -48,11 +49,23 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
   }
   
 
-  double _positionNodeDFS(String nodeId, int depth, double currentY,
-      Map<String, Node> nodes, double spaceX, double spaceY) {
-    final node = nodes[nodeId]!;
-    // Use copyWith to create a new immutable Node with updated position
-    nodes[nodeId] = node.copyWith(x: -depth * spaceX); // 左側に配置
+  double _positionNodeDFS(
+    String nodeId,
+    int depth,
+    double currentY,
+    Map<String, Node> nodes,
+    double spaceX,
+    double spaceY,
+  ) {
+    final node = nodes[nodeId];
+    if (node == null) {
+      debugPrint('[LayoutError] nodeId "$nodeId" が nodes に存在しません。');
+      throw StateError(
+          'Layout Error: nodeId "$nodeId" not found in nodes map.');
+    }
+
+    // x座標を更新
+    nodes[nodeId] = node.copyWith(x: -depth * spaceX);
 
     if (node.childrenIds.isEmpty) {
       nodes[nodeId] = nodes[nodeId]!.copyWith(y: currentY);
@@ -60,6 +73,12 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
     } else {
       double nextY = currentY;
       for (final childId in node.childrenIds.reversed) {
+        if (!nodes.containsKey(childId)) {
+          debugPrint(
+              '[LayoutError] 子ノード "$childId" が nodes に存在しません（親: "$nodeId"）');
+          throw StateError(
+              'Layout Error: childId "$childId" not found (parent: "$nodeId")');
+        }
         nextY = _positionNodeDFS(
           childId,
           depth + 1,
@@ -69,11 +88,13 @@ class DefaultTreeLayoutAlgorithm implements TreeLayoutAlgorithm {
           spaceY,
         );
       }
-      nodes[nodeId] = nodes[nodeId]!
-          .copyWith(y: currentY); // Temporary, will be adjusted later
+
+      // 仮のy座標を設定（後で調整される）
+      nodes[nodeId] = nodes[nodeId]!.copyWith(y: currentY);
       return nextY;
     }
   }
+
 
   double _getMaxY(String nodeId, Map<String, Node> nodes) {
     final node = nodes[nodeId]!;

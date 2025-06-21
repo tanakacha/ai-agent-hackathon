@@ -6,7 +6,7 @@ part of '../roadmap_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$roadmapNotifierHash() => r'695585e7fd0281844fa540620f22d93e70a0d5d3';
+String _$roadmapNotifierHash() => r'b0fc4b4e61ebb9607c2a75bdbe2e6039a8dd62c2';
 
 /// See also [RoadmapNotifier].
 @ProviderFor(RoadmapNotifier)
