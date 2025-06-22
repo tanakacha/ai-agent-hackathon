@@ -18,19 +18,28 @@ class MainAppNotifier extends _$MainAppNotifier {
     try {
       final userApiService = ref.read(userApiServiceProvider);
       
-      await userApiService.createUser(
-        uid: user.uid,
-        email: user.email ?? '',
-      );
-      
+      // まず既存のユーザーかチェック
       final checkMapResponse = await userApiService.checkUserMap(
         userId: user.uid,
       );
       
-      if (checkMapResponse.hasMap && checkMapResponse.mapId != null) {
-        state = MainAppState.hasMap(checkMapResponse.mapId!);
+      if (checkMapResponse.hasMap) {
+        // 既存ユーザーでマップがある場合はマップ一覧画面へ
+        state = const MainAppState.hasMaps();
       } else {
-        state = const MainAppState.noMap();
+        // 新規ユーザーまたはマップがない場合
+        // ユーザープロファイルが作成されているかチェック
+        try {
+          await userApiService.createUser(
+            uid: user.uid,
+            email: user.email ?? '',
+          );
+          // 既存のcreateUserが成功した場合は既存ユーザー（プロファイル未設定）
+          state = const MainAppState.needsProfile();
+        } catch (e) {
+          // createUserが失敗した場合は既存ユーザー（プロファイル設定済み）
+          state = const MainAppState.noMap();
+        }
       }
     } catch (e) {
       state = MainAppState.error('初期化中にエラーが発生しました: ${e.toString()}');

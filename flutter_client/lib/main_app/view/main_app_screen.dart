@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../view_model/main_app_notifier.dart';
-import '../../map_input/view/map_input_screen.dart';
-import '../../roadmap_display/view/roadmap_display_screen.dart';
+import '../../user_profile/view/user_profile_input_screen.dart';
+import '../../maps_list/view/maps_list_screen.dart';
+import '../../goal_input/view/goal_input_screen.dart';
 
 class MainAppScreen extends HookConsumerWidget {
   final User user;
@@ -28,8 +29,9 @@ class MainAppScreen extends HookConsumerWidget {
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
-      hasMap: (mapId) => RoadmapDisplayScreen(mapId: mapId),
-      noMap: () => const MapInputScreen(),
+      needsProfile: () => UserProfileInputScreen(uid: user.uid),
+      hasMaps: () => MapsListScreen(uid: user.uid),
+      noMap: () => GoalInputScreen(uid: user.uid),
       error: (message) => Scaffold(
         body: Center(
           child: Column(

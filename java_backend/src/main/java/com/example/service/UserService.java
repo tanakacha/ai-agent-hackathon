@@ -1,6 +1,7 @@
 package com.example.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,6 +176,40 @@ public class UserService {
 		}
 	}
 
+	public String createUserWithProfile(String uid, String nickname, int age, 
+										String userType, int availableHoursPerDay, 
+										int availableDaysPerWeek, String experienceLevel) 
+										throws InterruptedException, ExecutionException {
+		logger.info("開始: プロファイル付きユーザー作成 (UID: {})", uid);
+		try {
+			CollectionReference usersCollection = firestore.collection(USERS_COLLECTION);
+			
+			Map<String, Object> profileData = new HashMap<>();
+			profileData.put("userType", userType);
+			profileData.put("availableHoursPerDay", availableHoursPerDay);
+			profileData.put("availableDaysPerWeek", availableDaysPerWeek);
+			profileData.put("experienceLevel", experienceLevel);
+
+			Map<String, Object> userData = new HashMap<>();
+			userData.put("id", uid);
+			userData.put("nickname", nickname);
+			userData.put(FIELD_AGE, age);
+			userData.put("profile", profileData);
+			userData.put("createdAt", new Date());
+			userData.put("updatedAt", new Date());
+			
+			ApiFuture<WriteResult> writeResult = usersCollection.document(uid).set(userData);
+			writeResult.get();
+			
+			logger.info("完了: プロファイル付きユーザー作成 (UID: {}, ニックネーム: {}, 年齢: {})", 
+						uid, nickname, age);
+			return uid;
+		} catch (Exception e) {
+			logger.error("プロファイル付きユーザー作成中にエラーが発生しました: {}", e.getMessage(), e);
+			throw e;
+		}
+	}
+
 	public boolean checkUserMapExists(String userId) throws InterruptedException, ExecutionException {
 		logger.info("開始: ユーザーのマップ存在確認 (ユーザーID: {})", userId);
 		try {
@@ -208,6 +243,33 @@ public class UserService {
 			return null;
 		} catch (Exception e) {
 			logger.error("ユーザーのマップID取得中にエラーが発生しました: {}", e.getMessage(), e);
+			throw e;
+		}
+	}
+
+	public List<Map<String, Object>> getUserMaps(String userId) throws InterruptedException, ExecutionException {
+		logger.info("開始: ユーザーのマップ一覧取得 (ユーザーID: {})", userId);
+		try {
+			CollectionReference mapsCollection = firestore.collection("maps");
+			ApiFuture<QuerySnapshot> future = mapsCollection.whereEqualTo("user_id", userId).get();
+			QuerySnapshot querySnapshot = future.get();
+			
+			List<Map<String, Object>> mapsList = new ArrayList<>();
+			for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+				if (doc.exists()) {
+					Map<String, Object> mapData = new HashMap<>();
+					mapData.put("mapId", doc.getId());
+					mapData.put("title", doc.getString("title"));
+					mapData.put("objective", doc.getString("objective"));
+					mapData.put("deadline", doc.getDate("deadline"));
+					mapsList.add(mapData);
+				}
+			}
+			
+			logger.info("完了: ユーザーのマップ一覧取得 (ユーザーID: {}, マップ数: {})", userId, mapsList.size());
+			return mapsList;
+		} catch (Exception e) {
+			logger.error("ユーザーのマップ一覧取得中にエラーが発生しました: {}", e.getMessage(), e);
 			throw e;
 		}
 	}

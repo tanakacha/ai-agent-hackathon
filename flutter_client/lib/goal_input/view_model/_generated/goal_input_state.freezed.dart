@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of '../main_app_state.dart';
+part of '../goal_input_state.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -15,14 +15,12 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
-mixin _$MainAppState {
+mixin _$GoalInputState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function() needsProfile,
-    required TResult Function() hasMaps,
-    required TResult Function() noMap,
+    required TResult Function(String mapId) success,
     required TResult Function(String message) error,
   }) =>
       throw _privateConstructorUsedError;
@@ -30,9 +28,7 @@ mixin _$MainAppState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function()? needsProfile,
-    TResult? Function()? hasMaps,
-    TResult? Function()? noMap,
+    TResult? Function(String mapId)? success,
     TResult? Function(String message)? error,
   }) =>
       throw _privateConstructorUsedError;
@@ -40,9 +36,7 @@ mixin _$MainAppState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? needsProfile,
-    TResult Function()? hasMaps,
-    TResult Function()? noMap,
+    TResult Function(String mapId)? success,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) =>
@@ -51,9 +45,7 @@ mixin _$MainAppState {
   TResult map<TResult extends Object?>({
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
-    required TResult Function(_NeedsProfile value) needsProfile,
-    required TResult Function(_HasMaps value) hasMaps,
-    required TResult Function(_NoMap value) noMap,
+    required TResult Function(_Success value) success,
     required TResult Function(_Error value) error,
   }) =>
       throw _privateConstructorUsedError;
@@ -61,9 +53,7 @@ mixin _$MainAppState {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
-    TResult? Function(_NeedsProfile value)? needsProfile,
-    TResult? Function(_HasMaps value)? hasMaps,
-    TResult? Function(_NoMap value)? noMap,
+    TResult? Function(_Success value)? success,
     TResult? Function(_Error value)? error,
   }) =>
       throw _privateConstructorUsedError;
@@ -71,9 +61,7 @@ mixin _$MainAppState {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
-    TResult Function(_NeedsProfile value)? needsProfile,
-    TResult Function(_HasMaps value)? hasMaps,
-    TResult Function(_NoMap value)? noMap,
+    TResult Function(_Success value)? success,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) =>
@@ -81,23 +69,23 @@ mixin _$MainAppState {
 }
 
 /// @nodoc
-abstract class $MainAppStateCopyWith<$Res> {
-  factory $MainAppStateCopyWith(
-          MainAppState value, $Res Function(MainAppState) then) =
-      _$MainAppStateCopyWithImpl<$Res, MainAppState>;
+abstract class $GoalInputStateCopyWith<$Res> {
+  factory $GoalInputStateCopyWith(
+          GoalInputState value, $Res Function(GoalInputState) then) =
+      _$GoalInputStateCopyWithImpl<$Res, GoalInputState>;
 }
 
 /// @nodoc
-class _$MainAppStateCopyWithImpl<$Res, $Val extends MainAppState>
-    implements $MainAppStateCopyWith<$Res> {
-  _$MainAppStateCopyWithImpl(this._value, this._then);
+class _$GoalInputStateCopyWithImpl<$Res, $Val extends GoalInputState>
+    implements $GoalInputStateCopyWith<$Res> {
+  _$GoalInputStateCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of MainAppState
+  /// Create a copy of GoalInputState
   /// with the given fields replaced by the non-null parameter values.
 }
 
@@ -110,13 +98,13 @@ abstract class _$$InitialImplCopyWith<$Res> {
 
 /// @nodoc
 class __$$InitialImplCopyWithImpl<$Res>
-    extends _$MainAppStateCopyWithImpl<$Res, _$InitialImpl>
+    extends _$GoalInputStateCopyWithImpl<$Res, _$InitialImpl>
     implements _$$InitialImplCopyWith<$Res> {
   __$$InitialImplCopyWithImpl(
       _$InitialImpl _value, $Res Function(_$InitialImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of MainAppState
+  /// Create a copy of GoalInputState
   /// with the given fields replaced by the non-null parameter values.
 }
 
@@ -127,7 +115,7 @@ class _$InitialImpl implements _Initial {
 
   @override
   String toString() {
-    return 'MainAppState.initial()';
+    return 'GoalInputState.initial()';
   }
 
   @override
@@ -144,9 +132,7 @@ class _$InitialImpl implements _Initial {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function() needsProfile,
-    required TResult Function() hasMaps,
-    required TResult Function() noMap,
+    required TResult Function(String mapId) success,
     required TResult Function(String message) error,
   }) {
     return initial();
@@ -157,9 +143,7 @@ class _$InitialImpl implements _Initial {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function()? needsProfile,
-    TResult? Function()? hasMaps,
-    TResult? Function()? noMap,
+    TResult? Function(String mapId)? success,
     TResult? Function(String message)? error,
   }) {
     return initial?.call();
@@ -170,9 +154,7 @@ class _$InitialImpl implements _Initial {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? needsProfile,
-    TResult Function()? hasMaps,
-    TResult Function()? noMap,
+    TResult Function(String mapId)? success,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -187,9 +169,7 @@ class _$InitialImpl implements _Initial {
   TResult map<TResult extends Object?>({
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
-    required TResult Function(_NeedsProfile value) needsProfile,
-    required TResult Function(_HasMaps value) hasMaps,
-    required TResult Function(_NoMap value) noMap,
+    required TResult Function(_Success value) success,
     required TResult Function(_Error value) error,
   }) {
     return initial(this);
@@ -200,9 +180,7 @@ class _$InitialImpl implements _Initial {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
-    TResult? Function(_NeedsProfile value)? needsProfile,
-    TResult? Function(_HasMaps value)? hasMaps,
-    TResult? Function(_NoMap value)? noMap,
+    TResult? Function(_Success value)? success,
     TResult? Function(_Error value)? error,
   }) {
     return initial?.call(this);
@@ -213,9 +191,7 @@ class _$InitialImpl implements _Initial {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
-    TResult Function(_NeedsProfile value)? needsProfile,
-    TResult Function(_HasMaps value)? hasMaps,
-    TResult Function(_NoMap value)? noMap,
+    TResult Function(_Success value)? success,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -226,7 +202,7 @@ class _$InitialImpl implements _Initial {
   }
 }
 
-abstract class _Initial implements MainAppState {
+abstract class _Initial implements GoalInputState {
   const factory _Initial() = _$InitialImpl;
 }
 
@@ -239,13 +215,13 @@ abstract class _$$LoadingImplCopyWith<$Res> {
 
 /// @nodoc
 class __$$LoadingImplCopyWithImpl<$Res>
-    extends _$MainAppStateCopyWithImpl<$Res, _$LoadingImpl>
+    extends _$GoalInputStateCopyWithImpl<$Res, _$LoadingImpl>
     implements _$$LoadingImplCopyWith<$Res> {
   __$$LoadingImplCopyWithImpl(
       _$LoadingImpl _value, $Res Function(_$LoadingImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of MainAppState
+  /// Create a copy of GoalInputState
   /// with the given fields replaced by the non-null parameter values.
 }
 
@@ -256,7 +232,7 @@ class _$LoadingImpl implements _Loading {
 
   @override
   String toString() {
-    return 'MainAppState.loading()';
+    return 'GoalInputState.loading()';
   }
 
   @override
@@ -273,9 +249,7 @@ class _$LoadingImpl implements _Loading {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function() needsProfile,
-    required TResult Function() hasMaps,
-    required TResult Function() noMap,
+    required TResult Function(String mapId) success,
     required TResult Function(String message) error,
   }) {
     return loading();
@@ -286,9 +260,7 @@ class _$LoadingImpl implements _Loading {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function()? needsProfile,
-    TResult? Function()? hasMaps,
-    TResult? Function()? noMap,
+    TResult? Function(String mapId)? success,
     TResult? Function(String message)? error,
   }) {
     return loading?.call();
@@ -299,9 +271,7 @@ class _$LoadingImpl implements _Loading {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? needsProfile,
-    TResult Function()? hasMaps,
-    TResult Function()? noMap,
+    TResult Function(String mapId)? success,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -316,9 +286,7 @@ class _$LoadingImpl implements _Loading {
   TResult map<TResult extends Object?>({
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
-    required TResult Function(_NeedsProfile value) needsProfile,
-    required TResult Function(_HasMaps value) hasMaps,
-    required TResult Function(_NoMap value) noMap,
+    required TResult Function(_Success value) success,
     required TResult Function(_Error value) error,
   }) {
     return loading(this);
@@ -329,9 +297,7 @@ class _$LoadingImpl implements _Loading {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
-    TResult? Function(_NeedsProfile value)? needsProfile,
-    TResult? Function(_HasMaps value)? hasMaps,
-    TResult? Function(_NoMap value)? noMap,
+    TResult? Function(_Success value)? success,
     TResult? Function(_Error value)? error,
   }) {
     return loading?.call(this);
@@ -342,9 +308,7 @@ class _$LoadingImpl implements _Loading {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
-    TResult Function(_NeedsProfile value)? needsProfile,
-    TResult Function(_HasMaps value)? hasMaps,
-    TResult Function(_NoMap value)? noMap,
+    TResult Function(_Success value)? success,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -355,59 +319,84 @@ class _$LoadingImpl implements _Loading {
   }
 }
 
-abstract class _Loading implements MainAppState {
+abstract class _Loading implements GoalInputState {
   const factory _Loading() = _$LoadingImpl;
 }
 
 /// @nodoc
-abstract class _$$NeedsProfileImplCopyWith<$Res> {
-  factory _$$NeedsProfileImplCopyWith(
-          _$NeedsProfileImpl value, $Res Function(_$NeedsProfileImpl) then) =
-      __$$NeedsProfileImplCopyWithImpl<$Res>;
+abstract class _$$SuccessImplCopyWith<$Res> {
+  factory _$$SuccessImplCopyWith(
+          _$SuccessImpl value, $Res Function(_$SuccessImpl) then) =
+      __$$SuccessImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({String mapId});
 }
 
 /// @nodoc
-class __$$NeedsProfileImplCopyWithImpl<$Res>
-    extends _$MainAppStateCopyWithImpl<$Res, _$NeedsProfileImpl>
-    implements _$$NeedsProfileImplCopyWith<$Res> {
-  __$$NeedsProfileImplCopyWithImpl(
-      _$NeedsProfileImpl _value, $Res Function(_$NeedsProfileImpl) _then)
+class __$$SuccessImplCopyWithImpl<$Res>
+    extends _$GoalInputStateCopyWithImpl<$Res, _$SuccessImpl>
+    implements _$$SuccessImplCopyWith<$Res> {
+  __$$SuccessImplCopyWithImpl(
+      _$SuccessImpl _value, $Res Function(_$SuccessImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of MainAppState
+  /// Create a copy of GoalInputState
   /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? mapId = null,
+  }) {
+    return _then(_$SuccessImpl(
+      null == mapId
+          ? _value.mapId
+          : mapId // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
 }
 
 /// @nodoc
 
-class _$NeedsProfileImpl implements _NeedsProfile {
-  const _$NeedsProfileImpl();
+class _$SuccessImpl implements _Success {
+  const _$SuccessImpl(this.mapId);
+
+  @override
+  final String mapId;
 
   @override
   String toString() {
-    return 'MainAppState.needsProfile()';
+    return 'GoalInputState.success(mapId: $mapId)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$NeedsProfileImpl);
+        (other.runtimeType == runtimeType &&
+            other is _$SuccessImpl &&
+            (identical(other.mapId, mapId) || other.mapId == mapId));
   }
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, mapId);
+
+  /// Create a copy of GoalInputState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SuccessImplCopyWith<_$SuccessImpl> get copyWith =>
+      __$$SuccessImplCopyWithImpl<_$SuccessImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function() needsProfile,
-    required TResult Function() hasMaps,
-    required TResult Function() noMap,
+    required TResult Function(String mapId) success,
     required TResult Function(String message) error,
   }) {
-    return needsProfile();
+    return success(mapId);
   }
 
   @override
@@ -415,12 +404,10 @@ class _$NeedsProfileImpl implements _NeedsProfile {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function()? needsProfile,
-    TResult? Function()? hasMaps,
-    TResult? Function()? noMap,
+    TResult? Function(String mapId)? success,
     TResult? Function(String message)? error,
   }) {
-    return needsProfile?.call();
+    return success?.call(mapId);
   }
 
   @override
@@ -428,14 +415,12 @@ class _$NeedsProfileImpl implements _NeedsProfile {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? needsProfile,
-    TResult Function()? hasMaps,
-    TResult Function()? noMap,
+    TResult Function(String mapId)? success,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
-    if (needsProfile != null) {
-      return needsProfile();
+    if (success != null) {
+      return success(mapId);
     }
     return orElse();
   }
@@ -445,12 +430,10 @@ class _$NeedsProfileImpl implements _NeedsProfile {
   TResult map<TResult extends Object?>({
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
-    required TResult Function(_NeedsProfile value) needsProfile,
-    required TResult Function(_HasMaps value) hasMaps,
-    required TResult Function(_NoMap value) noMap,
+    required TResult Function(_Success value) success,
     required TResult Function(_Error value) error,
   }) {
-    return needsProfile(this);
+    return success(this);
   }
 
   @override
@@ -458,12 +441,10 @@ class _$NeedsProfileImpl implements _NeedsProfile {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
-    TResult? Function(_NeedsProfile value)? needsProfile,
-    TResult? Function(_HasMaps value)? hasMaps,
-    TResult? Function(_NoMap value)? noMap,
+    TResult? Function(_Success value)? success,
     TResult? Function(_Error value)? error,
   }) {
-    return needsProfile?.call(this);
+    return success?.call(this);
   }
 
   @override
@@ -471,279 +452,27 @@ class _$NeedsProfileImpl implements _NeedsProfile {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
-    TResult Function(_NeedsProfile value)? needsProfile,
-    TResult Function(_HasMaps value)? hasMaps,
-    TResult Function(_NoMap value)? noMap,
+    TResult Function(_Success value)? success,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
-    if (needsProfile != null) {
-      return needsProfile(this);
+    if (success != null) {
+      return success(this);
     }
     return orElse();
   }
 }
 
-abstract class _NeedsProfile implements MainAppState {
-  const factory _NeedsProfile() = _$NeedsProfileImpl;
-}
+abstract class _Success implements GoalInputState {
+  const factory _Success(final String mapId) = _$SuccessImpl;
 
-/// @nodoc
-abstract class _$$HasMapsImplCopyWith<$Res> {
-  factory _$$HasMapsImplCopyWith(
-          _$HasMapsImpl value, $Res Function(_$HasMapsImpl) then) =
-      __$$HasMapsImplCopyWithImpl<$Res>;
-}
+  String get mapId;
 
-/// @nodoc
-class __$$HasMapsImplCopyWithImpl<$Res>
-    extends _$MainAppStateCopyWithImpl<$Res, _$HasMapsImpl>
-    implements _$$HasMapsImplCopyWith<$Res> {
-  __$$HasMapsImplCopyWithImpl(
-      _$HasMapsImpl _value, $Res Function(_$HasMapsImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of MainAppState
+  /// Create a copy of GoalInputState
   /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$HasMapsImpl implements _HasMaps {
-  const _$HasMapsImpl();
-
-  @override
-  String toString() {
-    return 'MainAppState.hasMaps()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$HasMapsImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function() loading,
-    required TResult Function() needsProfile,
-    required TResult Function() hasMaps,
-    required TResult Function() noMap,
-    required TResult Function(String message) error,
-  }) {
-    return hasMaps();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function()? loading,
-    TResult? Function()? needsProfile,
-    TResult? Function()? hasMaps,
-    TResult? Function()? noMap,
-    TResult? Function(String message)? error,
-  }) {
-    return hasMaps?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function()? needsProfile,
-    TResult Function()? hasMaps,
-    TResult Function()? noMap,
-    TResult Function(String message)? error,
-    required TResult orElse(),
-  }) {
-    if (hasMaps != null) {
-      return hasMaps();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Initial value) initial,
-    required TResult Function(_Loading value) loading,
-    required TResult Function(_NeedsProfile value) needsProfile,
-    required TResult Function(_HasMaps value) hasMaps,
-    required TResult Function(_NoMap value) noMap,
-    required TResult Function(_Error value) error,
-  }) {
-    return hasMaps(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Initial value)? initial,
-    TResult? Function(_Loading value)? loading,
-    TResult? Function(_NeedsProfile value)? needsProfile,
-    TResult? Function(_HasMaps value)? hasMaps,
-    TResult? Function(_NoMap value)? noMap,
-    TResult? Function(_Error value)? error,
-  }) {
-    return hasMaps?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Initial value)? initial,
-    TResult Function(_Loading value)? loading,
-    TResult Function(_NeedsProfile value)? needsProfile,
-    TResult Function(_HasMaps value)? hasMaps,
-    TResult Function(_NoMap value)? noMap,
-    TResult Function(_Error value)? error,
-    required TResult orElse(),
-  }) {
-    if (hasMaps != null) {
-      return hasMaps(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _HasMaps implements MainAppState {
-  const factory _HasMaps() = _$HasMapsImpl;
-}
-
-/// @nodoc
-abstract class _$$NoMapImplCopyWith<$Res> {
-  factory _$$NoMapImplCopyWith(
-          _$NoMapImpl value, $Res Function(_$NoMapImpl) then) =
-      __$$NoMapImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$NoMapImplCopyWithImpl<$Res>
-    extends _$MainAppStateCopyWithImpl<$Res, _$NoMapImpl>
-    implements _$$NoMapImplCopyWith<$Res> {
-  __$$NoMapImplCopyWithImpl(
-      _$NoMapImpl _value, $Res Function(_$NoMapImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of MainAppState
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$NoMapImpl implements _NoMap {
-  const _$NoMapImpl();
-
-  @override
-  String toString() {
-    return 'MainAppState.noMap()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$NoMapImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function() loading,
-    required TResult Function() needsProfile,
-    required TResult Function() hasMaps,
-    required TResult Function() noMap,
-    required TResult Function(String message) error,
-  }) {
-    return noMap();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function()? loading,
-    TResult? Function()? needsProfile,
-    TResult? Function()? hasMaps,
-    TResult? Function()? noMap,
-    TResult? Function(String message)? error,
-  }) {
-    return noMap?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function()? needsProfile,
-    TResult Function()? hasMaps,
-    TResult Function()? noMap,
-    TResult Function(String message)? error,
-    required TResult orElse(),
-  }) {
-    if (noMap != null) {
-      return noMap();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Initial value) initial,
-    required TResult Function(_Loading value) loading,
-    required TResult Function(_NeedsProfile value) needsProfile,
-    required TResult Function(_HasMaps value) hasMaps,
-    required TResult Function(_NoMap value) noMap,
-    required TResult Function(_Error value) error,
-  }) {
-    return noMap(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Initial value)? initial,
-    TResult? Function(_Loading value)? loading,
-    TResult? Function(_NeedsProfile value)? needsProfile,
-    TResult? Function(_HasMaps value)? hasMaps,
-    TResult? Function(_NoMap value)? noMap,
-    TResult? Function(_Error value)? error,
-  }) {
-    return noMap?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Initial value)? initial,
-    TResult Function(_Loading value)? loading,
-    TResult Function(_NeedsProfile value)? needsProfile,
-    TResult Function(_HasMaps value)? hasMaps,
-    TResult Function(_NoMap value)? noMap,
-    TResult Function(_Error value)? error,
-    required TResult orElse(),
-  }) {
-    if (noMap != null) {
-      return noMap(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _NoMap implements MainAppState {
-  const factory _NoMap() = _$NoMapImpl;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$SuccessImplCopyWith<_$SuccessImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -757,13 +486,13 @@ abstract class _$$ErrorImplCopyWith<$Res> {
 
 /// @nodoc
 class __$$ErrorImplCopyWithImpl<$Res>
-    extends _$MainAppStateCopyWithImpl<$Res, _$ErrorImpl>
+    extends _$GoalInputStateCopyWithImpl<$Res, _$ErrorImpl>
     implements _$$ErrorImplCopyWith<$Res> {
   __$$ErrorImplCopyWithImpl(
       _$ErrorImpl _value, $Res Function(_$ErrorImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of MainAppState
+  /// Create a copy of GoalInputState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -789,7 +518,7 @@ class _$ErrorImpl implements _Error {
 
   @override
   String toString() {
-    return 'MainAppState.error(message: $message)';
+    return 'GoalInputState.error(message: $message)';
   }
 
   @override
@@ -803,7 +532,7 @@ class _$ErrorImpl implements _Error {
   @override
   int get hashCode => Object.hash(runtimeType, message);
 
-  /// Create a copy of MainAppState
+  /// Create a copy of GoalInputState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
@@ -816,9 +545,7 @@ class _$ErrorImpl implements _Error {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function() needsProfile,
-    required TResult Function() hasMaps,
-    required TResult Function() noMap,
+    required TResult Function(String mapId) success,
     required TResult Function(String message) error,
   }) {
     return error(message);
@@ -829,9 +556,7 @@ class _$ErrorImpl implements _Error {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function()? needsProfile,
-    TResult? Function()? hasMaps,
-    TResult? Function()? noMap,
+    TResult? Function(String mapId)? success,
     TResult? Function(String message)? error,
   }) {
     return error?.call(message);
@@ -842,9 +567,7 @@ class _$ErrorImpl implements _Error {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? needsProfile,
-    TResult Function()? hasMaps,
-    TResult Function()? noMap,
+    TResult Function(String mapId)? success,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -859,9 +582,7 @@ class _$ErrorImpl implements _Error {
   TResult map<TResult extends Object?>({
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
-    required TResult Function(_NeedsProfile value) needsProfile,
-    required TResult Function(_HasMaps value) hasMaps,
-    required TResult Function(_NoMap value) noMap,
+    required TResult Function(_Success value) success,
     required TResult Function(_Error value) error,
   }) {
     return error(this);
@@ -872,9 +593,7 @@ class _$ErrorImpl implements _Error {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
-    TResult? Function(_NeedsProfile value)? needsProfile,
-    TResult? Function(_HasMaps value)? hasMaps,
-    TResult? Function(_NoMap value)? noMap,
+    TResult? Function(_Success value)? success,
     TResult? Function(_Error value)? error,
   }) {
     return error?.call(this);
@@ -885,9 +604,7 @@ class _$ErrorImpl implements _Error {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
-    TResult Function(_NeedsProfile value)? needsProfile,
-    TResult Function(_HasMaps value)? hasMaps,
-    TResult Function(_NoMap value)? noMap,
+    TResult Function(_Success value)? success,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -898,12 +615,12 @@ class _$ErrorImpl implements _Error {
   }
 }
 
-abstract class _Error implements MainAppState {
+abstract class _Error implements GoalInputState {
   const factory _Error(final String message) = _$ErrorImpl;
 
   String get message;
 
-  /// Create a copy of MainAppState
+  /// Create a copy of GoalInputState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
