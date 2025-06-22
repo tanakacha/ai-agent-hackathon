@@ -16,11 +16,9 @@ class NodeDetailModal extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = useState(false);
+    final isCompleting = useState(false);
     final nodes = ref.read(nodesNotifierProvider);
     final node = nodes[nodeId];
-    print('ノード件数: ${nodes.length}');
-    print('含まれるノードID: ${nodes.keys}');
-    print('探してるID: $nodeId');
 
     if (node == null) {
       return Dialog(
@@ -66,6 +64,39 @@ class NodeDetailModal extends HookConsumerWidget {
         }
       } finally {
         isLoading.value = false;
+      }
+    }
+
+    Future<void> handleCompletePressed() async {
+      if (isCompleting.value) return;
+
+      isCompleting.value = true;
+      try {
+        await ref.read(nodesNotifierProvider.notifier).completeNode(
+          mapId: node.mapId ?? 'map-5678',
+          nodeId: node.id,
+        );
+
+        if (context.mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('ノードが正常に完了しました'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('エラーが発生しました: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        isCompleting.value = false;
       }
     }
 
@@ -163,12 +194,38 @@ class NodeDetailModal extends HookConsumerWidget {
 
             const SizedBox(height: 12),
 
+            // 完了ボタン（未完了の場合のみ表示）
+            if (node.progressRate != 100) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: (isLoading.value || isCompleting.value) ? null : handleCompletePressed,
+                  icon: isCompleting.value 
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.check),
+                  label: Text(isCompleting.value ? '完了処理中...' : '完了'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
             // キャンセルボタン
             SizedBox(
               width: double.infinity,
               child: TextButton(
-                onPressed:
-                    isLoading.value ? null : () => Navigator.of(context).pop(),
+                onPressed: isLoading.value || isCompleting.value ? null : () => Navigator.of(context).pop(),
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),

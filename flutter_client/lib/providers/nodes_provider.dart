@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../common/model/node.dart';
 import '../common/sample_data/node_list.dart';
+import '../services/roadmap_service.dart';
 
 part '_generated/nodes_provider.g.dart';
 
@@ -136,6 +137,26 @@ class NodesNotifier extends _$NodesNotifier {
     );
     state = Map<String, Node>.from(
         currentNodes); // Update state with positioned nodes
+  }
+
+  Future<void> completeNode({
+    required String mapId,
+    required String nodeId,
+  }) async {
+    try {
+      final roadmapService = ref.read(roadmapServiceProvider);
+      final response = await roadmapService.completeNode(
+        mapId: mapId,
+        nodeId: nodeId,
+      );
+      
+      if (response.node != null) {
+        final completedNode = response.node!;
+        state = {...state, nodeId: completedNode};
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 }
 

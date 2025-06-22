@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.dto.AddChildNodesRequest;
 import com.example.dto.AddChildNodesResponse;
 import com.example.dto.AlternativeNodeRequest;
+import com.example.dto.CompleteNodeRequest;
+import com.example.dto.CompleteNodeResponse;
 import com.example.dto.DetailedRoadmapRequest;
 import com.example.dto.DetailedRoadmapResponse;
 import com.example.dto.Node;
@@ -116,5 +118,40 @@ public class RoadmapController {
     public Node generateSingleAlternativeNode(@RequestBody AlternativeNodeRequest request) { 
         Node savedNode = alternativeNodeGenerationService.generateAndUpdateNode(request.getNodeId());
         return savedNode;
+    }
+
+    @PostMapping("/nodes/complete")
+    public CompleteNodeResponse completeNode(@RequestBody CompleteNodeRequest request) {
+        try {
+            Node node = nodeService.getNodeById(request.getNodeId());
+            if (node == null) {
+                CompleteNodeResponse errorResponse = new CompleteNodeResponse();
+                errorResponse.setMessage("指定されたノードが見つかりませんでした: " + request.getNodeId());
+                return errorResponse;
+            }
+
+            if (!request.getMapId().equals(node.getMap_id())) {
+                CompleteNodeResponse errorResponse = new CompleteNodeResponse();
+                errorResponse.setMessage("ノードのマップIDが一致しません");
+                return errorResponse;
+            }
+
+            node.setProgress_rate(100);
+            node.setFinished_at(new java.util.Date());
+            node.setUpdated_at(new java.util.Date());
+
+            Node updatedNode = nodeService.updateNode(node);
+
+            CompleteNodeResponse response = new CompleteNodeResponse();
+            response.setNode(updatedNode);
+            response.setMessage("ノードを正常に完了しました");
+
+            return response;
+
+        } catch (Exception e) {
+            CompleteNodeResponse errorResponse = new CompleteNodeResponse();
+            errorResponse.setMessage("ノード完了中にエラーが発生しました: " + e.getMessage());
+            return errorResponse;
+        }
     }
 }
