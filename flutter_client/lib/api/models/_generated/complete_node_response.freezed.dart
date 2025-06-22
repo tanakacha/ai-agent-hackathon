@@ -21,6 +21,7 @@ CompleteNodeResponse _$CompleteNodeResponseFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$CompleteNodeResponse {
   Node? get node => throw _privateConstructorUsedError;
+  List<Node> get completedNodes => throw _privateConstructorUsedError;
   String get message => throw _privateConstructorUsedError;
 
   /// Serializes this CompleteNodeResponse to a JSON map.
@@ -39,7 +40,7 @@ abstract class $CompleteNodeResponseCopyWith<$Res> {
           $Res Function(CompleteNodeResponse) then) =
       _$CompleteNodeResponseCopyWithImpl<$Res, CompleteNodeResponse>;
   @useResult
-  $Res call({Node? node, String message});
+  $Res call({Node? node, List<Node> completedNodes, String message});
 
   $NodeCopyWith<$Res>? get node;
 }
@@ -61,6 +62,7 @@ class _$CompleteNodeResponseCopyWithImpl<$Res,
   @override
   $Res call({
     Object? node = freezed,
+    Object? completedNodes = null,
     Object? message = null,
   }) {
     return _then(_value.copyWith(
@@ -68,6 +70,10 @@ class _$CompleteNodeResponseCopyWithImpl<$Res,
           ? _value.node
           : node // ignore: cast_nullable_to_non_nullable
               as Node?,
+      completedNodes: null == completedNodes
+          ? _value.completedNodes
+          : completedNodes // ignore: cast_nullable_to_non_nullable
+              as List<Node>,
       message: null == message
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
@@ -98,7 +104,7 @@ abstract class _$$CompleteNodeResponseImplCopyWith<$Res>
       __$$CompleteNodeResponseImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({Node? node, String message});
+  $Res call({Node? node, List<Node> completedNodes, String message});
 
   @override
   $NodeCopyWith<$Res>? get node;
@@ -118,6 +124,7 @@ class __$$CompleteNodeResponseImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? node = freezed,
+    Object? completedNodes = null,
     Object? message = null,
   }) {
     return _then(_$CompleteNodeResponseImpl(
@@ -125,6 +132,10 @@ class __$$CompleteNodeResponseImplCopyWithImpl<$Res>
           ? _value.node
           : node // ignore: cast_nullable_to_non_nullable
               as Node?,
+      completedNodes: null == completedNodes
+          ? _value._completedNodes
+          : completedNodes // ignore: cast_nullable_to_non_nullable
+              as List<Node>,
       message: null == message
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
@@ -136,19 +147,32 @@ class __$$CompleteNodeResponseImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$CompleteNodeResponseImpl implements _CompleteNodeResponse {
-  const _$CompleteNodeResponseImpl({this.node, required this.message});
+  const _$CompleteNodeResponseImpl(
+      {this.node,
+      final List<Node> completedNodes = const [],
+      required this.message})
+      : _completedNodes = completedNodes;
 
   factory _$CompleteNodeResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$CompleteNodeResponseImplFromJson(json);
 
   @override
   final Node? node;
+  final List<Node> _completedNodes;
+  @override
+  @JsonKey()
+  List<Node> get completedNodes {
+    if (_completedNodes is EqualUnmodifiableListView) return _completedNodes;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_completedNodes);
+  }
+
   @override
   final String message;
 
   @override
   String toString() {
-    return 'CompleteNodeResponse(node: $node, message: $message)';
+    return 'CompleteNodeResponse(node: $node, completedNodes: $completedNodes, message: $message)';
   }
 
   @override
@@ -157,12 +181,15 @@ class _$CompleteNodeResponseImpl implements _CompleteNodeResponse {
         (other.runtimeType == runtimeType &&
             other is _$CompleteNodeResponseImpl &&
             (identical(other.node, node) || other.node == node) &&
+            const DeepCollectionEquality()
+                .equals(other._completedNodes, _completedNodes) &&
             (identical(other.message, message) || other.message == message));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, node, message);
+  int get hashCode => Object.hash(runtimeType, node,
+      const DeepCollectionEquality().hash(_completedNodes), message);
 
   /// Create a copy of CompleteNodeResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -185,6 +212,7 @@ class _$CompleteNodeResponseImpl implements _CompleteNodeResponse {
 abstract class _CompleteNodeResponse implements CompleteNodeResponse {
   const factory _CompleteNodeResponse(
       {final Node? node,
+      final List<Node> completedNodes,
       required final String message}) = _$CompleteNodeResponseImpl;
 
   factory _CompleteNodeResponse.fromJson(Map<String, dynamic> json) =
@@ -192,6 +220,8 @@ abstract class _CompleteNodeResponse implements CompleteNodeResponse {
 
   @override
   Node? get node;
+  @override
+  List<Node> get completedNodes;
   @override
   String get message;
 

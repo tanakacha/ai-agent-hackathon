@@ -103,6 +103,41 @@ public class NodeService {
         logger.info("複数ノード一括作成完了 (作成件数: {})", createdNodes.size());
         return createdNodes;
     }
+
+    public List<Node> completeNodeWithDescendants(String nodeId) throws InterruptedException, ExecutionException {
+        logger.info("開始: ノードとその子孫の完了処理 (ID: {})", nodeId);
+        
+        List<Node> completedNodes = new ArrayList<>();
+        completeNodeRecursively(nodeId, completedNodes);
+        
+        logger.info("ノードとその子孫の完了処理完了 (完了件数: {})", completedNodes.size());
+        return completedNodes;
+    }
+
+    private void completeNodeRecursively(String nodeId, List<Node> completedNodes) 
+            throws InterruptedException, ExecutionException {
+        Node node = getNodeById(nodeId);
+        if (node == null) {
+            logger.warn("ノードが見つかりません: ID={}", nodeId);
+            return;
+        }
+
+        if (node.getProgress_rate() != 100) {
+            node.setProgress_rate(100);
+            node.setFinished_at(new Date());
+            node.setUpdated_at(new Date());
+            
+            Node updatedNode = updateNode(node);
+            completedNodes.add(updatedNode);
+            logger.info("ノードを完了しました: ID={}, Title={}", nodeId, node.getTitle());
+        }
+
+        if (node.getChildren_ids() != null && !node.getChildren_ids().isEmpty()) {
+            for (String childId : node.getChildren_ids()) {
+                completeNodeRecursively(childId, completedNodes);
+            }
+        }
+    }
     
     private int getChildCountForParent(String parentId) throws InterruptedException, ExecutionException {
         CollectionReference nodesCollection = firestore.collection(NODES_COLLECTION);

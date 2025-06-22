@@ -9,6 +9,7 @@ part '_generated/complete_node_response.g.dart';
 class CompleteNodeResponse with _$CompleteNodeResponse {
   const factory CompleteNodeResponse({
     Node? node,
+    @Default([]) List<Node> completedNodes,
     required String message,
   }) = _CompleteNodeResponse;
 

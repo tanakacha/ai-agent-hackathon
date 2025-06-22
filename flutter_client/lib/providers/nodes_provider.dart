@@ -150,9 +150,12 @@ class NodesNotifier extends _$NodesNotifier {
         nodeId: nodeId,
       );
       
-      if (response.node != null) {
-        final completedNode = response.node!;
-        state = {...state, nodeId: completedNode};
+      if (response.completedNodes.isNotEmpty) {
+        final updatedState = Map<String, Node>.from(state);
+        for (final completedNode in response.completedNodes) {
+          updatedState[completedNode.id] = completedNode;
+        }
+        state = updatedState;
       }
     } catch (e) {
       rethrow;

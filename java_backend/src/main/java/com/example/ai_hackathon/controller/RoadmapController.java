@@ -136,15 +136,12 @@ public class RoadmapController {
                 return errorResponse;
             }
 
-            node.setProgress_rate(100);
-            node.setFinished_at(new java.util.Date());
-            node.setUpdated_at(new java.util.Date());
-
-            Node updatedNode = nodeService.updateNode(node);
+            List<Node> completedNodes = nodeService.completeNodeWithDescendants(request.getNodeId());
 
             CompleteNodeResponse response = new CompleteNodeResponse();
-            response.setNode(updatedNode);
-            response.setMessage("ノードを正常に完了しました");
+            response.setNode(node);
+            response.setCompletedNodes(completedNodes);
+            response.setMessage("ノードを正常に完了しました (完了件数: " + completedNodes.size() + ")");
 
             return response;
 
