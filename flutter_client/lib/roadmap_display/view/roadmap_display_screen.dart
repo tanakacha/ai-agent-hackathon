@@ -3,6 +3,7 @@ import 'package:flutter_client/common/model/node.dart';
 import 'package:flutter_client/roadmap_view/utils/default_tree_layout_algorithm.dart';
 import 'package:flutter_client/roadmap_view/widget/roadmap_widget.dart';
 import 'package:flutter_client/widgets/node_detail_modal.dart';
+import 'package:flutter_client/auth/view_model/auth_notifier.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../view_model/roadmap_display_notifier.dart';
@@ -210,6 +211,37 @@ class RoadmapDisplayScreen extends HookConsumerWidget {
                 onPressed: () {
                   ref.invalidate(roadmapDisplayNotifierProvider(mapId));
                 },
+              ),
+              PopupMenuButton<String>(
+                onSelected: (String value) async {
+                  if (value == 'logout') {
+                    try {
+                      await ref.read(authNotifierProvider.notifier).signOut();
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('ログアウトに失敗しました: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('ログアウト'),
+                      ],
+                    ),
+                  ),
+                ],
+                icon: const Icon(Icons.more_vert),
               ),
             ],
           ),
