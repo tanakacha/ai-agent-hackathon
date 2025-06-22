@@ -218,8 +218,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
                         start: leftAnclePos,
                         end: nodePos,
                         curveEnd: leftChildPos,
-                        midpoint:
-                        Offset(
+                        midpoint: Offset(
                           leftAnclePos.dx - RoadmapWidget._curveSpacing,
                           leftAnclePos.dy - RoadmapWidget._curveSpacing,
                         ),
@@ -254,8 +253,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
                         start: nodePos,
                         end: rightAuntPos,
                         curveStart: rightChildPos,
-                        midpoint:
-                        Offset(
+                        midpoint: Offset(
                           rightAuntPos.dx + RoadmapWidget._curveSpacing,
                           rightAuntPos.dy + RoadmapWidget._curveSpacing,
                         ),
@@ -265,7 +263,9 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
                   }),
 
                   // Draw nodes with spacing applied
-                  ...widget.nodes.values.map((node) {
+                  ...widget.nodes.values
+                      .where((node) => node.nodeType != NodeType.root)
+                      .map((node) {
                     final isSelected = widget.selectedNodeId == node.id;
                     return NodeWidget(
                       node: node,
