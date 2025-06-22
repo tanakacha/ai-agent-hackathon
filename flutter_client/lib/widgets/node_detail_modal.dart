@@ -172,7 +172,7 @@ class NodeDetailModal extends HookConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: isLoading.value ? null : handleDeepDivePressed,
+                onPressed: (isLoading.value || isCompleting.value) ? null : handleDeepDivePressed,
                 icon: isLoading.value
                     ? const SizedBox(
                         width: 20,
