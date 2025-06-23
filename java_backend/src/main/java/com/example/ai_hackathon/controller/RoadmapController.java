@@ -3,6 +3,7 @@ package com.example.ai_hackathon.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
+import com.example.dto.CreateQuestionsRequest;
+import com.example.dto.CreateQuestionsResponse;
+import com.example.service.QuestionGenerationService;
 import com.example.dto.AddChildNodesRequest;
 import com.example.dto.AddChildNodesResponse;
 import com.example.dto.AlternativeNodeRequest;
@@ -37,6 +42,7 @@ public class RoadmapController {
     private final ChildNodeGenerationService childNodeGenerationService;
     private final NodeService nodeService;
     private final AlternativeNodeGenerationService alternativeNodeGenerationService;
+    private final QuestionGenerationService questionGenerationService;
 
     @Autowired
     public RoadmapController(RoadmapGenerationService roadmapGenerationService, 
@@ -44,7 +50,8 @@ public class RoadmapController {
                            RoadMapService roadMapService,
                            ChildNodeGenerationService childNodeGenerationService,
                            NodeService nodeService,
-                           AlternativeNodeGenerationService alternativeNodeGenerationService
+                           AlternativeNodeGenerationService alternativeNodeGenerationService,
+                           QuestionGenerationService questionGenerationService
                            ) {
         this.roadmapGenerationService = roadmapGenerationService;
         this.detailedRoadmapGenerationService = detailedRoadmapGenerationService;
@@ -52,6 +59,17 @@ public class RoadmapController {
         this.childNodeGenerationService = childNodeGenerationService;
         this.nodeService = nodeService;
         this.alternativeNodeGenerationService = alternativeNodeGenerationService;
+        this.questionGenerationService = questionGenerationService;
+    }
+
+    @PostMapping("/v2/questions")
+    public ResponseEntity<CreateQuestionsResponse> getQuestionsForRoadmap(@RequestBody CreateQuestionsRequest request) {
+        try {
+            CreateQuestionsResponse response = questionGenerationService.generateQuestions(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/generate")
