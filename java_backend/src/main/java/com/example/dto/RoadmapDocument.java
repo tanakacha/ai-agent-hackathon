@@ -24,7 +24,7 @@ public class RoadmapDocument {
     private CreationContext creationContext;
 
     // --- 生成されたロードマップ本体---
-    private List<Node> nodes;
+    private List<String> nodeId;
 
     @Data
     @NoArgsConstructor
