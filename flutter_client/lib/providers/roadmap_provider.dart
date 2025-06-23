@@ -90,4 +90,17 @@ class RoadmapNotifier extends _$RoadmapNotifier {
       state = AsyncError(e, st);
     }
   }
+
+  Future<void> refreshRoadmap() async {
+    final currentState = state;
+    if (!currentState.hasValue) return;
+
+    final updatedNodes = ref.read(nodesNotifierProvider);
+    final roadmap = currentState.value!;
+    
+    state = AsyncData(roadmap.copyWith(
+      nodes: updatedNodes,
+      updatedAt: DateTime.now(),
+    ));
+  }
 }

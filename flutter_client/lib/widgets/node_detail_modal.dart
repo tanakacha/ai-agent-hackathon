@@ -77,6 +77,12 @@ class NodeDetailModal extends HookConsumerWidget {
           nodeId: node.id,
         );
 
+        try {
+          await ref.read(roadmapNotifierProvider.notifier).refreshRoadmap();
+        } catch (e) {
+          debugPrint('Failed to refresh roadmap: $e');
+        }
+
         if (context.mounted) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
