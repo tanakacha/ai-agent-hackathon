@@ -27,6 +27,7 @@ import com.example.service.QuestionGenerationService;
 import com.example.dto.AddChildNodesRequest;
 import com.example.dto.AddChildNodesResponse;
 import com.example.dto.AlternativeNodeRequest;
+import com.example.dto.CreateDetailedRoadmapRequest;
 import com.example.dto.DetailedRoadmapRequest;
 import com.example.dto.DetailedRoadmapResponse;
 import com.example.dto.Node;
@@ -187,5 +188,34 @@ public class RoadmapController {
     public Node generateSingleAlternativeNode(@RequestBody AlternativeNodeRequest request) { 
         Node savedNode = alternativeNodeGenerationService.generateAndUpdateNode(request.getNodeId());
         return savedNode;
+    }
+    @PostMapping("/create-with-user")
+    public DetailedRoadmapResponse createDetailedRoadmapWithUser(@RequestBody CreateDetailedRoadmapRequest request) {
+        try {
+            // Convert CreateDetailedRoadmapRequest to DetailedRoadmapRequest
+            DetailedRoadmapRequest detailedRequest = new DetailedRoadmapRequest();
+            detailedRequest.setGoal(request.getGoal());
+            detailedRequest.setDeadline(request.getDeadline());
+            
+            DetailedRoadmapRequest.UserProfile userProfile = new DetailedRoadmapRequest.UserProfile();
+            userProfile.setUserType(DetailedRoadmapRequest.UserProfile.UserType.valueOf(request.getUserType().toString()));
+            userProfile.setAvailableHoursPerDay(request.getAvailableHoursPerDay());
+            userProfile.setAvailableDaysPerWeek(request.getAvailableDaysPerWeek());
+            userProfile.setExperienceLevel(DetailedRoadmapRequest.UserProfile.ExperienceLevel.valueOf(request.getExperienceLevel().toString()));
+            
+            detailedRequest.setUserProfile(userProfile);
+            
+            // Generate roadmap
+            DetailedRoadmapResponse response = detailedRoadmapGenerationService.generateDetailedRoadmap(detailedRequest);
+            
+            // Update the roadmap with user_id
+            roadMapService.updateRoadmapUserId(response.getMapId(), request.getUserId());
+            
+            return response;
+        } catch (Exception e) {
+            DetailedRoadmapResponse errorResponse = new DetailedRoadmapResponse();
+            errorResponse.setMessage("ユーザー指定ロードマップ作成中にエラーが発生しました: " + e.getMessage());
+            return errorResponse;
+        }
     }
 }

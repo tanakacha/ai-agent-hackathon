@@ -23,7 +23,12 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	implementation 'com.google.firebase:firebase-admin:9.2.0'
+	
+	// Firebase Admin SDK - commons-loggingを除外
+	implementation('com.google.firebase:firebase-admin:9.2.0') {
+		exclude group: 'commons-logging', module: 'commons-logging'
+	}
+	
 	compileOnly("org.projectlombok:lombok:1.18.38")
 	annotationProcessor("org.projectlombok:lombok:1.18.38")
 	implementation 'org.json:json:20231013'

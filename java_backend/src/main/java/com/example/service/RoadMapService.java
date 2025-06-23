@@ -135,4 +135,17 @@ public class RoadMapService {
 		
 		return roadMap;
 	}
+
+	public void updateRoadmapUserId(String mapId, String userId) throws InterruptedException, ExecutionException {
+		logger.info("開始: RoadMapのuser_id更新 (ID: {}, UserId: {})", mapId, userId);
+		try {
+			DocumentReference docRef = firestore.collection(ROADMAPS_COLLECTION).document(mapId);
+			ApiFuture<WriteResult> future = docRef.update("user_id", userId);
+			WriteResult result = future.get();
+			logger.info("完了: RoadMapのuser_id更新 (ID: {}, UserId: {}, 更新時刻: {})", mapId, userId, result.getUpdateTime());
+		} catch (Exception e) {
+			logger.error("RoadMapのuser_id更新中にエラーが発生しました: {}", e.getMessage(), e);
+			throw e;
+		}
+	}
 }
