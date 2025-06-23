@@ -55,7 +55,7 @@ public class QuestionService {
                         q.setQuestionId(UUID.randomUUID().toString());
                     }
                 })
-                .map(this::createQuestion) // 下で修正されたcreateQuestionを再利用
+                .map(this::createQuestion)
                 .collect(Collectors.toList());
 
             logger.info("'{}'という目標に基づき、{}個の質問を生成・保存しました。", request.getGoal(), savedQuestions.size());
