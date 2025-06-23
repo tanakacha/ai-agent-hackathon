@@ -82,7 +82,7 @@ class RoadmapDocumentServiceTest {
         assertThat(actualDocument.getGoal()).isEqualTo("テストゴール"); // 中身が正しいこと
 
         // サービスが正しいコレクションとドキュメントIDを呼び出したか検証
-        verify(firestore).collection("roadmaps");
+        verify(firestore).collection("maps");
         verify(collectionReference).document(roadmapId);
     }
 

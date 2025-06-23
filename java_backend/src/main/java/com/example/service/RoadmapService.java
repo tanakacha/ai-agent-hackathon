@@ -65,7 +65,7 @@ public class RoadmapService {
             nodeRepository.saveAll(structuredNodes);
             logger.info("{}個のNodeをDBに保存しました。", structuredNodes.size());
 
-            // 4. 次にRoadmapDocumentを構築し、'roadmaps'コレクションに保存
+            // 4. 次にRoadmapDocumentを構築し、'maps'コレクションに保存
             RoadmapDocument roadmapToSave = buildRoadmapDocument(request, userId, llmResponse.roadmapTitle, structuredNodes);
             roadmapRepository.save(roadmapToSave);
             logger.info("RoadmapDocumentをDBに保存しました。ID: {}", roadmapToSave.getId());

@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutionException;
 
 @Repository
 public class RoadmapRepository {
-    private static final String COLLECTION_NAME = "roadmaps";
+    private static final String COLLECTION_NAME = "maps";
     private final Firestore firestore;
 
     public RoadmapRepository(Firestore firestore) { this.firestore = firestore; }

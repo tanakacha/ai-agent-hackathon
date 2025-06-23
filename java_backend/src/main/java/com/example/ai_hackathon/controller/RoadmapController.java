@@ -106,6 +106,7 @@ public class RoadmapController {
         }
     }
 
+    // デフォルトの質問リストを出力する
     @PostMapping("/v2/questions")
     public ResponseEntity<CreateQuestionsResponse> getQuestionsForRoadmap(@RequestBody CreateQuestionsRequest request) {
         try {
@@ -116,6 +117,7 @@ public class RoadmapController {
         }
     }
 
+    // デフォルトの推定時間を出力する
     @PostMapping("/v2/estimations")
     public ResponseEntity<EstimateHoursResponse> getEstimatedHours(@RequestBody EstimateHoursRequest request) {
         try {

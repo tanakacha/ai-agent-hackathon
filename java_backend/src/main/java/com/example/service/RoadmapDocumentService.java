@@ -21,7 +21,7 @@ public class RoadmapDocumentService {
     private static final Logger logger = LoggerFactory.getLogger(RoadmapDocumentService.class);
     private final Firestore firestore;
 
-    private static final String ROADMAPS_COLLECTION = "roadmaps";
+    private static final String ROADMAPS_COLLECTION = "maps";
 
     public RoadmapDocumentService(Firestore firestore) {
         this.firestore = firestore;
