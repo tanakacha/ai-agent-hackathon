@@ -58,7 +58,7 @@ class UserProfileInputScreen extends HookConsumerWidget {
         initial: () {},
         loading: () {},
         success: () {
-          Navigator.of(context).pushReplacement(
+          Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => GoalInputScreen(uid: uid),
             ),

@@ -55,7 +55,7 @@ class GoalInputScreen extends HookConsumerWidget {
         initial: () {},
         loading: () {},
         success: (mapId) {
-          Navigator.of(context).pushReplacement(
+          Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => RoadmapDisplayScreen(mapId: mapId),
             ),
