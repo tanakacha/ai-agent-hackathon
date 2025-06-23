@@ -83,7 +83,9 @@ class RoadMapDetailScreen extends HookConsumerWidget {
           showDialog(
             context: context,
             builder: (context) => NodeDetailModal(nodeId: nodeId),
-          );
+          ).then((_) {
+            ref.read(roadmapNotifierProvider.notifier).refreshRoadmap();
+          });
         }
 
         return Scaffold(

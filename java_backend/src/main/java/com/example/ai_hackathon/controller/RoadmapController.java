@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.dto.AddChildNodesRequest;
 import com.example.dto.AddChildNodesResponse;
 import com.example.dto.AlternativeNodeRequest;
+import com.example.dto.CompleteNodeRequest;
+import com.example.dto.CompleteNodeResponse;
 import com.example.dto.CreateDetailedRoadmapRequest;
 import com.example.dto.DetailedRoadmapRequest;
 import com.example.dto.DetailedRoadmapResponse;
@@ -118,6 +120,39 @@ public class RoadmapController {
         Node savedNode = alternativeNodeGenerationService.generateAndUpdateNode(request.getNodeId());
         return savedNode;
     }
+
+    @PostMapping("/nodes/complete")
+    public CompleteNodeResponse completeNode(@RequestBody CompleteNodeRequest request) {
+        try {
+            Node node = nodeService.getNodeById(request.getNodeId());
+            if (node == null) {
+                CompleteNodeResponse errorResponse = new CompleteNodeResponse();
+                errorResponse.setMessage("指定されたノードが見つかりませんでした: " + request.getNodeId());
+                return errorResponse;
+            }
+
+            if (!request.getMapId().equals(node.getMap_id())) {
+                CompleteNodeResponse errorResponse = new CompleteNodeResponse();
+                errorResponse.setMessage("ノードのマップIDが一致しません");
+                return errorResponse;
+            }
+
+            List<Node> completedNodes = nodeService.completeNodeWithDescendants(request.getNodeId());
+
+            CompleteNodeResponse response = new CompleteNodeResponse();
+            response.setNode(node);
+            response.setCompletedNodes(completedNodes);
+            response.setMessage("ノードを正常に完了しました (完了件数: " + completedNodes.size() + ")");
+
+            return response;
+
+        } catch (Exception e) {
+            CompleteNodeResponse errorResponse = new CompleteNodeResponse();
+            errorResponse.setMessage("ノード完了中にエラーが発生しました: " + e.getMessage());
+            return errorResponse;
+        }
+    }
+
     @PostMapping("/create-with-user")
     public DetailedRoadmapResponse createDetailedRoadmapWithUser(@RequestBody CreateDetailedRoadmapRequest request) {
         try {

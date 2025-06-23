@@ -198,7 +198,9 @@ class RoadmapDisplayScreen extends HookConsumerWidget {
           showDialog(
             context: context,
             builder: (context) => NodeDetailModal(nodeId: nodeId),
-          );
+          ).then((_) {
+            ref.invalidate(roadmapDisplayNotifierProvider(mapId));
+          });
         }
 
         return Scaffold(
