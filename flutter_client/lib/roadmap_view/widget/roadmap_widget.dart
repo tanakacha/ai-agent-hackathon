@@ -164,7 +164,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
             ),
             child: SizedBox(
               width: -minX + RoadmapWidget._horizontalOffset,
-              height: 2000,
+              height: maxY,
               child: Stack(
                 children: [
                   // Draw sibling connections

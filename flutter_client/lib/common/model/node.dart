@@ -2,21 +2,20 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part '_generated/node.freezed.dart';
 
-enum NodeType { 
+enum NodeType {
   @JsonValue('Start')
-  start, 
+  start,
   @JsonValue('Goal')
-  goal, 
+  goal,
   @JsonValue('Task')
-  normal, 
+  normal,
   @JsonValue('Root')
-  root 
+  root
 }
 
 @freezed
 class Node with _$Node {
   const Node._();
-  
   const factory Node({
     required String id,
     String? parentId,
@@ -39,7 +38,8 @@ class Node with _$Node {
     return Node(
       id: json['id'] as String,
       parentId: json['parent_id'] as String?,
-      childrenIds: (json['children_ids'] as List<dynamic>?)?.cast<String>() ?? [],
+      childrenIds:
+          (json['children_ids'] as List<dynamic>?)?.cast<String>() ?? [],
       nodeType: _parseNodeType(json['node_type'] as String?),
       title: json['title'] as String,
       description: json['description'] as String,
@@ -48,7 +48,9 @@ class Node with _$Node {
       x: (json['x'] as num?)?.toDouble() ?? 0.0,
       y: (json['y'] as num?)?.toDouble() ?? 0.0,
       dueAt: DateTime.parse(json['due_at'] as String),
-      finishedAt: json['finished_at'] != null ? DateTime.parse(json['finished_at'] as String) : null,
+      finishedAt: json['finished_at'] != null
+          ? DateTime.parse(json['finished_at'] as String)
+          : null,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       mapId: json['map_id'] as String?,

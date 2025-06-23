@@ -4,7 +4,7 @@
 		"name": "Taro Yamada"
 	},
 	"map": {
-		"id": "map-1",
+		"id": "map-5678",
 		"user_id": "user-1234",
 		"title": "Web開発マスターへの道",
 		"objective": "3ヶ月でWebアプリを作れるようになる",
@@ -15,36 +15,133 @@
 	},
 	"nodes": [
 		{
-			"id": "node-0001",
+			"id": "map-5678-node-001",
 			"map_id": "map-5678",
-			"title": "HTML基礎",
+			"title": "Web開発ロードマップ",
 			"node_type": "Root",
-			"duration": 5,
-			"description": "HTMLの基本構造を学ぶ",
-			"progress_rate": 100,
+			"duration": 0,
+			"description": "全体をまとめるルートノード",
+			"progress_rate": 0,
 			"parent_id": null,
 			"children_ids": [
-				"node-0002"
+				"map-5678-node-002",
+				"map-5678-node-003",
+				"map-5678-node-007"
 			],
-			"due_at": "2025-06-05T00:00:00",
-			"finished_at": "2025-06-03T00:00:00",
+			"x": 0.0,
+			"y": 0.0,
+			"due_at": "2025-09-01T00:00:00",
+			"finished_at": null,
 			"created_at": "2025-06-01T12:00:00",
 			"updated_at": "2025-06-01T12:00:00"
 		},
 		{
-			"id": "node-0002",
+			"id": "map-5678-node-002",
 			"map_id": "map-5678",
-			"title": "CSS入門",
-			"node_type": "Normal",
-			"duration": 7,
-			"description": "基本的なスタイルを付ける方法を学ぶ",
-			"progress_rate": 50,
-			"parent_id": "node-0001",
+			"title": "学習スタート",
+			"node_type": "Start",
+			"duration": 1,
+			"description": "学習開始！まずはHTMLの基礎から",
+			"progress_rate": 0,
+			"parent_id": "map-5678-node-001",
 			"children_ids": [],
-			"due_at": "2025-06-10T00:00:00",
+			"x": 0.0,
+			"y": 0.0,
+			"due_at": "2025-06-05T00:00:00",
 			"finished_at": null,
 			"created_at": "2025-06-01T12:00:00",
 			"updated_at": "2025-06-01T12:00:00"
+		},
+		{
+			"id": "map-5678-node-003",
+			"map_id": "map-5678",
+			"title": "HTML基礎",
+			"node_type": "Task",
+			"duration": 5,
+			"description": "HTMLの基本構造を学ぶ",
+			"progress_rate": 100,
+			"parent_id": "map-5678-node-001",
+			"children_ids": [
+				"map-5678-node-004"
+			],
+			"x": 0.0,
+			"y": 0.0,
+			"due_at": "2025-06-10T00:00:00",
+			"finished_at": "2025-06-07T00:00:00",
+			"created_at": "2025-06-01T12:00:00",
+			"updated_at": "2025-06-07T12:00:00"
+		},
+		{
+			"id": "map-5678-node-004",
+			"map_id": "map-5678",
+			"title": "CSS入門",
+			"node_type": "Task",
+			"duration": 7,
+			"description": "基本的なスタイルを付ける方法を学ぶ",
+			"progress_rate": 50,
+			"parent_id": "map-5678-node-003",
+			"children_ids": [
+				"map-5678-node-005"
+			],
+			"x": 0.0,
+			"y": 0.0,
+			"due_at": "2025-06-20T00:00:00",
+			"finished_at": null,
+			"created_at": "2025-06-01T12:00:00",
+			"updated_at": "2025-06-15T12:00:00"
+		},
+		{
+			"id": "map-5678-node-005",
+			"map_id": "map-5678",
+			"title": "JavaScript基礎",
+			"node_type": "Task",
+			"duration": 14,
+			"description": "動的なWebページ作成の基礎を学ぶ",
+			"progress_rate": 0,
+			"parent_id": "map-5678-node-003",
+			"children_ids": [
+				"map-5678-node-006"
+			],
+			"x": 0.0,
+			"y": 0.0,
+			"due_at": "2025-07-05T00:00:00",
+			"finished_at": null,
+			"created_at": "2025-06-01T12:00:00",
+			"updated_at": "2025-06-15T12:00:00"
+		},
+		{
+			"id": "map-5678-node-006",
+			"map_id": "map-5678",
+			"title": "簡単なWebアプリ作成",
+			"node_type": "Task",
+			"duration": 20,
+			"description": "HTML, CSS, JSを使ってシンプルなWebアプリを作成",
+			"progress_rate": 0,
+			"parent_id": "map-5678-node-005",
+			"children_ids": [],
+			"x": 0.0,
+			"y": 0.0,
+			"due_at": "2025-08-01T00:00:00",
+			"finished_at": null,
+			"created_at": "2025-06-01T12:00:00",
+			"updated_at": "2025-06-15T12:00:00"
+		},
+		{
+			"id": "map-5678-node-007",
+			"map_id": "map-5678",
+			"title": "Web開発マスター",
+			"node_type": "Goal",
+			"duration": 0,
+			"description": "基礎をマスターし、自作アプリを完成させた！",
+			"progress_rate": 0,
+			"parent_id": "map-5678-node-001",
+			"children_ids": [],
+			"x": 0.0,
+			"y": 0.0,
+			"due_at": "2025-09-01T00:00:00",
+			"finished_at": null,
+			"created_at": "2025-06-01T12:00:00",
+			"updated_at": "2025-06-15T12:00:00"
 		}
 	]
 }
