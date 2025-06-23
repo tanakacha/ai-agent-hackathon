@@ -8,7 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = {
     "com.example.ai_hackathon",
     "com.example.service",
-    "com.example.config"
+    "com.example.config",
+    "com.example.repository"
 })
 public class AiHackathonApplication {
 

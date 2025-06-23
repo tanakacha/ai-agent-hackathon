@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.CreateRoadmapRequest;
+// import com.example.service.RoadmapOrchestrationService;
 import com.example.dto.EstimateHoursRequest;
 import com.example.dto.EstimateHoursResponse;
 import com.example.service.EstimationService;
@@ -46,6 +48,7 @@ public class RoadmapController {
     private final AlternativeNodeGenerationService alternativeNodeGenerationService;
     private final QuestionGenerationService questionGenerationService;
     private final EstimationService estimationService;
+    // private final RoadmapOrchestrationService roadmapOrchestrationService;
 
     @Autowired
     public RoadmapController(RoadmapGenerationService roadmapGenerationService, 
@@ -66,6 +69,16 @@ public class RoadmapController {
         this.questionGenerationService = questionGenerationService;
         this.estimationService = estimationService;
     }
+
+    // @PostMapping("/v2/roadmaps")
+    // public ResponseEntity<RoadmapResponse> createRoadmap(@RequestBody CreateRoadmapRequest request) {
+    //     try {
+    //         RoadmapResponse response = roadmapOrchestrationService.createFullRoadmap(request);
+    //         return ResponseEntity.ok(response);
+    //     } catch (Exception e) {
+    //         return ResponseEntity.internalServerError().build();
+    //     }
+    // }
 
     @PostMapping("/v2/questions")
     public ResponseEntity<CreateQuestionsResponse> getQuestionsForRoadmap(@RequestBody CreateQuestionsRequest request) {
