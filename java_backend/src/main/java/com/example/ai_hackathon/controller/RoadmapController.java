@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
+import com.example.dto.EstimateHoursRequest;
+import com.example.dto.EstimateHoursResponse;
+import com.example.service.EstimationService;
 import com.example.dto.CreateQuestionsRequest;
 import com.example.dto.CreateQuestionsResponse;
 import com.example.service.QuestionGenerationService;
@@ -43,6 +45,7 @@ public class RoadmapController {
     private final NodeService nodeService;
     private final AlternativeNodeGenerationService alternativeNodeGenerationService;
     private final QuestionGenerationService questionGenerationService;
+    private final EstimationService estimationService;
 
     @Autowired
     public RoadmapController(RoadmapGenerationService roadmapGenerationService, 
@@ -51,7 +54,8 @@ public class RoadmapController {
                            ChildNodeGenerationService childNodeGenerationService,
                            NodeService nodeService,
                            AlternativeNodeGenerationService alternativeNodeGenerationService,
-                           QuestionGenerationService questionGenerationService
+                           QuestionGenerationService questionGenerationService,
+                           EstimationService estimationService
                            ) {
         this.roadmapGenerationService = roadmapGenerationService;
         this.detailedRoadmapGenerationService = detailedRoadmapGenerationService;
@@ -60,12 +64,23 @@ public class RoadmapController {
         this.nodeService = nodeService;
         this.alternativeNodeGenerationService = alternativeNodeGenerationService;
         this.questionGenerationService = questionGenerationService;
+        this.estimationService = estimationService;
     }
 
     @PostMapping("/v2/questions")
     public ResponseEntity<CreateQuestionsResponse> getQuestionsForRoadmap(@RequestBody CreateQuestionsRequest request) {
         try {
             CreateQuestionsResponse response = questionGenerationService.generateQuestions(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/v2/estimations")
+    public ResponseEntity<EstimateHoursResponse> getEstimatedHours(@RequestBody EstimateHoursRequest request) {
+        try {
+            EstimateHoursResponse response = estimationService.estimateHours(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
