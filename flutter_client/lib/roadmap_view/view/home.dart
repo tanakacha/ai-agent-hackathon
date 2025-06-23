@@ -5,6 +5,7 @@ import 'package:flutter_client/roadmap_view/utils/default_tree_layout_algorithm.
 import 'package:flutter_client/roadmap_view/widget/roadmap_widget.dart';
 import 'package:flutter_client/widgets/node_detail_modal.dart';
 import 'package:flutter_client/auth/view_model/auth_notifier.dart';
+import 'package:flutter_client/app_router.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -96,6 +97,12 @@ class RoadMapDetailScreen extends HookConsumerWidget {
                   if (value == 'logout') {
                     try {
                       await ref.read(authNotifierProvider.notifier).signOut();
+                      if (context.mounted) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => const AppRouter()),
+                          (route) => false,
+                        );
+                      }
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
