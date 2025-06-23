@@ -32,18 +32,28 @@ public class VertexAIConfig {
     @Value("${google.cloud.vertexai.secret-id}")
     private String secretId;  // 例: "verex-ai-key"
 
+    @Value("${google.cloud.auth.type:secret-manager}")
+    private String authType;
+
     @Bean(name = "vertexAIGoogleCredentials")
     public GoogleCredentials googleCredentials() throws IOException {
-        try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
-            SecretVersionName secretVersionName =
-                    SecretVersionName.of(projectId, secretId, "latest");
+        if ("adc".equals(authType)) {
+            // 開発環境では Application Default Credentials を使用
+            return GoogleCredentials.getApplicationDefault()
+                    .createScoped("https://www.googleapis.com/auth/cloud-platform");
+        } else {
+            // 本番環境では Secret Manager を使用
+            try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
+                SecretVersionName secretVersionName =
+                        SecretVersionName.of(projectId, secretId, "latest");
 
-            AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
-            ByteString secretData = response.getPayload().getData();
+                AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
+                ByteString secretData = response.getPayload().getData();
 
-            try (InputStream keyStream = new ByteArrayInputStream(secretData.toByteArray())) {
-                return GoogleCredentials.fromStream(keyStream)
-                        .createScoped("https://www.googleapis.com/auth/cloud-platform");
+                try (InputStream keyStream = new ByteArrayInputStream(secretData.toByteArray())) {
+                    return GoogleCredentials.fromStream(keyStream)
+                            .createScoped("https://www.googleapis.com/auth/cloud-platform");
+                }
             }
         }
     }

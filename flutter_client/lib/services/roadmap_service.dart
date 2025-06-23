@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_client/common/model/node.dart';
 import 'package:flutter_client/common/model/road_map.dart';
@@ -8,6 +9,8 @@ import '../api/models/add_child_nodes_request.dart';
 import '../api/models/add_child_nodes_response.dart';
 import '../api/models/complete_node_request.dart';
 import '../api/models/complete_node_response.dart';
+import '../api/models/detailed_roadmap_response.dart';
+import '../auth/repository/user_profile_dto.dart';
 
 part '_generated/roadmap_service.g.dart';
 
@@ -79,4 +82,36 @@ class RoadmapService {
     return updatedRoadmap;
   }
 
+  Future<DetailedRoadmapResponse> createDetailedRoadmapWithUser({
+    required String userId,
+    required String goal,
+    required String deadline,
+    required UserType userType,
+    required int availableHoursPerDay,
+    required int availableDaysPerWeek,
+    required ExperienceLevel experienceLevel,
+  }) async {
+    final request = CreateDetailedRoadmapRequest(
+      userId: userId,
+      goal: goal,
+      deadline: deadline,
+      userType: userType,
+      availableHoursPerDay: availableHoursPerDay,
+      availableDaysPerWeek: availableDaysPerWeek,
+      experienceLevel: experienceLevel,
+    );
+
+    // ロードマップ作成は特に時間がかかるため、より長いタイムアウトを設定
+    return _apiClient.handleResponse(
+      _apiClient.dio.post(
+        '/api/roadmap/create-with-user',
+        data: request.toJson(),
+        options: Options(
+          receiveTimeout: const Duration(minutes: 10), // ロードマップ作成用に10分に延長
+          sendTimeout: const Duration(minutes: 3),     // 送信タイムアウトを3分に延長
+        ),
+      ),
+      (json) => DetailedRoadmapResponse.fromJson(json),
+    );
+  }
 }
