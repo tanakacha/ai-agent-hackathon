@@ -24,28 +24,21 @@ public class EstimationService {
     private final SimpleLLMService llmService;
     private final ObjectMapper objectMapper;
 
-    // コンストラクタを更新
     public EstimationService(SimpleLLMService llmService, ObjectMapper objectMapper) {
         this.llmService = llmService;
         this.objectMapper = objectMapper;
     }
 
-    /**
-     * ユーザーの目標と回答に基づき、AIを用いて必要時間を算出します。
-     */
     public EstimateHoursResponse estimateHours(EstimateHoursRequest request) {
         logger.info("必要時間の算出を開始します。Goal: {}", request.getGoal());
 
-        // 1. AIに渡すためのプロンプトを生成
         String prompt = createPromptForEstimation(request);
 
-        // 2. AIサービスを呼び出し、JSON形式の応答を取得
         String rawResponse = llmService.askLLM(prompt);
         String jsonResponse = cleanAiResponse(rawResponse);
         logger.debug("AIからの整形済みレスポンス: {}", jsonResponse);
 
         try {
-            // 3. AIからのJSON文字列を直接 `EstimateHoursResponse` DTOにマッピング
             return objectMapper.readValue(jsonResponse, EstimateHoursResponse.class);
         } catch (JsonProcessingException e) {
             logger.error("AIからのJSONレスポンスのパースに失敗しました。Response: {}", jsonResponse, e);
@@ -53,9 +46,7 @@ public class EstimationService {
         }
     }
 
-    /**
-     * 必要時間算出のためにAIに渡すプロンプトを生成します。
-     */
+   
     private String createPromptForEstimation(EstimateHoursRequest request) {
         String answersText = request.getQaPairs().stream()
             .map(pair -> String.format("質問: %s\n回答: %s", pair.getQuestion(), pair.getAnswer()))
@@ -84,11 +75,8 @@ public class EstimationService {
     }
 
     
-    /**
-     * AIからの応答文字列を整形し、JSONパースしやすいようにします。
-     */
+    
     private String cleanAiResponse(String response) {
-        // (このメソッドの実装は変更なし)
         if (response == null) { return ""; }
         String cleaned = response.trim();
         if (cleaned.startsWith("```json")) { cleaned = cleaned.substring(7); }

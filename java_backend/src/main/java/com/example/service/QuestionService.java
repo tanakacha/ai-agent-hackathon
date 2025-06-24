@@ -85,7 +85,6 @@ public class QuestionService {
         if (response == null) {
             return "";
         }
-        // AIが応答を```json ... ```で囲むことがあるため、それを取り除く
         String cleaned = response.trim();
         if (cleaned.startsWith("```json")) {
             cleaned = cleaned.substring(7);

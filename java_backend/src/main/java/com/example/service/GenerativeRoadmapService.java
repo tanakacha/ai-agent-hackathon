@@ -30,7 +30,6 @@ public class GenerativeRoadmapService {
     private final NodeRepository nodeRepository; // Node保存用に必須
     private final ObjectMapper objectMapper;
 
-    // AIからのJSON応答をマッピングするための中間クラス
     private static class LlmRoadmapResponse {
         public String roadmapTitle;
         public List<Node> nodes;
@@ -52,7 +51,6 @@ public class GenerativeRoadmapService {
         logger.info("正規化モデルでのロードマップ生成処理を開始します。Goal: {}", request.getGoal());
 
         try {
-            // 1. AIでロードマップの骨子（タイトルとシンプルなNodeリスト）を生成
             String prompt = createPromptForRoadmap(request);
             String jsonResponse = cleanAiResponse(llmService.askLLM(prompt));
             LlmRoadmapResponse llmResponse = objectMapper.readValue(jsonResponse, LlmRoadmapResponse.class);
@@ -61,7 +59,6 @@ public class GenerativeRoadmapService {
             String mapId = "map-" + roadmapIdStr;
             
 
-            // 2. AIからのNodeリストに詳細情報（ID、タイムスタンプ等）を付与
             List<Node> taskNodes = structureTaskNodes(llmResponse.nodes, roadmapIdStr, mapId);
             Node rootNode = createSpecialNode(roadmapIdStr, mapId, "root", "root", "root_description");
             Node startNode = createSpecialNode(roadmapIdStr, mapId, "start", "start", "開始！");
@@ -74,16 +71,13 @@ public class GenerativeRoadmapService {
             allNodes.add(goalNode);
             
 
-            // 3. 【重要】最初にNodeのリストを'nodes'コレクションに保存
             nodeRepository.saveAll(allNodes);
             logger.info("{}個のNodeをDBに保存しました。", allNodes.size());
 
-            // 4. 次にRoadmapDocumentを構築し、'maps'コレクションに保存
             RoadmapDocument roadmapToSave = buildRoadmapDocument(request, userId, llmResponse.roadmapTitle, allNodes, mapId);
             roadmapRepository.save(roadmapToSave);
             logger.info("RoadmapDocumentをDBに保存しました。ID: {}", roadmapToSave.getId());
 
-            // 5. Controllerに返すためのレスポンスDTOを構築
             return new RoadmapCreationResponseDto(roadmapToSave, allNodes);
 
         } catch (Exception e) {
@@ -92,9 +86,6 @@ public class GenerativeRoadmapService {
         }
     }
 
-    /**
-     * DBに保存するためのRoadmapDocumentを構築します。
-     */
     private RoadmapDocument buildRoadmapDocument(CreateRoadmapRequest request, String userId, String title, List<Node> nodes, String mapId) {
         RoadmapDocument doc = new RoadmapDocument();
         Instant now = Instant.now();
@@ -113,8 +104,6 @@ public class GenerativeRoadmapService {
         return doc;
     }
     
-    // (structureNodes, createPromptForRoadmap, などの他のヘルパーメソッドは変更ありません)
-    // AIが生成したNodeリストに、IDやタイムスタンプ等の詳細情報を付与します。
     private List<Node> structureTaskNodes(List<Node> simpleNodes, String roadmapIdStr, String mapId) {
         if (simpleNodes == null || simpleNodes.isEmpty()) return List.of();
         Date now = new Date();
@@ -145,7 +134,6 @@ public class GenerativeRoadmapService {
 
 
 
-        // String.formatと三重引用符を使って、読みやすく保守しやすいプロンプトを構築
         return String.format("""
             あなたは優秀なメンターであり、学習コンサルタントです。
             以下の情報に基づき、ユーザーが目標を達成するための具体的なステップで構成された学習ロードマップを作成してください。
@@ -194,10 +182,8 @@ public class GenerativeRoadmapService {
             return "";
         }
         
-        // 前後の空白を除去
         String cleaned = response.trim();
         
-        // ```json ... ``` のようなマークダウン形式を検知して除去
         if (cleaned.startsWith("```json")) {
             cleaned = cleaned.substring(7);
         } else if (cleaned.startsWith("```")) {
@@ -208,7 +194,6 @@ public class GenerativeRoadmapService {
             cleaned = cleaned.substring(0, cleaned.length() - 3);
         }
         
-        // 再度、前後の空白を除去して返す
         return cleaned.trim();
     }
 
