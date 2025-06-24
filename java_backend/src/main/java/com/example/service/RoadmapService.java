@@ -2,7 +2,6 @@ package com.example.service;
 
 import com.example.dto.*;
 import com.example.repository.NodeRepository;
-import com.example.repository.QuestionRepository;
 import com.example.repository.RoadmapRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -15,9 +14,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.function.Function;
 
 @Service
 public class RoadmapService {
@@ -25,7 +26,6 @@ public class RoadmapService {
     private static final Logger logger = LoggerFactory.getLogger(RoadmapService.class);
 
     private final SimpleLLMService llmService;
-    private final QuestionRepository questionRepository;
     private final RoadmapRepository roadmapRepository;
     private final NodeRepository nodeRepository; // Node保存用に必須
     private final ObjectMapper objectMapper;
@@ -36,10 +36,9 @@ public class RoadmapService {
         public List<Node> nodes;
     }
 
-    public RoadmapService(SimpleLLMService llmService, QuestionRepository questionRepository,
+    public RoadmapService(SimpleLLMService llmService, 
                           RoadmapRepository roadmapRepository, NodeRepository nodeRepository, ObjectMapper objectMapper) {
         this.llmService = llmService;
-        this.questionRepository = questionRepository;
         this.roadmapRepository = roadmapRepository;
         this.nodeRepository = nodeRepository;
         this.objectMapper = objectMapper;
@@ -58,22 +57,34 @@ public class RoadmapService {
             String jsonResponse = cleanAiResponse(llmService.askLLM(prompt));
             LlmRoadmapResponse llmResponse = objectMapper.readValue(jsonResponse, LlmRoadmapResponse.class);
 
-            String roadmapId = UUID.randomUUID().toString().substring(0, 8);
+            String roadmapIdStr = UUID.randomUUID().toString().substring(0, 8);
+            String mapId = "map-" + roadmapIdStr;
+            
 
             // 2. AIからのNodeリストに詳細情報（ID、タイムスタンプ等）を付与
-            List<Node> structuredNodes = structureNodes(llmResponse.nodes, roadmapId);
+            List<Node> taskNodes = structureTaskNodes(llmResponse.nodes, roadmapIdStr, mapId);
+            Node rootNode = createSpecialNode(roadmapIdStr, mapId, "root", "root", "root");
+            Node startNode = createSpecialNode(roadmapIdStr, mapId, "start", "start", "start");
+            Node goalNode = createSpecialNode(roadmapIdStr, mapId, "goal", "goal", "goal");
+
+            List<Node> allNodes = new ArrayList<>();
+            allNodes.add(rootNode);
+            allNodes.add(startNode);
+            allNodes.addAll(taskNodes);
+            allNodes.add(goalNode);
+            
 
             // 3. 【重要】最初にNodeのリストを'nodes'コレクションに保存
-            nodeRepository.saveAll(structuredNodes);
-            logger.info("{}個のNodeをDBに保存しました。", structuredNodes.size());
+            nodeRepository.saveAll(allNodes);
+            logger.info("{}個のNodeをDBに保存しました。", allNodes.size());
 
             // 4. 次にRoadmapDocumentを構築し、'maps'コレクションに保存
-            RoadmapDocument roadmapToSave = buildRoadmapDocument(request, userId, llmResponse.roadmapTitle, structuredNodes, roadmapId);
+            RoadmapDocument roadmapToSave = buildRoadmapDocument(request, userId, llmResponse.roadmapTitle, allNodes, mapId);
             roadmapRepository.save(roadmapToSave);
             logger.info("RoadmapDocumentをDBに保存しました。ID: {}", roadmapToSave.getId());
 
             // 5. Controllerに返すためのレスポンスDTOを構築
-            return new RoadmapCreationResponseDto(roadmapToSave, structuredNodes);
+            return new RoadmapCreationResponseDto(roadmapToSave, allNodes);
 
         } catch (Exception e) {
             logger.error("ロードマップ生成の予期せぬエラー。", e);
@@ -84,11 +95,11 @@ public class RoadmapService {
     /**
      * DBに保存するためのRoadmapDocumentを構築します。
      */
-    private RoadmapDocument buildRoadmapDocument(CreateRoadmapRequest request, String userId, String title, List<Node> structuredNodes, String roadmapId) {
+    private RoadmapDocument buildRoadmapDocument(CreateRoadmapRequest request, String userId, String title, List<Node> nodes, String mapId) {
         RoadmapDocument doc = new RoadmapDocument();
         Instant now = Instant.now();
 
-        doc.setId("map-" + roadmapId);
+        doc.setId(mapId);
         doc.setUserId(userId);
         doc.setCreatedAt(now);
         doc.setUpdatedAt(now);
@@ -97,20 +108,10 @@ public class RoadmapService {
 
         // CreationContextを構築
         RoadmapDocument.CreationContext context = new RoadmapDocument.CreationContext();
+        context.setQuestions(request.getQuestions());
         context.setAnswers(request.getAnswers());
-        List<String> questionIds = request.getAnswers().stream().map(AnswerDto::getQuestionId).distinct().collect(Collectors.toList());
-        List<QuestionDto> questions = questionIds.stream()
-                .map(id -> {
-                    try { return questionRepository.findById(id).orElse(null); }
-                    catch (Exception e) { logger.error("Question取得失敗 ID:{}", id, e); return null; }
-                })
-                .filter(java.util.Objects::nonNull).collect(Collectors.toList());
-        context.setQuestions(questions);
         doc.setCreationContext(context);
-        
-        // ★★★ 最も重要な変更点 ★★★
-        // 保存するドキュメントには、Node本体ではなく、NodeのIDリストを設定します。
-        List<String> nodeIds = structuredNodes.stream().map(Node::getId).collect(Collectors.toList());
+        List<String> nodeIds = nodes.stream().map(Node::getId).collect(Collectors.toList());
         doc.setNodeId(nodeIds);
         
         return doc;
@@ -118,16 +119,17 @@ public class RoadmapService {
     
     // (structureNodes, createPromptForRoadmap, などの他のヘルパーメソッドは変更ありません)
     // AIが生成したNodeリストに、IDやタイムスタンプ等の詳細情報を付与します。
-    private List<Node> structureNodes(List<Node> simpleNodes, String roadmapId) {
+    private List<Node> structureTaskNodes(List<Node> simpleNodes, String roadmapIdStr, String mapId) {
         if (simpleNodes == null || simpleNodes.isEmpty()) return List.of();
         Date now = new Date();
         int sequence = 1;
         for (Node node : simpleNodes) {
-            node.setId("node-" + roadmapId + "-" + sequence++);
+            node.setId("node-" + roadmapIdStr + "-" + sequence++);
             node.setNode_type("Task");
             node.setProgress_rate(0);
             node.setCreated_at(now);
             node.setUpdated_at(now);
+            node.setMap_id(mapId);
         }
         return simpleNodes;
     }
@@ -141,10 +143,19 @@ public class RoadmapService {
      * @return AIに送信するための整形済みプロンプト文字列
      */
     private String createPromptForRoadmap(CreateRoadmapRequest request) {
-        // ユーザーの全回答を、内部ヘルパーメソッドを使って「質問：回答」の形式に変換
+        Map<String, QuestionDto> questionMap = request.getQuestions().stream()
+                  .collect(Collectors.toMap(QuestionDto::getQuestionId, Function.identity()));
         String answersText = request.getAnswers().stream()
-                .map(this::formatAnswerWithQuestionText)
-                .collect(Collectors.joining("\n---\n"));
+            .map(answer -> {
+                QuestionDto question = questionMap.get(answer.getQuestionId());
+                String questionText = (question != null) ? question.getText() : "不明な質問";
+                return String.format(
+                    "質問: %s\n回答: %s",
+                    questionText,
+                    String.join(", ", answer.getValue())
+                );
+            })
+            .collect(Collectors.joining("\n---\n"));
 
         // String.formatと三重引用符を使って、読みやすく保守しやすいプロンプトを構築
         return String.format("""
@@ -190,32 +201,7 @@ public class RoadmapService {
      * @param answer ユーザーの回答DTO
      * @return "質問: ... \n回答: ..." 形式の文字列
      */
-    private String formatAnswerWithQuestionText(AnswerDto answer) {
-        try {
-            // questionIdを使ってリポジトリからQuestionDtoを取得
-            String questionText = questionRepository.findById(answer.getQuestionId())
-                .map(QuestionDto::getText) // QuestionDtoからテキストを取得
-                .orElse("不明な質問"); // 万が一DBに見つからなかった場合の代替テキスト
-
-            // 質問と回答を整形して返す
-            return String.format(
-                "質問: %s\n回答: %s",
-                questionText,
-                String.join(", ", answer.getValue()) // 回答が複数選択の場合も考慮
-            );
-        } catch (ExecutionException | InterruptedException e) {
-            // DBアクセス中にエラーが発生した場合のフォールバック処理
-            Thread.currentThread().interrupt(); // スレッドの割り込みステータスを復元
-            logger.error("質問テキストの取得に失敗しました。questionId: {}", answer.getQuestionId(), e);
-            // エラーが発生した場合も、ID情報を含めて処理を続行する
-            return String.format(
-                "質問(ID: %s): [質問テキストの取得に失敗しました]\n回答: %s",
-                answer.getQuestionId(),
-                String.join(", ", answer.getValue())
-            );
-        }
-    }
-
+    
     /**
      * AIからの応答文字列を整形し、JSONパースしやすいようにします。
      * LLMが返しがちなマークダウンのコードブロックなどを除去します。
@@ -244,5 +230,26 @@ public class RoadmapService {
         
         // 再度、前後の空白を除去して返す
         return cleaned.trim();
+    }
+
+    /**
+     * Root, Start, Goal などの特別なノードを生成するためのヘルパーメソッド。
+     * @param mapId       ロードマップID ("map-xxxx")
+     * @param type        ノードのタイプ兼IDの接尾辞 ("root", "start", "goal")
+     * @param title       ノードのタイトル
+     * @param description ノードの説明
+     * @return 生成されたNodeオブジェクト
+     */
+    private Node createSpecialNode(String roadmapIdStr, String mapId, String type, String title, String description) {
+        Node node = new Node();
+        node.setId("node-" + roadmapIdStr + "-" + type);
+        node.setMap_id(mapId);
+        node.setNode_type(type.substring(0, 1).toUpperCase() + type.substring(1));
+        node.setTitle(title);
+        node.setDescription(description);
+        node.setProgress_rate(0);
+        node.setCreated_at(new Date());
+        node.setUpdated_at(new Date());
+        return node;
     }
 }

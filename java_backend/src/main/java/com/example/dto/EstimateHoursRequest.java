@@ -12,4 +12,5 @@ import java.util.List;
 public class EstimateHoursRequest {
     private String goal;
     private List<AnswerDto> answers;
+    private List<QuestionDto> questions;
 }

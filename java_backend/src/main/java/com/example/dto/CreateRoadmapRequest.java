@@ -14,4 +14,5 @@ public class CreateRoadmapRequest {
     private String goal;
     private List<AnswerDto> answers;
     private int totalEstimatedHours;
+    private List<QuestionDto> questions;
 }
