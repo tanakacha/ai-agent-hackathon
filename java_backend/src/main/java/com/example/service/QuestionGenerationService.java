@@ -46,26 +46,17 @@ public class QuestionGenerationService {
 
         // 質問1: プログラミング経験
         QuestionDto q1 = new QuestionDto();
-        q1.setQuestionId("wd_q1_prog_exp");
-        q1.setText("あなたのプログラミング経験に最も近いものを選択してください。");
-        q1.setType("single_choice");
-        q1.setOptions(List.of("未経験", "趣味や学校で学んだことがある", "実務経験1年以上"));
+        q1.setQuestion("あなたのプログラミング経験に最も近いものを選択してください。");
         questions.add(q1);
 
         // 質問2: HTML/CSSのスキル
         QuestionDto q2 = new QuestionDto();
-        q2.setQuestionId("wd_q2_html_css");
-        q2.setText("HTML/CSSの知識はどのレベルですか？");
-        q2.setType("single_choice");
-        q2.setOptions(List.of("触ったことがない", "基本的なタグやスタイルが書ける", "レスポンシブデザインも実装できる"));
+        q2.setQuestion("HTML/CSSの知識はどのレベルですか？");
         questions.add(q2);
 
         // 質問3: JavaScriptのスキル
         QuestionDto q3 = new QuestionDto();
-        q3.setQuestionId("wd_q3_javascript");
-        q3.setText("JavaScript（またはTypeScript）の経験について教えてください。");
-        q3.setType("single_choice");
-        q3.setOptions(List.of("未経験", "基本的な文法を理解している", "非同期処理やフレームワークの利用経験がある"));
+        q3.setQuestion("JavaScript（またはTypeScript）の経験について教えてください。");
         questions.add(q3);
 
         return questions;

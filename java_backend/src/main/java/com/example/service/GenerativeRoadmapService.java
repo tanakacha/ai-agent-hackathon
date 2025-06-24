@@ -63,9 +63,9 @@ public class GenerativeRoadmapService {
 
             // 2. AIからのNodeリストに詳細情報（ID、タイムスタンプ等）を付与
             List<Node> taskNodes = structureTaskNodes(llmResponse.nodes, roadmapIdStr, mapId);
-            Node rootNode = createSpecialNode(roadmapIdStr, mapId, "root", "root", "root");
-            Node startNode = createSpecialNode(roadmapIdStr, mapId, "start", "start", "start");
-            Node goalNode = createSpecialNode(roadmapIdStr, mapId, "goal", "goal", "goal");
+            Node rootNode = createSpecialNode(roadmapIdStr, mapId, "root", "root", "root_description");
+            Node startNode = createSpecialNode(roadmapIdStr, mapId, "start", "start", "開始！");
+            Node goalNode = createSpecialNode(roadmapIdStr, mapId, "goal", "goal", "終了！");
 
             List<Node> allNodes = new ArrayList<>();
             allNodes.add(rootNode);
@@ -143,19 +143,23 @@ public class GenerativeRoadmapService {
      * @return AIに送信するための整形済みプロンプト文字列
      */
     private String createPromptForRoadmap(CreateRoadmapRequest request) {
-        Map<String, QuestionDto> questionMap = request.getQuestions().stream()
-                  .collect(Collectors.toMap(QuestionDto::getQuestionId, Function.identity()));
-        String answersText = request.getAnswers().stream()
-            .map(answer -> {
-                QuestionDto question = questionMap.get(answer.getQuestionId());
-                String questionText = (question != null) ? question.getText() : "不明な質問";
-                return String.format(
-                    "質問: %s\n回答: %s",
-                    questionText,
-                    String.join(", ", answer.getValue())
-                );
-            })
-            .collect(Collectors.joining("\n---\n"));
+        List<QuestionDto> questions = request.getQuestions();
+        List<AnswerDto> answers = request.getAnswers();
+        StringBuilder answersTextBuilder = new StringBuilder();
+
+        // 質問と回答をインデックスで紐付ける
+        // 念のため、リストのサイズが小さい方に合わせる
+        int size = Math.min(questions.size(), answers.size());
+        for (int i = 0; i < size; i++) {
+            String questionText = questions.get(i).getQuestion();
+            String answerValue = answers.get(i).getAnswer();
+            answersTextBuilder.append(String.format("質問: %s\n回答: %s", questionText, answerValue));
+            if (i < size - 1) {
+                answersTextBuilder.append("\n---\n");
+            }
+        }
+        String answersText = answersTextBuilder.toString();
+
 
         // String.formatと三重引用符を使って、読みやすく保守しやすいプロンプトを構築
         return String.format("""
@@ -187,20 +191,12 @@ public class GenerativeRoadmapService {
                 {
                   "title": "（ステップ2のタイトル）",
                   "description": "（ステップ2で何をすべきかの具体的な説明）",
-                  "duration": (ステップ2の所要時間 int)
+                  "duration": (ステップ2の_所要時間 int)
                 }
               ]
             }
             """, request.getGoal(), request.getTotalEstimatedHours(), answersText);
     }
-
-    /**
-     * AnswerDto（questionIdと回答値）から、質問テキストを含む人間が読みやすいQ&A形式の文字列を生成します。
-     * AIに渡すプロンプトの質を高めるために使用します。
-     *
-     * @param answer ユーザーの回答DTO
-     * @return "質問: ... \n回答: ..." 形式の文字列
-     */
     
     /**
      * AIからの応答文字列を整形し、JSONパースしやすいようにします。

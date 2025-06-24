@@ -57,21 +57,23 @@ public class EstimationService {
      * 必要時間算出のためにAIに渡すプロンプトを生成します。
      */
     private String createPromptForEstimation(EstimateHoursRequest request) {
-       // questionIdをキーにしたQuestionDtoのMapを作成し、効率的に検索できるようにする
-        Map<String, QuestionDto> questionMap = request.getQuestions().stream()
-                .collect(Collectors.toMap(QuestionDto::getQuestionId, Function.identity()));
+        List<QuestionDto> questions = request.getQuestions();
+        List<AnswerDto> answers = request.getAnswers();
+        StringBuilder answersTextBuilder = new StringBuilder();
 
-        String answersText = request.getAnswers().stream()
-            .map(answer -> {
-                QuestionDto question = questionMap.get(answer.getQuestionId());
-                String questionText = (question != null) ? question.getText() : "不明な質問";
-                return String.format(
-                    "質問: %s\n回答: %s",
-                    questionText,
-                    String.join(", ", answer.getValue())
-                );
-            })
-            .collect(Collectors.joining("\n---\n"));
+        // 質問と回答をインデックスで紐付ける
+        // 念のため、リストのサイズが小さい方に合わせる
+        int size = Math.min(questions.size(), answers.size());
+        for (int i = 0; i < size; i++) {
+            String questionText = questions.get(i).getQuestion();
+            String answerValue = answers.get(i).getAnswer();
+            answersTextBuilder.append(String.format("質問: %s\n回答: %s", questionText, answerValue));
+            if (i < size - 1) {
+                answersTextBuilder.append("\n---\n");
+            }
+        }
+        String answersText = answersTextBuilder.toString();
+
 
         return String.format("""
     あなたは、ユーザーのスキルレベルや目標に基づき、学習に必要な時間を推定する専門家です。

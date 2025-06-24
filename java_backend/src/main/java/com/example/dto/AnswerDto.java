@@ -11,8 +11,5 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class AnswerDto {
-    @JsonProperty("question_id")
-    private String questionId;
-    // テキスト、単一選択、複数選択の全てをList<String>で統一的に扱います
-    private List<String> value;
+    private String answer;
 }

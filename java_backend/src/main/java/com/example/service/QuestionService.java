@@ -40,15 +40,9 @@ public class QuestionService {
         logger.debug("AIからの整形済みレスポンス: {}", jsonResponse);
         
         try {
-            List<QuestionDto> questions = objectMapper.readValue(jsonResponse, new TypeReference<>() {});
+            List<QuestionDto> questions = objectMapper.readValue(jsonResponse, new TypeReference<List<QuestionDto>>() {});
 
-            questions.forEach(q -> {
-                if (q.getQuestionId() == null || q.getQuestionId().isEmpty()) {
-                    q.setQuestionId(UUID.randomUUID().toString());
-                }
-            });
-
-            logger.info("'{}'という目標に基づき、{}個の質問を生成・保存しました。", request.getGoal(),  questions.size());
+            logger.info("'{}'という目標に基づき、{}個の質問を生成しました。", request.getGoal(),  questions.size());
             return new CreateQuestionsResponse(questions);
 
         } catch (JsonProcessingException e) {
@@ -67,22 +61,16 @@ public class QuestionService {
             - 質問は日本語で生成してください。
             - 回答はJSON配列形式で、他のテキストは含めないでください。
             - 各質問オブジェクトには、以下のキーを含めてください。
-              - "text": 質問文 (string)
-              - "type": 質問の形式 (string)。"text", "single_choice", "multiple_choice" のいずれか。
-              - "options": "single_choice" または "multiple_choice" の場合の選択肢リスト (stringの配列)。"text"の場合は空の配列 `[]` にしてください。
+              - "question": 質問文 (string)
             - "question_id" は含めないでください。
 
             # 出力形式の例
             [
               {
-                "text": "質問文の例1です。",
-                "type": "single_choice",
-                "options": ["選択肢A", "選択肢B", "選択肢C"]
+                "question": "質問文の例1です。",
               },
               {
-                "text": "質問文の例2です。",
-                "type": "text",
-                "options": []
+                "question": "質問文の例2です。",
               }
             ]
             """, goal);

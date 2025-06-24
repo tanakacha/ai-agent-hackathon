@@ -24,9 +24,5 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class QuestionDto {
-    @JsonProperty("question_id")
-    private String questionId;
-    private String text;
-    private String type;
-    private List<String> options;
+    private String question;
 }
