@@ -58,15 +58,17 @@ public class RoadmapService {
             String jsonResponse = cleanAiResponse(llmService.askLLM(prompt));
             LlmRoadmapResponse llmResponse = objectMapper.readValue(jsonResponse, LlmRoadmapResponse.class);
 
+            String roadmapId = UUID.randomUUID().toString().substring(0, 8);
+
             // 2. AIからのNodeリストに詳細情報（ID、タイムスタンプ等）を付与
-            List<Node> structuredNodes = structureNodes(llmResponse.nodes);
+            List<Node> structuredNodes = structureNodes(llmResponse.nodes, roadmapId);
 
             // 3. 【重要】最初にNodeのリストを'nodes'コレクションに保存
             nodeRepository.saveAll(structuredNodes);
             logger.info("{}個のNodeをDBに保存しました。", structuredNodes.size());
 
             // 4. 次にRoadmapDocumentを構築し、'maps'コレクションに保存
-            RoadmapDocument roadmapToSave = buildRoadmapDocument(request, userId, llmResponse.roadmapTitle, structuredNodes);
+            RoadmapDocument roadmapToSave = buildRoadmapDocument(request, userId, llmResponse.roadmapTitle, structuredNodes, roadmapId);
             roadmapRepository.save(roadmapToSave);
             logger.info("RoadmapDocumentをDBに保存しました。ID: {}", roadmapToSave.getId());
 
@@ -82,11 +84,11 @@ public class RoadmapService {
     /**
      * DBに保存するためのRoadmapDocumentを構築します。
      */
-    private RoadmapDocument buildRoadmapDocument(CreateRoadmapRequest request, String userId, String title, List<Node> structuredNodes) {
+    private RoadmapDocument buildRoadmapDocument(CreateRoadmapRequest request, String userId, String title, List<Node> structuredNodes, String roadmapId) {
         RoadmapDocument doc = new RoadmapDocument();
         Instant now = Instant.now();
 
-        doc.setId("map-" + UUID.randomUUID().toString().substring(0, 8));
+        doc.setId("map-" + roadmapId);
         doc.setUserId(userId);
         doc.setCreatedAt(now);
         doc.setUpdatedAt(now);
@@ -116,11 +118,12 @@ public class RoadmapService {
     
     // (structureNodes, createPromptForRoadmap, などの他のヘルパーメソッドは変更ありません)
     // AIが生成したNodeリストに、IDやタイムスタンプ等の詳細情報を付与します。
-    private List<Node> structureNodes(List<Node> simpleNodes) {
+    private List<Node> structureNodes(List<Node> simpleNodes, String roadmapId) {
         if (simpleNodes == null || simpleNodes.isEmpty()) return List.of();
         Date now = new Date();
+        int sequence = 1;
         for (Node node : simpleNodes) {
-            node.setId("node-" + UUID.randomUUID().toString().substring(0, 8));
+            node.setId("node-" + roadmapId + "-" + sequence++);
             node.setNode_type("Task");
             node.setProgress_rate(0);
             node.setCreated_at(now);
