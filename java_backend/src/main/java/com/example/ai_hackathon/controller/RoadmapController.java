@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.dto.RoadmapDocument;
-import com.example.service.RoadmapService_v2;
+import com.example.service.GenerativeRoadmapService;
 
 import com.example.dto.CreateRoadmapRequest;
 // import com.example.service.RoadmapOrchestrationService;
@@ -42,7 +42,7 @@ import com.example.service.DetailedRoadmapGenerationService;
 import com.example.service.NodeService;
 import com.example.service.RoadMapService;
 import com.example.service.RoadmapGenerationService;
-import com.example.service.RoadmapService_v2;
+import com.example.service.GenerativeRoadmapService;
 
 import org.springframework.http.HttpStatus;
 
@@ -58,7 +58,7 @@ public class RoadmapController {
     private final AlternativeNodeGenerationService alternativeNodeGenerationService;
     private final QuestionGenerationService questionGenerationService;
     private final EstimationService estimationService;
-    private final RoadmapService_v2 roadmapService;
+    private final GenerativeRoadmapService roadmapService;
     // private final RoadmapOrchestrationService roadmapOrchestrationService;
 
     @Autowired
@@ -70,7 +70,7 @@ public class RoadmapController {
                            AlternativeNodeGenerationService alternativeNodeGenerationService,
                            QuestionGenerationService questionGenerationService,
                            EstimationService estimationService,
-                           RoadmapService_v2 roadmapService
+                           GenerativeRoadmapService roadmapService
                            ) {
         this.roadmapGenerationService = roadmapGenerationService;
         this.detailedRoadmapGenerationService = detailedRoadmapGenerationService;

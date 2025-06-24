@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 import java.util.function.Function;
 
 @Service
-public class RoadmapService_v2 {
+public class GenerativeRoadmapService {
 
-    private static final Logger logger = LoggerFactory.getLogger(RoadmapService_v2.class);
+    private static final Logger logger = LoggerFactory.getLogger(GenerativeRoadmapService.class);
 
     private final SimpleLLMService llmService;
     private final RoadmapRepository roadmapRepository;
@@ -36,7 +36,7 @@ public class RoadmapService_v2 {
         public List<Node> nodes;
     }
 
-    public RoadmapService_v2(SimpleLLMService llmService, 
+    public GenerativeRoadmapService(SimpleLLMService llmService, 
                           RoadmapRepository roadmapRepository, NodeRepository nodeRepository, ObjectMapper objectMapper) {
         this.llmService = llmService;
         this.roadmapRepository = roadmapRepository;
