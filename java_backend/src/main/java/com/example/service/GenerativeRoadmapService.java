@@ -106,11 +106,7 @@ public class GenerativeRoadmapService {
         doc.setGoal(request.getGoal());
         doc.setTotalEstimatedHours(request.getTotalEstimatedHours());
 
-        // CreationContextを構築
-        RoadmapDocument.CreationContext context = new RoadmapDocument.CreationContext();
-        context.setQuestions(request.getQuestions());
-        context.setAnswers(request.getAnswers());
-        doc.setCreationContext(context);
+        doc.setQaPairs(request.getQaPairs());
         List<String> nodeIds = nodes.stream().map(Node::getId).collect(Collectors.toList());
         doc.setNodeId(nodeIds);
         
@@ -143,22 +139,10 @@ public class GenerativeRoadmapService {
      * @return AIに送信するための整形済みプロンプト文字列
      */
     private String createPromptForRoadmap(CreateRoadmapRequest request) {
-        List<QuestionDto> questions = request.getQuestions();
-        List<AnswerDto> answers = request.getAnswers();
-        StringBuilder answersTextBuilder = new StringBuilder();
+        String answersText = request.getQaPairs().stream()
+            .map(pair -> String.format("質問: %s\n回答: %s", pair.getQuestion(), pair.getAnswer()))
+            .collect(Collectors.joining("\n---\n"));
 
-        // 質問と回答をインデックスで紐付ける
-        // 念のため、リストのサイズが小さい方に合わせる
-        int size = Math.min(questions.size(), answers.size());
-        for (int i = 0; i < size; i++) {
-            String questionText = questions.get(i).getQuestion();
-            String answerValue = answers.get(i).getAnswer();
-            answersTextBuilder.append(String.format("質問: %s\n回答: %s", questionText, answerValue));
-            if (i < size - 1) {
-                answersTextBuilder.append("\n---\n");
-            }
-        }
-        String answersText = answersTextBuilder.toString();
 
 
         // String.formatと三重引用符を使って、読みやすく保守しやすいプロンプトを構築

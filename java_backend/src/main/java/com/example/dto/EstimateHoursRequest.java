@@ -11,6 +11,5 @@ import java.util.List;
 @NoArgsConstructor
 public class EstimateHoursRequest {
     private String goal;
-    private List<QuestionDto> questions;
-    private List<AnswerDto> answers;
+    private List<QuestionAnswerPairDto> qaPairs;
 }

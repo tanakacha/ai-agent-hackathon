@@ -13,6 +13,5 @@ import java.util.List;
 public class CreateRoadmapRequest {
     private String goal;
     private int totalEstimatedHours;
-    private List<QuestionDto> questions;
-    private List<AnswerDto> answers;
+    private List<QuestionAnswerPairDto> qaPairs;
 }

@@ -21,16 +21,9 @@ public class RoadmapDocument {
     // --- ロードマップ生成時のインプット情報 ---
     private String goal;
     private int totalEstimatedHours;
-    private CreationContext creationContext;
+    private List<QuestionAnswerPairDto> qaPairs;
 
     // --- 生成されたロードマップ本体---
     private List<String> nodeId;
 
-    @Data
-    @NoArgsConstructor
-    public static class CreationContext {
-        // 将来の参照のために持たせる
-        private List<QuestionDto> questions;
-        private List<AnswerDto> answers;
-    }
 }

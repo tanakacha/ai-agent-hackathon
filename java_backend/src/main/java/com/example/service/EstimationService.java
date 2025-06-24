@@ -57,23 +57,9 @@ public class EstimationService {
      * 必要時間算出のためにAIに渡すプロンプトを生成します。
      */
     private String createPromptForEstimation(EstimateHoursRequest request) {
-        List<QuestionDto> questions = request.getQuestions();
-        List<AnswerDto> answers = request.getAnswers();
-        StringBuilder answersTextBuilder = new StringBuilder();
-
-        // 質問と回答をインデックスで紐付ける
-        // 念のため、リストのサイズが小さい方に合わせる
-        int size = Math.min(questions.size(), answers.size());
-        for (int i = 0; i < size; i++) {
-            String questionText = questions.get(i).getQuestion();
-            String answerValue = answers.get(i).getAnswer();
-            answersTextBuilder.append(String.format("質問: %s\n回答: %s", questionText, answerValue));
-            if (i < size - 1) {
-                answersTextBuilder.append("\n---\n");
-            }
-        }
-        String answersText = answersTextBuilder.toString();
-
+        String answersText = request.getQaPairs().stream()
+            .map(pair -> String.format("質問: %s\n回答: %s", pair.getQuestion(), pair.getAnswer()))
+            .collect(Collectors.joining("\n---\n"));
 
         return String.format("""
     あなたは、ユーザーのスキルレベルや目標に基づき、学習に必要な時間を推定する専門家です。
@@ -96,6 +82,7 @@ public class EstimationService {
     }
     """, request.getGoal(), answersText);
     }
+
     
     /**
      * AIからの応答文字列を整形し、JSONパースしやすいようにします。
