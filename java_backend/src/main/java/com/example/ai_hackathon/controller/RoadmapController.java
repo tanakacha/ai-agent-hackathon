@@ -2,15 +2,28 @@ package com.example.ai_hackathon.controller;
 
 import java.util.List;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.example.dto.RoadmapDocument;
+import com.example.service.GenerativeRoadmapService;
 
+import com.example.dto.CreateRoadmapRequest;
+// import com.example.service.RoadmapOrchestrationService;
+import com.example.dto.EstimateHoursRequest;
+import com.example.dto.EstimateHoursResponse;
+import com.example.service.EstimationService;
+import com.example.dto.CreateQuestionsRequest;
+import com.example.dto.CreateQuestionsResponse;
+import com.example.service.QuestionGenerationService;
 import com.example.dto.AddChildNodesRequest;
 import com.example.dto.AddChildNodesResponse;
 import com.example.dto.AlternativeNodeRequest;
@@ -21,6 +34,8 @@ import com.example.dto.DetailedRoadmapRequest;
 import com.example.dto.DetailedRoadmapResponse;
 import com.example.dto.Node;
 import com.example.dto.RoadMap;
+import com.example.dto.RoadmapCreationResponseDto;
+import com.example.dto.RoadmapDocument;
 import com.example.dto.RoadmapRequest;
 import com.example.dto.RoadmapResponse;
 import com.example.service.AlternativeNodeGenerationService;
@@ -29,6 +44,9 @@ import com.example.service.DetailedRoadmapGenerationService;
 import com.example.service.NodeService;
 import com.example.service.RoadMapService;
 import com.example.service.RoadmapGenerationService;
+import com.example.service.GenerativeRoadmapService;
+
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/roadmap")
@@ -40,6 +58,10 @@ public class RoadmapController {
     private final ChildNodeGenerationService childNodeGenerationService;
     private final NodeService nodeService;
     private final AlternativeNodeGenerationService alternativeNodeGenerationService;
+    private final QuestionGenerationService questionGenerationService;
+    private final EstimationService estimationService;
+    private final GenerativeRoadmapService roadmapService;
+    // private final RoadmapOrchestrationService roadmapOrchestrationService;
 
     @Autowired
     public RoadmapController(RoadmapGenerationService roadmapGenerationService, 
@@ -47,7 +69,10 @@ public class RoadmapController {
                            RoadMapService roadMapService,
                            ChildNodeGenerationService childNodeGenerationService,
                            NodeService nodeService,
-                           AlternativeNodeGenerationService alternativeNodeGenerationService
+                           AlternativeNodeGenerationService alternativeNodeGenerationService,
+                           QuestionGenerationService questionGenerationService,
+                           EstimationService estimationService,
+                           GenerativeRoadmapService roadmapService
                            ) {
         this.roadmapGenerationService = roadmapGenerationService;
         this.detailedRoadmapGenerationService = detailedRoadmapGenerationService;
@@ -55,6 +80,54 @@ public class RoadmapController {
         this.childNodeGenerationService = childNodeGenerationService;
         this.nodeService = nodeService;
         this.alternativeNodeGenerationService = alternativeNodeGenerationService;
+        this.questionGenerationService = questionGenerationService;
+        this.estimationService = estimationService;
+        this.roadmapService = roadmapService;
+    }
+
+    // @PostMapping("/v2/roadmaps")
+    // public ResponseEntity<RoadmapResponse> createRoadmap(@RequestBody CreateRoadmapRequest request) {
+    //     try {
+    //         RoadmapResponse response = roadmapOrchestrationService.createFullRoadmap(request);
+    //         return ResponseEntity.ok(response);
+    //     } catch (Exception e) {
+    //         return ResponseEntity.internalServerError().build();
+    //     }
+    // }
+
+    @PostMapping
+    public ResponseEntity<RoadmapCreationResponseDto> createRoadmap(
+            @RequestBody CreateRoadmapRequest request,
+            @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String userId) {
+        
+        try {
+            RoadmapCreationResponseDto response = roadmapService.createRoadmap(request, userId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // デフォルトの質問リストを出力する
+    @PostMapping("/v2/questions")
+    public ResponseEntity<CreateQuestionsResponse> getQuestionsForRoadmap(@RequestBody CreateQuestionsRequest request) {
+        try {
+            CreateQuestionsResponse response = questionGenerationService.generateQuestions(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // デフォルトの推定時間を出力する
+    @PostMapping("/v2/estimations")
+    public ResponseEntity<EstimateHoursResponse> getEstimatedHours(@RequestBody EstimateHoursRequest request) {
+        try {
+            EstimateHoursResponse response = estimationService.estimateHours(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/generate")
