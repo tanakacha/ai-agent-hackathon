@@ -130,6 +130,25 @@ class AuthScreen extends HookConsumerWidget {
                                 : 'すでにアカウントをお持ちの方はこちら',
                           ),
                         ),
+                        const SizedBox(height: 24),
+                        const Divider(),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            onPressed: authState.maybeWhen(
+                              loading: () => null,
+                              orElse: () => authNotifier.signInWithGoogle,
+                            ),
+                            icon: Image.asset('assets/images/google_logo.png', height: 24),
+                            label: const Text('Googleでサインイン'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
