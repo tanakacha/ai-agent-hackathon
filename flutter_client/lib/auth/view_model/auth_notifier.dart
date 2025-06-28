@@ -1,25 +1,24 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../repository/auth_repository.dart';
 import 'auth_state.dart';
 
 part '_generated/auth_notifier.g.dart';
 
 @riverpod
 class AuthNotifier extends _$AuthNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late final AuthRepository _authRepository;
 
   @override
   AuthState build() {
+    _authRepository = ref.watch(authRepositoryProvider);
     _listenToAuthChanges();
-    final currentUser = _auth.currentUser;
-    if (currentUser != null) {
-      return AuthState.authenticated(currentUser);
-    }
+    final currentUser = _authRepository.authStateChanges;
     return const AuthState.unauthenticated();
   }
 
   void _listenToAuthChanges() {
-    _auth.authStateChanges().listen((User? user) {
+    _authRepository.authStateChanges.listen((User? user) {
       if (user != null) {
         state = AuthState.authenticated(user);
       } else {
@@ -28,10 +27,21 @@ class AuthNotifier extends _$AuthNotifier {
     });
   }
 
+  Future<void> signInWithGoogle() async {
+    state = const AuthState.loading();
+    try {
+      await _authRepository.signInWithGoogle();
+    } on FirebaseAuthException catch (e) {
+      state = AuthState.error(_getErrorMessage(e));
+    } catch (e) {
+      state = AuthState.error('Googleサインインに失敗しました: ${e.toString()}');
+    }
+  }
+
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     state = const AuthState.loading();
     try {
-      await _auth.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -45,7 +55,7 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> createUserWithEmailAndPassword(String email, String password) async {
     state = const AuthState.loading();
     try {
-      await _auth.createUserWithEmailAndPassword(
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -58,7 +68,7 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> signOut() async {
     try {
-      await _auth.signOut();
+      await _authRepository.signOut();
     } catch (e) {
       state = AuthState.error('ログアウトに失敗しました: ${e.toString()}');
     }

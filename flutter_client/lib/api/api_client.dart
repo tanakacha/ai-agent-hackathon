@@ -1,25 +1,41 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part '_generated/api_client.g.dart';
 
+class AuthInterceptor extends Interceptor {
+  @override
+  Future<void> onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
+    final token = await FirebaseAuth.instance.currentUser?.getIdToken();
+    if (token != null) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
+    super.onRequest(options, handler);
+  }
+}
+
 @riverpod
 Dio dio(DioRef ref) {
   final dio = Dio();
-  
+
   // Base URL - バックエンドのURLに置き換えてください
   dio.options.baseUrl = 'http://localhost:8080';
   dio.options.connectTimeout = const Duration(seconds: 30);
   dio.options.receiveTimeout = const Duration(seconds: 30);
   dio.options.sendTimeout = const Duration(seconds: 30);
-  
+
+  // Add AuthInterceptor
+  dio.interceptors.add(AuthInterceptor());
+
   // Request/Response のロギング（開発時のみ）
   dio.interceptors.add(LogInterceptor(
     requestBody: true,
     responseBody: true,
     logPrint: (obj) => print(obj), // ignore: avoid_print (開発時のみ使用)
   ));
-  
+
   return dio;
 }
 
