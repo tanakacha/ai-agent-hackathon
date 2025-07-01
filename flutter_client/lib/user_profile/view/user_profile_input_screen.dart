@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../app_router.dart';
 import '../../auth/repository/user_profile_dto.dart';
-import '../../goal_input/view/goal_input_screen.dart';
 import '../view_model/user_profile_notifier.dart';
 import '../view_model/user_profile_state.dart';
 
@@ -58,11 +59,7 @@ class UserProfileInputScreen extends HookConsumerWidget {
         initial: () {},
         loading: () {},
         success: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => GoalInputScreen(uid: uid),
-            ),
-          );
+          context.go('${AppRoutes.mapsList}?uid=$uid');
         },
         error: (message) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -77,6 +74,10 @@ class UserProfileInputScreen extends HookConsumerWidget {
         title: const Text('プロファイル設定'),
         backgroundColor: Colors.blue[700],
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go(AppRoutes.auth),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
