@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../roadmap_display/view/roadmap_display_screen.dart';
-import '../../goal_input/view/goal_input_screen.dart';
+import 'package:go_router/go_router.dart';
+import '../../app_router.dart';
+import '../../auth/view_model/auth_notifier.dart';
+import '../../main_app/view_model/main_app_notifier.dart';
 import '../view_model/maps_list_notifier.dart';
 
 class MapsListScreen extends HookConsumerWidget {
@@ -30,9 +32,17 @@ class MapsListScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mapsListState = ref.watch(mapsListNotifierProvider);
     final mapsListNotifier = ref.read(mapsListNotifierProvider.notifier);
+    final authState = ref.watch(authNotifierProvider);
+    final mainAppNotifier = ref.read(mainAppNotifierProvider.notifier);
 
     useEffect(() {
-      Future.microtask(() => mapsListNotifier.loadUserMaps(uid));
+      Future.microtask(() async {
+        await mapsListNotifier.loadUserMaps(uid);
+        // MainAppNotifierを初期化
+        authState.whenOrNull(
+          authenticated: (user, isNewUser) => mainAppNotifier.initializeUser(user),
+        );
+      });
       return null;
     }, [uid]);
 
@@ -41,6 +51,26 @@ class MapsListScreen extends HookConsumerWidget {
         title: const Text('マイロードマップ'),
         backgroundColor: Colors.blue[700],
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () async {
+            try {
+              await ref.read(authNotifierProvider.notifier).signOut();
+              if (context.mounted) {
+                context.go(AppRoutes.auth);
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('ログアウトに失敗しました: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -82,11 +112,7 @@ class MapsListScreen extends HookConsumerWidget {
                   const SizedBox(height: 32),
                   ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => GoalInputScreen(uid: uid),
-                        ),
-                      );
+                      context.go('${AppRoutes.goalInput}?uid=$uid');
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('新しいロードマップを作成'),
@@ -126,11 +152,7 @@ class MapsListScreen extends HookConsumerWidget {
                         const SizedBox(width: 8),
                         ElevatedButton.icon(
                           onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => GoalInputScreen(uid: uid),
-                              ),
-                            );
+                            context.go('${AppRoutes.goalInput}?uid=$uid');
                           },
                           icon: const Icon(Icons.add, size: 18),
                           label: const Text('新規作成'),
@@ -217,13 +239,7 @@ class MapsListScreen extends HookConsumerWidget {
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios),
                         onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => RoadmapDisplayScreen(
-                                mapId: map.mapId,
-                              ),
-                            ),
-                          );
+                          context.go('${AppRoutes.roadmapDisplay}?mapId=${map.mapId}');
                         },
                       ),
                     );

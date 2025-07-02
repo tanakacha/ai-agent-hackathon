@@ -4,9 +4,10 @@ import 'package:flutter_client/roadmap_view/utils/default_tree_layout_algorithm.
 import 'package:flutter_client/roadmap_view/widget/roadmap_widget.dart';
 import 'package:flutter_client/widgets/node_detail_modal.dart';
 import 'package:flutter_client/auth/view_model/auth_notifier.dart';
-import 'package:flutter_client/app_router.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../app_router.dart';
 import '../view_model/roadmap_display_notifier.dart';
 
 class RoadmapDisplayScreen extends HookConsumerWidget {
@@ -208,6 +209,20 @@ class RoadmapDisplayScreen extends HookConsumerWidget {
             title: Text(roadMap.title),
             backgroundColor: Colors.blue,
             foregroundColor: Colors.white,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                // 戻るボタンを押したときは常にマップ一覧に戻る
+                final authState = ref.read(authNotifierProvider);
+                authState.when(
+                  initial: () => context.go(AppRoutes.auth),
+                  loading: () => context.go(AppRoutes.auth),
+                  authenticated: (user, isNewUser) => context.go('${AppRoutes.mapsList}?uid=${user.uid}'),
+                  unauthenticated: () => context.go(AppRoutes.auth),
+                  error: (message) => context.go(AppRoutes.auth),
+                );
+              },
+            ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh),
@@ -221,10 +236,7 @@ class RoadmapDisplayScreen extends HookConsumerWidget {
                     try {
                       await ref.read(authNotifierProvider.notifier).signOut();
                       if (context.mounted) {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (context) => const AppRouter()),
-                          (route) => false,
-                        );
+                        context.go(AppRoutes.auth);
                       }
                     } catch (e) {
                       if (context.mounted) {

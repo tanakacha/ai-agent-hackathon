@@ -13,7 +13,7 @@ class AuthNotifier extends _$AuthNotifier {
     _listenToAuthChanges();
     final currentUser = _auth.currentUser;
     if (currentUser != null) {
-      return AuthState.authenticated(currentUser);
+      return AuthState.authenticated(currentUser, isNewUser: false);
     }
     return const AuthState.unauthenticated();
   }
@@ -21,7 +21,7 @@ class AuthNotifier extends _$AuthNotifier {
   void _listenToAuthChanges() {
     _auth.authStateChanges().listen((User? user) {
       if (user != null) {
-        state = AuthState.authenticated(user);
+        state = AuthState.authenticated(user, isNewUser: false);
       } else {
         state = const AuthState.unauthenticated();
       }
@@ -45,10 +45,14 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> createUserWithEmailAndPassword(String email, String password) async {
     state = const AuthState.loading();
     try {
-      await _auth.createUserWithEmailAndPassword(
+      final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      // 新規登録の場合はisNewUserをtrueに設定
+      if (userCredential.user != null) {
+        state = AuthState.authenticated(userCredential.user!, isNewUser: true);
+      }
     } on FirebaseAuthException catch (e) {
       state = AuthState.error(_getErrorMessage(e));
     } catch (e) {
@@ -62,6 +66,16 @@ class AuthNotifier extends _$AuthNotifier {
     } catch (e) {
       state = AuthState.error('ログアウトに失敗しました: ${e.toString()}');
     }
+  }
+
+  void clearNewUserFlag() {
+    state.whenOrNull(
+      authenticated: (user, isNewUser) {
+        if (isNewUser == true) {
+          state = AuthState.authenticated(user, isNewUser: false);
+        }
+      },
+    );
   }
 
   String _getErrorMessage(FirebaseAuthException e) {
