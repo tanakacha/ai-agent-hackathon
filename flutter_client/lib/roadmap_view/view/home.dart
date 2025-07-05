@@ -5,9 +5,10 @@ import 'package:flutter_client/roadmap_view/utils/default_tree_layout_algorithm.
 import 'package:flutter_client/roadmap_view/widget/roadmap_widget.dart';
 import 'package:flutter_client/widgets/node_detail_modal.dart';
 import 'package:flutter_client/auth/view_model/auth_notifier.dart';
-import 'package:flutter_client/app_router.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../app_router.dart';
 
 class RoadMapDetailScreen extends HookConsumerWidget {
   final String roadMapId = "map-5678";
@@ -100,10 +101,7 @@ class RoadMapDetailScreen extends HookConsumerWidget {
                     try {
                       await ref.read(authNotifierProvider.notifier).signOut();
                       if (context.mounted) {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (context) => const AppRouter()),
-                          (route) => false,
-                        );
+                        context.go(AppRoutes.auth);
                       }
                     } catch (e) {
                       if (context.mounted) {

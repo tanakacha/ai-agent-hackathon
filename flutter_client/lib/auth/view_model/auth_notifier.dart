@@ -20,7 +20,7 @@ class AuthNotifier extends _$AuthNotifier {
   void _listenToAuthChanges() {
     _authRepository.authStateChanges.listen((User? user) {
       if (user != null) {
-        state = AuthState.authenticated(user);
+        state = AuthState.authenticated(user, isNewUser: false);
       } else {
         state = const AuthState.unauthenticated();
       }
@@ -59,6 +59,10 @@ class AuthNotifier extends _$AuthNotifier {
         email: email,
         password: password,
       );
+      // 新規登録の場合はisNewUserをtrueに設定
+      if (userCredential.user != null) {
+        state = AuthState.authenticated(userCredential.user!, isNewUser: true);
+      }
     } on FirebaseAuthException catch (e) {
       state = AuthState.error(_getErrorMessage(e));
     } catch (e) {
@@ -74,13 +78,24 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
+  void clearNewUserFlag() {
+    state.whenOrNull(
+      authenticated: (user, isNewUser) {
+        if (isNewUser == true) {
+          state = AuthState.authenticated(user, isNewUser: false);
+        }
+      },
+    );
+  }
+
   String _getErrorMessage(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
         return 'ユーザーが見つかりません';
       case 'wrong-password':
         return 'パスワードが間違っています';
-      case 'email-already-in-use':
+      case '
+      -already-in-use':
         return 'このメールアドレスは既に使用されています';
       case 'weak-password':
         return 'パスワードが弱すぎます';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../view_model/auth_notifier.dart';
 import '../view_model/auth_state.dart';
 
@@ -40,7 +41,13 @@ class AuthScreen extends HookConsumerWidget {
       next.when(
         initial: () {},
         loading: () {},
-        authenticated: (user) {},
+        authenticated: (user, isNewUser) {
+          if (isNewUser == true) {
+            context.go('/profile-input');
+          } else {
+            context.go('/maps-list');
+          }
+        },
         unauthenticated: () {},
         error: (message) {
           ScaffoldMessenger.of(context).showSnackBar(

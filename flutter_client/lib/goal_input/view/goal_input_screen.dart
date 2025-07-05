@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../roadmap_display/view/roadmap_display_screen.dart';
+import 'package:go_router/go_router.dart';
+import '../../app_router.dart';
 import '../view_model/goal_input_notifier.dart';
 import '../view_model/goal_input_state.dart';
 
@@ -55,11 +56,8 @@ class GoalInputScreen extends HookConsumerWidget {
         initial: () {},
         loading: () {},
         success: (mapId) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => RoadmapDisplayScreen(mapId: mapId),
-            ),
-          );
+          // go_routerを使用してロードマップ表示画面に遷移
+          context.go('${AppRoutes.roadmapDisplay}?mapId=$mapId');
         },
         error: (message) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -74,6 +72,10 @@ class GoalInputScreen extends HookConsumerWidget {
         title: const Text('目標設定'),
         backgroundColor: Colors.blue[700],
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('${AppRoutes.userProfile}?uid=$uid'),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),

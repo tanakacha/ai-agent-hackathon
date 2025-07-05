@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../auth/repository/user_api_service.dart';
 import '../../auth/repository/user_profile_dto.dart';
+import '../../auth/view_model/auth_notifier.dart';
 import 'user_profile_state.dart';
 
 part '_generated/user_profile_notifier.g.dart';
@@ -35,6 +36,9 @@ class UserProfileNotifier extends _$UserProfileNotifier {
         availableDaysPerWeek: availableDaysPerWeek,
         experienceLevel: experienceLevel,
       );
+      
+      // プロフィール作成成功時に新規ユーザーフラグをクリア
+      ref.read(authNotifierProvider.notifier).clearNewUserFlag();
       
       state = const UserProfileState.success();
     } catch (e) {

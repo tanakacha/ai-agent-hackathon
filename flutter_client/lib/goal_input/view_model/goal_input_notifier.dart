@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../services/roadmap_service.dart';
-import '../../auth/repository/user_profile_dto.dart';
 import 'goal_input_state.dart';
 
 part '_generated/goal_input_notifier.g.dart';
