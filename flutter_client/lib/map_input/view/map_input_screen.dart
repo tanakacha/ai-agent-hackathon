@@ -30,7 +30,7 @@ class MapInputScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Way 25'),
+        title: const Text('Way25'),
         backgroundColor: Colors.blue[700],
         foregroundColor: Colors.white,
       ),
@@ -47,7 +47,7 @@ class MapInputScreen extends HookConsumerWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Way 25',
+                'Way25',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
