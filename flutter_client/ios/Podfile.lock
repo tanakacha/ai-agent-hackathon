@@ -125,8 +125,8 @@ SPEC CHECKSUMS:
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   Firebase: 3435bc66b4d494c2f22c79fd3aae4c1db6662327
-  firebase_auth: a9855fe79286576c5225b28aafed65bc374ac19a
-  firebase_core: a861be150c0e7c6aecedde077968eb92cbf790b9
+  firebase_auth: ebc1f561cc3077efebad5005974c9ed58008973b
+  firebase_core: 700bac7ed92bb754fd70fbf01d72b36ecdd6d450
   FirebaseAppCheckInterop: a92ba81d0ee3c4cddb1a2e52c668ea51dc63c3ae
   FirebaseAuth: 175cb5503dfdb52191b8ff81cdd52c1d9dee9ac9
   FirebaseAuthInterop: e25b58ecb90f3285085fa2118861a3c9dfdc62ad
@@ -134,7 +134,7 @@ SPEC CHECKSUMS:
   FirebaseCoreExtension: c048485c347616dba6165358dbef765c5197597b
   FirebaseCoreInternal: 29d7b3af4aaf0b8f3ed20b568c13df399b06f68c
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  google_sign_in_ios: 7411fab6948df90490dc4620ecbcabdc3ca04017
+  google_sign_in_ios: b48bb9af78576358a168361173155596c845f0b9
   GoogleSignIn: ce8c89bb9b37fb624b92e7514cc67335d1e277e4
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
