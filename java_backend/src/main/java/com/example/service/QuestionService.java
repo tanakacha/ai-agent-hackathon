@@ -1,18 +1,16 @@
 package com.example.service;
 
-import com.example.dto.CreateQuestionsRequest;
-import com.example.dto.CreateQuestionsResponse;
-import com.example.dto.QuestionDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
+import com.example.dto.CreateQuestionsRequest;
+import com.example.model.Question;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 質問に関するビジネスロジックを処理するサービスクラス。
@@ -31,7 +29,7 @@ public class QuestionService {
         this.objectMapper = objectMapper;
     }
 
-    public CreateQuestionsResponse generateQuestions(CreateQuestionsRequest request) {
+    public List<Question> generateQuestions(CreateQuestionsRequest request) {
         logger.info("AIによる質問生成と保存処理を開始します。Goal: {}", request.getGoal());
         
         String prompt = createPromptForQuestionGeneration(request.getGoal());
@@ -40,11 +38,10 @@ public class QuestionService {
         logger.debug("AIからの整形済みレスポンス: {}", jsonResponse);
         
         try {
-            List<QuestionDto> questions = objectMapper.readValue(jsonResponse, new TypeReference<List<QuestionDto>>() {});
+            List<Question> questions = objectMapper.readValue(jsonResponse, new TypeReference<List<Question>>() {});
 
             logger.info("'{}'という目標に基づき、{}個の質問を生成しました。", request.getGoal(),  questions.size());
-            return new CreateQuestionsResponse(questions);
-
+            return questions;
         } catch (JsonProcessingException e) {
             logger.error("AIからのJSONレスポンスのパースに失敗しました。", e);
             throw new RuntimeException("AIからの応答の処理に失敗しました。", e);

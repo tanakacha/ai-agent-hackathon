@@ -1,14 +1,20 @@
 package com.example.ai_hackathon.controller;
 
-import com.example.dto.CreateQuestionsRequest;
-import com.example.dto.CreateQuestionsResponse;
-import com.example.service.QuestionService;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.dto.CreateQuestionsRequest;
+import com.example.model.Question;
+import com.example.service.QuestionService;
 
 @RestController
 @RequestMapping("/api/questions")
@@ -27,10 +33,10 @@ public class QuestionController {
      * URL: POST http://localhost:8080/api/questions/generate
      */
     @PostMapping("/generate")
-    public ResponseEntity<CreateQuestionsResponse> generateQuestions(@RequestBody CreateQuestionsRequest request) {
+    public ResponseEntity<List<Question>> generateQuestions(@RequestBody CreateQuestionsRequest request) {
         logger.info("AI質問生成リクエストを受信しました。Goal: {}", request.getGoal());
         try {
-            CreateQuestionsResponse response = questionService.generateQuestions(request);
+            List<Question> response = questionService.generateQuestions(request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             logger.error("AIによる質問生成処理中にエラーが発生しました。", e);

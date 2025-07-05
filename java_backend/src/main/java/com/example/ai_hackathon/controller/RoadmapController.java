@@ -2,8 +2,8 @@ package com.example.ai_hackathon.controller;
 
 import java.util.List;
 
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,40 +13,34 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.example.dto.RoadmapDocument;
-import com.example.service.GenerativeRoadmapService;
 
-import com.example.dto.CreateRoadmapRequest;
-// import com.example.service.RoadmapOrchestrationService;
-import com.example.dto.EstimateHoursRequest;
-import com.example.dto.EstimateHoursResponse;
-import com.example.service.EstimationService;
-import com.example.dto.CreateQuestionsRequest;
-import com.example.dto.CreateQuestionsResponse;
-import com.example.service.QuestionGenerationService;
 import com.example.dto.AddChildNodesRequest;
 import com.example.dto.AddChildNodesResponse;
 import com.example.dto.AlternativeNodeRequest;
 import com.example.dto.CompleteNodeRequest;
 import com.example.dto.CompleteNodeResponse;
 import com.example.dto.CreateDetailedRoadmapRequest;
+import com.example.dto.CreateQuestionsRequest;
+import com.example.dto.CreateRoadmapRequest;
 import com.example.dto.DetailedRoadmapRequest;
 import com.example.dto.DetailedRoadmapResponse;
+import com.example.dto.EstimateHoursRequest;
+import com.example.dto.EstimateHoursResponse;
 import com.example.dto.Node;
 import com.example.dto.RoadMap;
 import com.example.dto.RoadmapCreationResponseDto;
-import com.example.dto.RoadmapDocument;
 import com.example.dto.RoadmapRequest;
 import com.example.dto.RoadmapResponse;
+import com.example.model.Question;
 import com.example.service.AlternativeNodeGenerationService;
 import com.example.service.ChildNodeGenerationService;
 import com.example.service.DetailedRoadmapGenerationService;
+import com.example.service.EstimationService;
+import com.example.service.GenerativeRoadmapService;
 import com.example.service.NodeService;
+import com.example.service.QuestionGenerationService;
 import com.example.service.RoadMapService;
 import com.example.service.RoadmapGenerationService;
-import com.example.service.GenerativeRoadmapService;
-
-import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/roadmap")
@@ -110,9 +104,9 @@ public class RoadmapController {
 
     // デフォルトの質問リストを出力する
     @PostMapping("/v2/questions")
-    public ResponseEntity<CreateQuestionsResponse> getQuestionsForRoadmap(@RequestBody CreateQuestionsRequest request) {
+    public ResponseEntity<List<Question>> getQuestionsForRoadmap(@RequestBody CreateQuestionsRequest request) {
         try {
-            CreateQuestionsResponse response = questionGenerationService.generateQuestions(request);
+            List<Question> response = questionGenerationService.generateQuestions(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();

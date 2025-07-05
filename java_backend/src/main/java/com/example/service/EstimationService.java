@@ -1,20 +1,15 @@
 package com.example.service;
 
-import com.example.dto.AnswerDto;
-import com.example.dto.EstimateHoursRequest;
-import com.example.dto.EstimateHoursResponse;
-import com.example.dto.QuestionDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.function.Function;
+import com.example.dto.EstimateHoursRequest;
+import com.example.dto.EstimateHoursResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class EstimationService {
